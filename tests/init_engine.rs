@@ -1,32 +1,33 @@
-mod tests {
-    #[test]
-    fn init_engine() {
-        let white = chui::Player::new(
-            chui::PieceColor::White,
-            "Vander Martin",
-            Some("Nathan"),
-            None,
-            None,
-            Some(36),
-            None,
-        );
+use chui::{Engine, Player, PieceColor};
 
-        let black = chui::Player::new(
-            chui::PieceColor::Black,
-            "Vila",
-            Some("Bob"),
-            Some("Shop Guy."),
-            Some("III"),
-            Some(57),
-            Some(987),
-        );
+#[test]
+fn init_engine() {
+    let white = Player::new(
+        PieceColor::White,
+        "Vander Martin",
+        Some("Nathan"),
+        None,
+        None,
+        Some(36),
+        None,
+    );
 
-        let engine = chui::Engine::new(white, black);
+    let black = Player::new(
+        PieceColor::Black,
+        "Vila",
+        Some("Bob"),
+        Some("Shop Guy."),
+        Some("III"),
+        Some(57),
+        Some(987),
+    );
 
-        // Note the whitespace around the output.
-        assert_eq!(
-            &format!("{}", engine),
-            "White: Vander Martin, Nathan (no rating)
+    let engine = Engine::new(white, black);
+
+    // Note the whitespace around the output.
+    assert_eq!(
+        &format!("{}", engine),
+        "White: Vander Martin, Nathan (no rating)
 Black: Shop Guy. Vila, Bob III (987)
 Position:
 8 | r  n  b  q  k  b  n  r 
@@ -42,4 +43,3 @@ Position:
 White to move."
         );
     }
-}
