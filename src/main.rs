@@ -1,4 +1,7 @@
-use chui::{Player, PieceColor, Engine, MoveGenerator};
+use chui::{
+    Player, PieceColor, Engine, MoveGenerator,
+    parser::{self, ParserEngine}
+};
 
 fn main() {
     let white = Player::new(
@@ -28,30 +31,6 @@ fn main() {
 
     println!("{}", engine.display_for_black());
     println!();
-
-    let white = Player::new(
-        PieceColor::White,
-        "Vander Martin",
-        Some("Nathan"),
-        None,
-        None,
-        Some(36),
-        None,
-    );
-
-    let black = Player::new(
-        PieceColor::Black,
-        "Vila",
-        Some("Bob"),
-        Some("Shop Guy."),
-        Some("III"),
-        Some(57),
-        Some(987),
-    );
-
-    let engine = Engine::new(white, black);
-
-    println!("{}", engine);
 
     // Erroneous and possible moves for
     // `{col}{row}-{col}{row}{{=,/}RNBQ{+,++,#}}` format.
@@ -96,19 +75,9 @@ fn main() {
     // let the_move = engine.make_move("g3-f4");
     // println!("The move: {} [{:?}]", the_move, the_move);
 
+    let parser = parser::new(ParserEngine::Algebraic);
+    println!("the move: {:?}", parser.parse("the move"));
 
-    let g = MoveGenerator::generate_move_list();
-    println!("{}", g);
-
-    let (answer, reason) = g.validate_moves();
-    if !answer {
-        println!("Moves did not validate correctly. Reason: {}", reason);
-    } else {
-        println!("Moves validated correctly.");
-    }
-
-    println!(
-        "There are {} possible Algebraic and Coordinate Chess Notation moves.",
-        g.move_list.len()
-    );
+    let parser = parser::new(ParserEngine::Coordinate);
+    println!("the move: {:?}", parser.parse("the move"));
 }

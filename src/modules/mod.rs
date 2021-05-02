@@ -18,3 +18,5 @@ pub use chess_move::Move;
 
 pub mod move_generator;
 pub use move_generator::MoveGenerator;
+
+pub mod parser;

@@ -87,7 +87,7 @@ pub struct Engine<'a> {
     pub move_generator: MoveGenerator<'a>,
 }
 
-/// Implement `Display` for `Engine`. Displays the position for
+/// Implements `Display` for `Engine`. Displays the position for
 /// white.
 impl fmt::Display for Engine<'static> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
