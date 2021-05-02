@@ -1,69 +1,135 @@
-use std::fmt;
+#![allow(clippy::upper_case_acronyms)]
 
-use super::{Move, Square, Engine, Player, PieceColor};
+use super::{Move, Square};
 
-pub mod algebraic;
-// mod long_algebraic;
-// mod reversible_algebraic;
-// mod concise_reversible;
-// mod smith;
-// mod descriptive;
-pub mod coordinate;
-// mod iccf;
-// mod invalid;
+mod algebraic;
+mod long_algebraic;
+mod reversible_algebraic;
+mod concise_reversible;
+mod smith;
+mod descriptive;
+mod coordinate;
+mod iccf;
 
-pub trait ParserEngineType {
+/// Implement this trait to define the `parse()` method on a parser.
+/// Any struct implementing this trait should parse a chess move
+/// in an expected notation and return a `Move` object, representing
+/// the validty or invalidity of the requested for for the given
+/// chessboard.
+/// 
+/// Example:
+/// 
+/// ```
+/// use chui::{Move, Square, parser::Parser};
+/// 
+/// pub struct MyParser;
+/// 
+/// impl Parser for MyParser {
+///     fn parse(&self, the_move: &str, _board: &[[Square; 8]; 8]) -> Move {
+///         Move::invalid(the_move, "Error: MyParser not implemented.")
+///     }
+/// }
+/// ```
+pub trait Parser {
     fn parse(&self, the_move: &str, board: &[[Square; 8]; 8]) -> Move;
 }
 
-impl fmt::Display for dyn ParserEngineType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let white = Player::new(
-            PieceColor::White,
-            "Drummer",
-            Some("Camina"),
-            None,
-            None,
-            Some(37),
-            None,
-        );
-    
-        let black = Player::new(
-            PieceColor::Black,
-            "Ashford",
-            Some("Klaes"),
-            None,
-            None,
-            Some(72),
-            Some(1500),
-        );
-        
-        let engine = Engine::new(white, black);
-
-        write!(
-            f,
-            "(ParserEngineType) parse is {}",
-            self.parse("ParseEngineType move", &engine.board)
-        )
-    }
-}
-
+/// Represents the different available supported parser engines for
+/// chess moves.
 #[derive(Debug)]
 pub enum ParserEngine {
+    /// This engine variant helps to return an `AlgebraicParser`, which
+    /// parses moves in algebraic notation.
+    /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
     Algebraic,
-    // LongAlgebraic,
-    // ReverisbleAlgebraic,
-    // ConciseReversible,
-    // Smith,
-    // Descriptive,
+    /// This engine variant helps to return a `ConciseReversibleParser`,
+    /// which parses moves in concise reversible notation.
+    /// Example moves: `e24`, `e75`, `Ng1f3`, `Nb8c6`, `Bb5:Nc6`, etc.
+    ConciseReversible,
+    /// This engine variant helps to return a `CoordinateParser`,
+    /// which parses moves in coordinate notation.
+    /// Example moves: `E2-E4`, `e7-e5`, `G1-F3`, `B8-c6`, `f1-b5`, etc.
     Coordinate,
-    // Iccf,
-    // Invalid,
+    /// This engine variant helps to return a `DescriptiveParser`,
+    /// which parses moves in English descriptive notation.
+    /// Example moves: `P-K4`, `NxN`, `QxRch`, `Q-KR4 mate`, `O-O`, etc.
+    Descriptive,
+    /// This engine variant helps to return a `ICCFParser`,
+    /// which parses moves in ICCF notation.
+    /// Example moves: `5254`, `5755`, `7163`, `2836`, `6125`, etc.
+    ICCF,
+    /// This engine variant helps to return a `LongAlgebraicParser`,
+    /// which parses moves in long algebraic notation.
+    /// Example moves: `e2e4`, `e7e5`, `d2d3`, `Bf8b4+`, `Bb5xc6`, etc.
+    LongAlgebraic,
+    /// This engine variant helps to return a `ReversibleAlgebraicParser`,
+    /// which parses moves in reversible algebraic notation.
+    /// Example moves: `e2-e4`, `e7-e5`, `Bb5xNc6`, `Bf8-b4#`, etc.
+    ReversibleAlgebraic,
+    /// This engine variant helps to return a `SmithParser`,
+    /// which parses moves in Smith notation.
+    /// Example moves: `e1g1c`, `b4c3n`, `b5c6n`, `d7c6b`, `e2e4`, etc.
+    Smith,
 }
 
-pub fn new(parser: ParserEngine) -> Box<dyn ParserEngineType> {
+/// Given a variant of `ParserEngine`, this function returns a
+/// dynamic parser that implements the `Parse` trait.
+/// 
+/// Example:
+/// 
+/// ```
+/// use chui::{Engine, Player, PieceColor, parser::{self, ParserEngine}};
+/// 
+/// let white = Player::new(
+///     PieceColor::White,
+///     "Drummer",
+///     Some("Camina"),
+///     None,
+///     None,
+///     Some(37),
+///     None,
+/// );
+/// 
+/// let black = Player::new(
+///     PieceColor::Black,
+///     "Ashford",
+///     Some("Klaes"),
+///     None,
+///     None,
+///     Some(72),
+///     Some(1500),
+/// );
+/// 
+/// let engine = Engine::new(white, black);
+/// let parser = parser::new(ParserEngine::Descriptive);
+/// 
+/// println!("the move: {:?}", parser.parse("P-K4", &engine.board));
+/// ```
+pub fn new(parser: ParserEngine) -> Box<dyn Parser> {
     match parser {
-        ParserEngine::Algebraic => algebraic::Parser::new(),
-        ParserEngine::Coordinate => coordinate::Parser::new(),
+        ParserEngine::Algebraic => {
+            algebraic::AlgebraicParser::new()
+        },
+        ParserEngine::ConciseReversible => {
+            concise_reversible::ConciseReversibleParser::new()
+        },
+        ParserEngine::Coordinate => {
+            coordinate::CoordinateParser::new()
+        },
+        ParserEngine::Descriptive => {
+            descriptive::DescriptiveParser::new()
+        },
+        ParserEngine::ICCF => {
+            iccf::ICCFParser::new()
+        },
+        ParserEngine::LongAlgebraic => {
+            long_algebraic::LongAlgebraicParser::new()
+        },
+        ParserEngine::ReversibleAlgebraic => {
+            reversible_algebraic::ReversibleAlgebraicParser::new()
+        },
+        ParserEngine::Smith => {
+            smith::SmithParser::new()
+        },
     }
 }

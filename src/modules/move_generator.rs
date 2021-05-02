@@ -43,7 +43,7 @@ pub struct MoveGenerator<'a> {
     /// The check notation (+).
     pub check: &'a str,
     /// The 2 check mate notations (++, #).
-    pub check_mate: [&'a str; 2],
+    pub check_mate: [&'a str; 4],
     /// The move notation (-).
     pub move_notation: &'a str,
     /// The capture notation (x).
@@ -183,7 +183,7 @@ impl<'a> MoveGenerator<'a> {
     ///         promotion_notation: ["", "=", "/", "\\"],
     ///         promotion_pieces: ["Q", "R", "B", "N"],
     ///         check: "+",
-    ///         check_mate: ["++", "#"],
+    ///         check_mate: ["++", "#", "≠", "‡"],
     ///         move_notation: "-",
     ///         capture: "x",
     ///         castle: ["O-O", "0-0", "O-O-O", "0-0-0"],
@@ -199,7 +199,7 @@ impl<'a> MoveGenerator<'a> {
             promotion_notation: ["", "=", "/", "\\"],
             promotion_pieces: ["Q", "R", "B", "N"],
             check: "+",
-            check_mate: ["++", "#"],
+            check_mate: ["++", "#", "≠", "‡"],
             move_notation: "-",
             capture: "x",
             castle: [

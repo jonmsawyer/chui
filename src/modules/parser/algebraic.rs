@@ -2,26 +2,25 @@
 
 //use std::fmt;
 
-use super::ParserEngineType;
+use super::Parser;
 use super::super::{Move, Square};
 
-pub struct Parser {
-    pub foo: String,
-}
+/// A parser that will parse algebraic chess notation.
+/// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
+pub struct AlgebraicParser;
 
-impl ParserEngineType for Parser {
+impl Parser for AlgebraicParser {
     fn parse(&self, the_move: &str, _board: &[[Square; 8]; 8]) -> Move {
         Move::invalid(
             the_move,
-            &format!("invalid at algebraic, foo is {}", self.foo)
+            "Error: AlgebraicParser not implemented."
         )
     }
 }
 
-impl Parser {
-    pub fn new() -> Box<dyn ParserEngineType> {
-        Box::new(Parser {
-            foo: String::from("123"),
-        })
+impl AlgebraicParser {
+    /// Return a new dynamic parser that implements the `Parser` trait.
+    pub fn new() -> Box<dyn Parser> {
+        Box::new(AlgebraicParser { })
     }
 }
