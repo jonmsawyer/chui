@@ -41,5 +41,5 @@ Position:
   +-----------------------
     a  b  c  d  e  f  g  h 
 White to move."
-        );
-    }
+    );
+}
