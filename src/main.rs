@@ -1,5 +1,5 @@
 use chui::{
-    Player, PieceColor, Engine, MoveGenerator,
+    Player, PieceColor, Engine,
     parser::{self, ParserEngine}
 };
 

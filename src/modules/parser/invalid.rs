@@ -3,21 +3,25 @@
 //use std::fmt;
 
 use super::ParserEngineType;
+use super::super::Move;
 
 pub struct Parser {
-    pub bar: String,
+    pub qux: String,
 }
 
 impl ParserEngineType for Parser {
-    fn parse(&self) -> String {
-        String::from("Invalid parser.")
+    fn parse(&self, the_move: &str) -> Move {
+        Move::invalid(
+            the_move,
+            &format!("invalid at algebraic, foo is {}", self.qux)
+        )
     }
 }
 
 impl Parser {
     pub fn new() -> Box<dyn ParserEngineType> {
         Box::new(Parser {
-            bar: String::from("bar"),
+            qux: String::from("qux"),
         })
     }
 }
