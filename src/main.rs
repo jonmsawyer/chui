@@ -76,8 +76,8 @@ fn main() {
     // println!("The move: {} [{:?}]", the_move, the_move);
 
     let parser = parser::new(ParserEngine::Algebraic);
-    println!("the move: {:?}", parser.parse("the move"));
+    println!("the move: {:?}", parser.parse("abc 123", &engine.board));
 
     let parser = parser::new(ParserEngine::Coordinate);
-    println!("the move: {:?}", parser.parse("the move"));
+    println!("the move: {:?}", parser.parse("def 456", &engine.board));
 }

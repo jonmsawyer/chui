@@ -3,14 +3,14 @@
 //use std::fmt;
 
 use super::ParserEngineType;
-use super::super::Move;
+use super::super::{Move, Square};
 
 pub struct Parser {
     pub foo: String,
 }
 
 impl ParserEngineType for Parser {
-    fn parse(&self, the_move: &str) -> Move {
+    fn parse(&self, the_move: &str, _board: &[[Square; 8]; 8]) -> Move {
         Move::invalid(
             the_move,
             &format!("invalid at algebraic, foo is {}", self.foo)
