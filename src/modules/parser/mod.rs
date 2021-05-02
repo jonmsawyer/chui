@@ -2,19 +2,19 @@
 
 use super::{Move, Square};
 
-mod algebraic;
-mod long_algebraic;
-mod reversible_algebraic;
-mod concise_reversible;
-mod smith;
-mod descriptive;
-mod coordinate;
-mod iccf;
+pub mod algebraic;
+pub mod long_algebraic;
+pub mod reversible_algebraic;
+pub mod concise_reversible;
+pub mod smith;
+pub mod descriptive;
+pub mod coordinate;
+pub mod iccf;
 
 /// Implement this trait to define the `parse()` method on a parser.
 /// Any struct implementing this trait should parse a chess move
 /// in an expected notation and return a `Move` object, representing
-/// the validty or invalidity of the requested for for the given
+/// the validty or invalidity of the requested move for the given
 /// chessboard.
 /// 
 /// Example:
