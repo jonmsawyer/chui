@@ -35,20 +35,27 @@ pub struct Player {
     /// The piece color of the player. One of `PieceColor::White`
     /// or `PieceColor::Black`.
     pub color: PieceColor,
+
     /// The last name of the player.
     pub last_name: String,
+
     /// The optional first name of the player.
     pub first_name: Option<String>,
+
     /// The optional name prefix of the player (e.g., "Dr.").
     pub name_prefix: Option<String>,
+
     /// The optional name suffix of the player (e.g., "Jr.").
     pub name_suffix: Option<String>,
+
     /// The full name of the player. Will contain all parts of the
     /// name if they are available (e.g., "Dr. Smitch, John Jr.").
     pub full_name: String,
+
     /// The optional age of the player. Useful in certain export
     /// formats.
     pub age: Option<u8>,
+
     /// The optional ELO or national rating of the player.
     pub rating: Option<u32>,
 }

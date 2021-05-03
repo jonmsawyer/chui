@@ -27,16 +27,22 @@ use super::color::PieceColor;
 pub enum Piece {
     /// A king with its `PieceColor`.
     King(PieceColor),
+
     /// A queen with its `PieceColor`.
     Queen(PieceColor),
+
     /// A rook with its `PieceColor`.
     Rook(PieceColor),
+
     /// A bishop with its `PieceColor`.
     Bishop(PieceColor),
+
     /// A knight with its `PieceColor`.
     Knight(PieceColor),
+
     /// A pawn with its `PieceColor`.
     Pawn(PieceColor),
+
     /// No piece at all.
     None,
 }

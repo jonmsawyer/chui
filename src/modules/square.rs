@@ -32,9 +32,11 @@ use super::piece::Piece;
 pub struct Square {
     /// The coordinate of the square (e.g., ('a', 1)).
     pub coord: (char, u8),
+
     /// The `Piece` that occupies the square. If none, then
     /// `Piece::None`.
     pub piece: Piece,
+
     /// The square color of the square. One of `Light` and
     /// `Dark`.
     pub color: SquareColor,

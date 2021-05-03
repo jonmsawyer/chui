@@ -20,6 +20,7 @@ use super::{Piece, PieceColor};
 pub enum MoveState {
     /// Represents the valid move state.
     Valid,
+
     /// Represents the invalid move state.
     Invalid,
 }
@@ -33,9 +34,11 @@ pub enum MoveType {
     /// Represents that the desired move is just a move, not
     /// a capture.
     Move,
+
     /// Represents that the desired move is a capture, not just
     /// a move.
     Capture,
+
     /// Represents that the desired move is invalid.
     Invalid,
 }
@@ -45,22 +48,31 @@ pub enum MoveType {
 pub struct Move {
     /// Represents a move's "from" coordinate (e.g., ('a', 1)).
     pub from_coord: (char, u32),
+
     /// Represents a move's "to" coordinate (e.g., ('b' 8)).
     pub to_coord: (char, u32),
+
     /// Represents a move's "from" index (e.g., (0, 0) \[a1\]).
     pub from_index: (u32, u32),
+
     /// Represents a move's "to" index (e.g., (1, 7) \[b8\]).
     pub to_index: (u32, u32),
+
     /// The chess piece to move
     pub piece: Piece,
+
     /// The parsed move text (e.g., "Pawn on e4 captures e5").
     pub move_text: String,
+
     /// The user's input move text (e.g., "Be5").
     pub input_move: String,
+
     /// The move's `MoveState`. One of `Move`, `Capture`, or `Invalid`.
     pub move_state: MoveState,
+
     /// The move's `MoveType`. One of `Valid` or `Invalid`.
     pub move_type: MoveType,
+
     /// The reason if `MoveState` or `MoveType` is `Invalid`.
     pub reason: String,
 }

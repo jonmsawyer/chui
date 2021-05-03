@@ -50,33 +50,45 @@ use super::MoveGenerator;
 pub struct Engine<'a> {
     /// Represents the `White` player.
     pub white: Player,
+
     /// Represents the `Black` player.
     pub black: Player,
+
     /// Represents the board as an array of arrays each containing
     /// a `Square`.
     pub board: [[Square; 8]; 8],
+
     /// The `PieceColor` to move.
     pub to_move: PieceColor,
+
     /// Can white castle on the king side?
     pub can_white_castle_kingside: bool,
+
     /// Can white castle on the queen side?
     pub can_white_castle_queenside: bool,
+
     /// Can black castle on the king side?
     pub can_black_castle_kingside: bool,
+
     /// Can black castle on the queen side?
     pub can_black_castle_queenside: bool,
+
     /// Represents the half-move counter for pawn moves and piece
     /// capture. Needed to declare the "50-move rule" draws in
     /// chess games.
     pub pawn_move_or_piece_capture_half_move_counter: u32,
+
     /// The "ply", or number of half-moves, recorded in this game.
     pub half_move_counter: u32,
+
     /// The number of full moves made in this game.
     pub move_counter: u32,
+
     /// When a pawn is moved, the en passant target square is
     /// noted, even if there's no en passant move possible. This
     /// comes from the FEN layout of the game.
     pub enpassant_target_square: (char, u32),
+
     /// The `MoveGenerator` object representing the move list
     /// of all possible supported chess notations. Useful for
     /// checking the parsing of a move against a known, calculated,
