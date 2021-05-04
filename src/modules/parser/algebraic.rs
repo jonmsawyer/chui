@@ -3,14 +3,14 @@
 //use std::fmt;
 
 use super::Parser;
-use super::super::{Move, Square};
+use super::super::{Move, Piece};
 
 /// A parser that will parse algebraic chess notation.
 /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
 pub struct AlgebraicParser;
 
 impl Parser for AlgebraicParser {
-    fn parse(&self, the_move: &str, _board: &[[Square; 8]; 8]) -> Move {
+    fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
         Move::invalid(
             the_move,
             "Error: AlgebraicParser not implemented."

@@ -1,16 +1,10 @@
-//! File: `engine.rs`
-//!
-//! Module: `engine`
-//!
 //! Provides the `Engine` struct. `Engine` drives the game itself.
 
 use std::fmt;
 
 use super::chess_move::Move;
-use super::color::{PieceColor, SquareColor};
-use super::piece::Piece;
+use super::piece::{Piece, Color};
 use super::player::Player;
-use super::square::Square;
 use super::MoveGenerator;
 
 /// Represents the engine of the chess game. Moves will be input
@@ -20,31 +14,25 @@ use super::MoveGenerator;
 /// Example:
 ///
 /// ```
-/// use chui::{Player, PieceColor, Engine};
+/// use chui::{Player, Color, Engine};
 /// 
 /// let white = Player::new(
-///     PieceColor::White,
-///     "Drummer",
-///     Some("Camina"),
-///     None,
-///     None,
+///     Color::White,
+///     Some("Camina Drummer"),
 ///     Some(37),
 ///     None,
 /// );
 /// 
 /// let black = Player::new(
-///     PieceColor::Black,
-///     "Ashford",
-///     Some("Klaes"),
-///     None,
-///     None,
+///     Color::Black,
+///     Some("Klaes Ashford"),
 ///     Some(72),
 ///     Some(1500),
 /// );
 /// 
 /// let mut engine = Engine::new(white, black);
 /// 
-/// println!("{}", engine.display_for_white());
+/// println!("{}", engine.white_to_string());
 /// ```
 #[derive(Debug)]
 pub struct Engine<'a> {
@@ -56,10 +44,10 @@ pub struct Engine<'a> {
 
     /// Represents the board as an array of arrays each containing
     /// a `Square`.
-    pub board: [[Square; 8]; 8],
+    pub board: [[Option<Piece>; 8]; 8],
 
-    /// The `PieceColor` to move.
-    pub to_move: PieceColor,
+    /// The `Color` to move.
+    pub to_move: Color,
 
     /// Can white castle on the king side?
     pub can_white_castle_kingside: bool,
@@ -103,7 +91,7 @@ pub struct Engine<'a> {
 /// white.
 impl fmt::Display for Engine<'static> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.display_for_white())
+        write!(f, "{}", self.white_to_string())
     }
 }
 
@@ -124,12 +112,12 @@ impl Engine<'static> {
     }
 
     /// Return the display headers for white as a `String`.
-    pub fn display_headers_for_white(&self) -> String {
+    pub fn headers_for_white(&self) -> String {
         format!("{}\n{}", self.white, self.black)
     }
 
     /// Return the display headers for black as a `String`.
-    pub fn display_headers_for_black(&self) -> String {
+    pub fn headers_for_black(&self) -> String {
         format!("{}\n{}", self.black, self.white)
     }
 
@@ -144,65 +132,64 @@ impl Engine<'static> {
     /// a `&str` instance of the representation of the piece
     /// on the chessboard. If the square is empty, a "·" str
     /// is returned.
-    pub fn match_for_piece(&self, square: &Square) -> &str {
-        match square.piece {
+    pub fn match_for_piece(&self, piece: &Piece) -> &str {
+        match piece {
             Piece::None => "·",
-            Piece::Pawn(PieceColor::White) => "P",
-            Piece::Rook(PieceColor::White) => "R",
-            Piece::Knight(PieceColor::White) => "N",
-            Piece::Bishop(PieceColor::White) => "B",
-            Piece::Queen(PieceColor::White) => "Q",
-            Piece::King(PieceColor::White) => "K",
-            Piece::Pawn(PieceColor::Black) => "p",
-            Piece::Rook(PieceColor::Black) => "r",
-            Piece::Knight(PieceColor::Black) => "n",
-            Piece::Bishop(PieceColor::Black) => "b",
-            Piece::Queen(PieceColor::Black) => "q",
-            Piece::King(PieceColor::Black) => "k",
+            Piece::Pawn(Color::White) => "P",
+            Piece::Rook(Color::White) => "R",
+            Piece::Knight(Color::White) => "N",
+            Piece::Bishop(Color::White) => "B",
+            Piece::Queen(Color::White) => "Q",
+            Piece::King(Color::White) => "K",
+            Piece::Pawn(Color::Black) => "p",
+            Piece::Rook(Color::Black) => "r",
+            Piece::Knight(Color::Black) => "n",
+            Piece::Bishop(Color::Black) => "b",
+            Piece::Queen(Color::Black) => "q",
+            Piece::King(Color::Black) => "k",
         }
     }
 
-    /// Return the display of the board for a given `PieceColor` as
-    /// a `String`.
-    pub fn display(&self, color: PieceColor) -> String {
+    /// Return the formatted board for a given `Color` as a `String`.
+    pub fn to_string(&self, color: Color) -> String {
         let alpha_coords: Vec<char> = match color {
-            PieceColor::White => ('a'..='h').collect(),
-            PieceColor::Black => ('a'..='h').rev().collect(),
+            Color::White => ('a'..='h').collect(),
+            Color::Black => ('a'..='h').rev().collect(),
         };
 
-        let numeric_coords: Vec<u32> = (1..=8).rev().collect();
+        let numeric_coords: Vec<u8> = (1..=8).collect();
 
         let display_headers = match color {
-            PieceColor::White => self.display_headers_for_white(),
-            PieceColor::Black => self.display_headers_for_black(),
+            Color::White => self.headers_for_white(),
+            Color::Black => self.headers_for_black(),
         };
 
-        let row_vec: Vec<u32> = match color {
-            PieceColor::White => (0..8).collect(),
-            PieceColor::Black => (0..8).rev().collect(),
+        let row_vec: Vec<u8> = match color {
+            Color::White => (0..8).collect(),
+            Color::Black => (0..8).rev().collect(),
         };
 
         let col_vec = row_vec.clone();
 
         let to_move = match self.to_move {
-            PieceColor::White => "White to move.",
-            PieceColor::Black => "Black to move.",
+            Color::White => "White to move.",
+            Color::Black => "Black to move.",
         };
 
         let mut output = String::new();
 
-        for i in row_vec.iter() {
-            output += &format!("{} |", numeric_coords[*i as usize]);
+        for i in row_vec.iter().rev() {
+            output = format!("{}{} |", output, numeric_coords[*i as usize]);
             for j in col_vec.iter() {
-                output += &format!(
-                    " {} ",
-                    self.match_for_piece(&self.board[*i as usize][*j as usize])
-                );
+                output = match &self.board[*i as usize][*j as usize] {
+                    Some(piece) => format!("{} {} ", output, self.match_for_piece(piece)),
+                    None => format!("{} · ", output),
+                };
             }
-            output += "\n";
+            output = format!("{}\n", output);
         }
 
-        output += "  +-----------------------\n   ";
+        output = format!("{}  +-----------------------\n   ", output);
 
         for coord in alpha_coords.iter() {
             output += &format!(" {} ", *coord);
@@ -218,13 +205,43 @@ impl Engine<'static> {
     }
 
     /// Display the chessboard for `White`.
-    pub fn display_for_white(&self) -> String {
-        self.display(PieceColor::White)
+    pub fn white_to_string(&self) -> String {
+        self.to_string(Color::White)
     }
 
     /// Display the chessboard for `Black`.
-    pub fn display_for_black(&self) -> String {
-        self.display(PieceColor::Black)
+    pub fn black_to_string(&self) -> String {
+        self.to_string(Color::Black)
+    }
+
+    pub fn row_of_pawns(color: Color) -> [Option<Piece>; 8] {
+        [
+            Some(Piece::Pawn(color)),
+            Some(Piece::Pawn(color)),
+            Some(Piece::Pawn(color)),
+            Some(Piece::Pawn(color)),
+            Some(Piece::Pawn(color)),
+            Some(Piece::Pawn(color)),
+            Some(Piece::Pawn(color)),
+            Some(Piece::Pawn(color)),
+        ]
+    }
+
+    pub fn row_of_pieces(color: Color) -> [Option<Piece>; 8] {
+        [
+            Some(Piece::Rook(color)),
+            Some(Piece::Knight(color)),
+            Some(Piece::Bishop(color)),
+            Some(Piece::Queen(color)),
+            Some(Piece::King(color)),
+            Some(Piece::Bishop(color)),
+            Some(Piece::Knight(color)),
+            Some(Piece::Rook(color)),
+        ]
+    }
+
+    pub fn row_of_none() -> [Option<Piece>; 8] {
+        [None, None, None, None, None, None, None, None]
     }
 
     /// Return a new instance of `Engine` given a white
@@ -233,7 +250,7 @@ impl Engine<'static> {
         Engine {
             white,
             black,
-            to_move: PieceColor::White,
+            to_move: Color::White,
             can_white_castle_kingside: true,
             can_white_castle_queenside: true,
             can_black_castle_kingside: true,
@@ -244,350 +261,29 @@ impl Engine<'static> {
             enpassant_target_square: ('-', 0),
             move_generator: MoveGenerator::generate_move_list(),
             board: [
-                // rank 8
-                [
-                    Square {
-                        coord: ('a', 8),
-                        piece: Piece::Rook(PieceColor::Black),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('b', 8),
-                        piece: Piece::Knight(PieceColor::Black),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('c', 8),
-                        piece: Piece::Bishop(PieceColor::Black),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('d', 8),
-                        piece: Piece::Queen(PieceColor::Black),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('e', 8),
-                        piece: Piece::King(PieceColor::Black),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('f', 8),
-                        piece: Piece::Bishop(PieceColor::Black),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('g', 8),
-                        piece: Piece::Knight(PieceColor::Black),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('h', 8),
-                        piece: Piece::Rook(PieceColor::Black),
-                        color: SquareColor::Dark,
-                    },
-                ],
-                // rank 7
-                [
-                    Square {
-                        coord: ('a', 7),
-                        piece: Piece::Pawn(PieceColor::Black),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('b', 7),
-                        piece: Piece::Pawn(PieceColor::Black),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('c', 7),
-                        piece: Piece::Pawn(PieceColor::Black),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('d', 7),
-                        piece: Piece::Pawn(PieceColor::Black),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('e', 7),
-                        piece: Piece::Pawn(PieceColor::Black),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('f', 7),
-                        piece: Piece::Pawn(PieceColor::Black),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('g', 7),
-                        piece: Piece::Pawn(PieceColor::Black),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('h', 7),
-                        piece: Piece::Pawn(PieceColor::Black),
-                        color: SquareColor::Light,
-                    },
-                ],
-                // rank 6
-                [
-                    Square {
-                        coord: ('a', 6),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('b', 6),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('c', 6),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('d', 6),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('e', 6),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('f', 6),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('g', 6),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('h', 6),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                ],
-                // rank 5
-                [
-                    Square {
-                        coord: ('a', 5),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('b', 5),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('c', 5),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('d', 5),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('e', 5),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('f', 5),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('g', 5),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('h', 5),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                ],
-                // rank 4
-                [
-                    Square {
-                        coord: ('a', 4),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('b', 4),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('c', 4),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('d', 4),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('e', 4),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('f', 4),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('g', 4),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('h', 4),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                ],
-                // rank 3
-                [
-                    Square {
-                        coord: ('a', 3),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('b', 3),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('c', 3),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('d', 3),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('e', 3),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('f', 3),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('g', 3),
-                        piece: Piece::None,
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('h', 3),
-                        piece: Piece::None,
-                        color: SquareColor::Light,
-                    },
-                ],
-                // rank 2
-                [
-                    Square {
-                        coord: ('a', 2),
-                        piece: Piece::Pawn(PieceColor::White),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('b', 2),
-                        piece: Piece::Pawn(PieceColor::White),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('c', 2),
-                        piece: Piece::Pawn(PieceColor::White),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('d', 2),
-                        piece: Piece::Pawn(PieceColor::White),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('e', 2),
-                        piece: Piece::Pawn(PieceColor::White),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('f', 2),
-                        piece: Piece::Pawn(PieceColor::White),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('g', 2),
-                        piece: Piece::Pawn(PieceColor::White),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('h', 2),
-                        piece: Piece::Pawn(PieceColor::White),
-                        color: SquareColor::Dark,
-                    },
-                ],
                 // rank 1
-                [
-                    Square {
-                        coord: ('a', 1),
-                        piece: Piece::Rook(PieceColor::White),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('b', 1),
-                        piece: Piece::Knight(PieceColor::White),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('c', 1),
-                        piece: Piece::Bishop(PieceColor::White),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('d', 1),
-                        piece: Piece::Queen(PieceColor::White),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('e', 1),
-                        piece: Piece::King(PieceColor::White),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('f', 1),
-                        piece: Piece::Bishop(PieceColor::White),
-                        color: SquareColor::Light,
-                    },
-                    Square {
-                        coord: ('g', 1),
-                        piece: Piece::Knight(PieceColor::White),
-                        color: SquareColor::Dark,
-                    },
-                    Square {
-                        coord: ('h', 1),
-                        piece: Piece::Rook(PieceColor::White),
-                        color: SquareColor::Light,
-                    },
-                ],
+                Engine::row_of_pieces(Color::White),
+
+                // rank 2
+                Engine::row_of_pawns(Color::White),
+
+                // rank 3
+                Engine::row_of_none(),
+
+                // rank 4
+                Engine::row_of_none(),
+
+                // rank 5
+                Engine::row_of_none(),
+
+                // rank 6
+                Engine::row_of_none(),
+
+                // rank 7
+                Engine::row_of_pawns(Color::Black),
+
+                // rank 8
+                Engine::row_of_pieces(Color::Black),
             ],
         }
     }

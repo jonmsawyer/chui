@@ -1,6 +1,6 @@
 mod modules;
 pub use modules::{
-    Engine, Move, MoveGenerator, Piece,
-    PieceColor, Player, Square, SquareColor,
+    Engine, Move, MoveGenerator, Player,
+    piece::{Piece, Color},
     parser::{self, ParserEngine},
 };

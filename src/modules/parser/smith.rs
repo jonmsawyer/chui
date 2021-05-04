@@ -3,14 +3,14 @@
 //use std::fmt;
 
 use super::Parser;
-use super::super::{Move, Square};
+use super::super::{Move, Piece};
 
 /// A parser that will parse Smith chess notation.
 /// Example moves: `e1g1c`, `b4c3n`, `b5c6n`, `d7c6b`, `e2e4`, etc.
 pub struct SmithParser;
 
 impl Parser for SmithParser {
-    fn parse(&self, the_move: &str, _board: &[[Square; 8]; 8]) -> Move {
+    fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
         Move::invalid(
             the_move,
             "Error: SmithParser not implemented."

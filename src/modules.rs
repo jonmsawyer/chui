@@ -1,11 +1,5 @@
-pub mod color;
-pub use color::{PieceColor, SquareColor};
-
 pub mod piece;
-pub use piece::Piece;
-
-pub mod square;
-pub use square::Square;
+pub use piece::{Piece, Color};
 
 pub mod player;
 pub use player::Player;

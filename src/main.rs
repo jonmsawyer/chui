@@ -1,35 +1,29 @@
 use chui::{
-    Player, PieceColor, Engine,
+    Player, Color, Engine,
     parser::{self, ParserEngine}
 };
 
 fn main() {
     let white = Player::new(
-        PieceColor::White,
-        "Drummer",
-        Some("Camina"),
-        None,
-        None,
+        Color::White,
+        Some("Camina Drummer"),
         Some(37),
         None,
     );
 
     let black = Player::new(
-        PieceColor::Black,
-        "Ashford",
-        Some("Klaes"),
-        None,
-        None,
+        Color::Black,
+        Some("Klaes Ashford"),
         Some(72),
         Some(1500),
     );
     
     let engine = Engine::new(white, black);
 
-    println!("{}", engine.display_for_white());
+    println!("{}", engine.white_to_string());
     println!();
 
-    println!("{}", engine.display_for_black());
+    println!("{}", engine.black_to_string());
     println!();
 
     let parser = parser::new(ParserEngine::Algebraic);

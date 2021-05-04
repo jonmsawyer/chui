@@ -1,7 +1,3 @@
-//! File: `chess_move.rs`
-//!
-//! Module: `chess_move`
-//!
 //! Provides a struct for `Move` instances. Each move has properties
 //! covering from and to coordinates, the piece being moved, the
 //! original move text and interpreted move text. If the move is
@@ -12,18 +8,7 @@
 use std::fmt;
 //use std::ops;
 
-use super::{Piece, PieceColor};
-
-/// Represents the state of the move being performed. `Valid` if
-/// the move is valid, otherwise `Invalid`.
-#[derive(Debug)]
-pub enum MoveState {
-    /// Represents the valid move state.
-    Valid,
-
-    /// Represents the invalid move state.
-    Invalid,
-}
+use super::{Piece, Color};
 
 /// Represents the type of move to be performed. If the move
 /// is a simple move, then `Move` is represented. If the move
@@ -38,9 +23,13 @@ pub enum MoveType {
     /// Represents that the desired move is a capture, not just
     /// a move.
     Capture,
+}
 
-    /// Represents that the desired move is invalid.
-    Invalid,
+/// I plan on refactoring this later, so it's defined here for now
+/// to accomodate the Result<T, ErrorKind> types in future modules.
+#[derive(Debug)]
+pub enum ErrorKind {
+    InvalidMove,
 }
 
 /// Represents a chess move.
@@ -67,13 +56,12 @@ pub struct Move {
     /// The user's input move text (e.g., "Be5").
     pub input_move: String,
 
-    /// The move's `MoveState`. One of `Move`, `Capture`, or `Invalid`.
-    pub move_state: MoveState,
+    /// Represents the type of move to be performed. A `Move`
+    /// or a `Capture`. An `ErrorKind` is returned if the move is
+    /// invalid.
+    pub move_type: Result<MoveType, ErrorKind>,
 
-    /// The move's `MoveType`. One of `Valid` or `Invalid`.
-    pub move_type: MoveType,
-
-    /// The reason if `MoveState` or `MoveType` is `Invalid`.
+    /// The reason if the error state of the move is invalid.
     pub reason: String,
 }
 
@@ -91,142 +79,33 @@ impl fmt::Display for Move {
 }
 
 impl Move {
-    /// Parse a coordinate move (e.g., "a1-a2").
-    /// 
-    /// TODO: implement a real parser.
-    pub fn parse_square_to_square_move(the_move: &str) -> Move {
-        let move_tokens: Vec<&str> = the_move.split('-').collect();
-
-        if move_tokens.len() != 2 {
-            return Move::invalid(the_move, "num tokens != 2 [split on '-']");
-        }
-
-        //
-        // Part One
-        //
-
-        let part_one = move_tokens[0]; // must be valid `{a-h}{1-8}`
-
-        if part_one.len() != 2 {
-            return Move::invalid(
-                the_move,
-                &format!("len of first part != 2 [{}]", part_one)
-            );
-        }
-
-        let part_one_chars: Vec<char> = part_one.chars().collect();
-
-        let mut round = 1;
-        for c in part_one_chars.iter() {
-            if round == 1 && !('a'..='h').contains(&c) {
-                return Move::invalid(
-                    the_move,
-                    &format!(
-                        "first part, {}, not in [a, b, c, d, e, f, g, h]",
-                        c
-                    ),
-                );
-            } else if round == 2 && !('1'..='8').contains(&c) {
-                return Move::invalid(
-                    the_move,
-                    &format!(
-                        "second part, {}, not in [1, 2, 3, 4, 5, 6, 7, 8]",
-                        c
-                    ),
-                );
-            }
-            round += 1;
-        }
-
-        //
-        // Part Two
-        //
-
-        let part_two = move_tokens[1]; // must be valid {a-h}{1-8}
-
-        if part_two.len() != 2 {
-            return Move::invalid(the_move, &format!("len of second part != 2 [{}]", part_two));
-        }
-
-        let part_two_chars: Vec<char> = part_two.chars().collect();
-
-        let mut round = 1;
-        for c in part_two_chars.iter() {
-            if round == 1 && !('a'..='h').contains(&c) {
-                return Move::invalid(
-                    the_move,
-                    &format!("first part, {}, not in [a, b, c, d, e, f, g, h]", c),
-                );
-            } else if round == 2 && !('1'..='8').contains(&c) {
-                return Move::invalid(
-                    the_move,
-                    &format!("second part, {}, not in [1, 2, 3, 4, 5, 6, 7, 8]", c),
-                );
-            }
-            round += 1;
-        }
-
-        Move {
-            from_coord: (part_one_chars[0], part_one_chars[1].to_digit(10).unwrap()),
-            to_coord: (part_two_chars[0], part_two_chars[1].to_digit(10).unwrap()),
-            from_index: (0, 0),
-            to_index: (0, 0),
-            piece: Piece::Pawn(PieceColor::White),
-            move_text: the_move.to_string(),
-            input_move: the_move.to_string(),
-            move_state: MoveState::Valid,
-            move_type: MoveType::Move,
-            reason: String::from("foo"),
-        }
-    }
-
-    /// Parse a piece capture move.
-    /// 
-    /// TODO: implement a real parser.
-    pub fn parse_piece_capture_move(the_move: &str) -> Move {
-        let move_tokens: Vec<&str> = the_move.split('x').collect();
-        if move_tokens.len() != 2 {
-            return Move::invalid(the_move, "num tokens != 2 [split on 'x']");
-        }
-        Move::invalid(the_move, "not implemented")
-    }
-
     /// Parse the input move.
     /// 
     /// TODO: implement a real parser.
-    pub fn parse_move(the_move: &str, to_move: PieceColor) -> Move {
+    pub fn parse_move(the_move: &str, to_move: Color) -> Move {
         // Trim the whitespace from `the_move`, then check if
         // it contains a whitespace character. If so, the move
         // is invalid.
         let the_move = the_move.trim();
 
+        if the_move == String::new() {
+            return Move::invalid(the_move, "invalid empty input");
+        }
+
         if the_move.contains(char::is_whitespace) {
             return Move::invalid(the_move, "contains whitespace");
         }
 
-        // Move is similar to `square-to-square`, now must expect
-        // `{col}{row}-{col}{row}{{=}RNBQ|+|++|#}` format.
-        if the_move.contains('-') {
-            return Move::parse_square_to_square_move(the_move);
-        }
-
-        // Move is similar to `(square|piece)-takes-square`,
-        // now must expect `{col}{row}x{col}{row}` or
-        // `{piece}x{col}{row}{{=}RNBQ|+|++|#}`.
-        else if the_move.contains('x') {
-            return Move::parse_piece_capture_move(the_move);
-        }
-
+        // Just for development. A parser will be implemented soon.
         Move {
-            from_coord: ('a', 1),
-            to_coord: ('a', 8),
-            from_index: (7, 0),
-            to_index: (0, 0),
-            piece: Piece::Rook(to_move),
+            from_coord: ('e', 2),
+            to_coord: ('e', 4),
+            from_index: (4, 1),
+            to_index: (4, 3),
+            piece: Piece::Pawn(to_move),
             move_text: String::from("Pawn from e2 to e4"),
-            input_move: String::from(the_move),
-            move_state: MoveState::Valid,
-            move_type: MoveType::Move,
+            input_move: the_move.to_string(),
+            move_type: Ok(MoveType::Move),
             reason: String::new(),
         }
     }
@@ -241,8 +120,7 @@ impl Move {
             piece: Piece::None,
             move_text: String::from("invalid move"),
             input_move: the_move.to_string(),
-            move_state: MoveState::Invalid,
-            move_type: MoveType::Invalid,
+            move_type: Err(ErrorKind::InvalidMove), 
             reason: reason.to_string(),
         }
     }

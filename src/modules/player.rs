@@ -1,56 +1,36 @@
-//! File: `player.rs`
-//!
-//! Module: `player`
-//!
 //! Provides the struct and implementation of `Player`. Each
 //! player requires a `last_name`, but optionally a `first_name`,
 //! `name_prefix`, `name_suffix`, `age`, and `rating`.
 
 use std::fmt;
 
-use super::color::PieceColor;
+use super::piece::Color;
 
 /// Contains the information related to a player, such as piece
-/// `color`, `last_name`, `first_name`, `name_prefix`,
-/// `name_suffix`, `full_name`, `age`, and `rating`.
+/// `color`, `name`, `age`, and Elo `rating`.
 ///
 /// Initialize a new player like so:
 ///
 /// Example:
 ///
 /// ```
-/// use chui::{PieceColor, Player};
+/// use chui::{Color, Player};
+/// 
 /// let player = Player::new(
-///     PieceColor::White,
-///     "Johnson",
-///     Some("Fred"),
-///     None,
-///     None,
+///     Color::White,
+///     Some("Fred Johnson"),
 ///     Some(48),
 ///     None,
 /// );
 /// ```
 #[derive(Debug)]
 pub struct Player {
-    /// The piece color of the player. One of `PieceColor::White`
-    /// or `PieceColor::Black`.
-    pub color: PieceColor,
+    /// The piece color of the player. One of `Color::White`
+    /// or `Color::Black`.
+    pub color: Color,
 
-    /// The last name of the player.
-    pub last_name: String,
-
-    /// The optional first name of the player.
-    pub first_name: Option<String>,
-
-    /// The optional name prefix of the player (e.g., "Dr.").
-    pub name_prefix: Option<String>,
-
-    /// The optional name suffix of the player (e.g., "Jr.").
-    pub name_suffix: Option<String>,
-
-    /// The full name of the player. Will contain all parts of the
-    /// name if they are available (e.g., "Dr. Smitch, John Jr.").
-    pub full_name: String,
+    /// The name of the player. All UTF-8 input is valid.
+    pub name: Option<String>,
 
     /// The optional age of the player. Useful in certain export
     /// formats.
@@ -61,53 +41,24 @@ pub struct Player {
 }
 
 impl Player {
-    /// Creates a new `Player` instance when provided with `color`,
-    /// `last_name`, `first_name`, `name_prefix`, `name_suffix`,
-    /// `age`, and `rating` information. Some fields are `Option`al.
+    /// Creates a new `Player` instance when provided with `color`.
+    /// Most fields are `Option`al.
     pub fn new(
-        color: PieceColor,
-        last_name: &str,
-        first_name: Option<&str>,
-        name_prefix: Option<&str>,
-        name_suffix: Option<&str>,
+        color: Color,
+        name: Option<&str>,
         age: Option<u8>,
         rating: Option<u32>,
     ) -> Player {
-        let mut full_name = String::from(last_name);
-
-        let first_name = match first_name {
-            Some(first_name) => {
-                full_name += &format!(", {}", first_name);
-                Some(first_name.to_string())
-            }
-            None => None,
-        };
-
-        let name_prefix = match name_prefix {
-            Some(name_prefix) => {
-                full_name = format!("{} {}", name_prefix, full_name);
-                Some(name_prefix.to_string())
-            }
-            None => None,
-        };
-
-        let name_suffix = match name_suffix {
-            Some(name_suffix) => {
-                full_name = format!("{} {}", full_name, name_suffix);
-                Some(name_suffix.to_string())
-            }
-            None => None,
+        let name = match name {
+            Some(name) => Some(name.to_string()),
+            _ => None,
         };
 
         Player {
             color,
-            last_name: last_name.to_string(),
-            first_name,
-            name_prefix,
-            name_suffix,
-            full_name,
-            rating,
+            name,
             age,
+            rating,
         }
     }
 }
@@ -115,13 +66,24 @@ impl Player {
 /// Writes the full computed name of the player.
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut name = format!("{:?}: {}", self.color, self.full_name);
-        if let Some(rating) = self.rating {
-            name += &format!(" ({})", rating);
-        } else {
-            name += " (no rating)";
-        }
-        write!(f, "{}", name)
+        let color = format!("{:?}", self.color);
+
+        let name = match &self.name {
+            Some(name) => name.to_string(),
+            None => String::from("(no name)"),
+        };
+
+        let age = match self.age {
+            Some(age) => format!(" (Age {})", age),
+            None => String::new(),
+        };
+
+        let rating = match self.rating {
+            Some(rating) => format!("({} Elo)", rating),
+            None => String::from("(no Elo rating)"),
+        };
+
+        write!(f, "{}: {}{} {}", color, name, age, rating)
     }
 }
 
@@ -130,56 +92,122 @@ mod test {
     use super::*;
 
     #[test]
-    fn full_name_is_computed_1() {
+    fn full_name_is_computed_name_age_rating() {
         let player = Player::new(
-            PieceColor::White,
-            "Smith",
-            Some("John"),
-            Some("Dr."),
-            Some("III"),
+            Color::White,
+            Some("Dr. John Smith III"),
             Some(47),
             Some(1500)
         );
 
         assert_eq!(
             format!("{}", player),
-            String::from("White: Dr. Smith, John III (1500)")
+            String::from("White: Dr. John Smith III (Age 47) (1500 Elo)")
         )
     }
 
     #[test]
-    fn full_name_is_computed_2() {
+    fn full_name_is_computed_name_age_no_rating() {
         let player = Player::new(
-            PieceColor::Black,
-            "Smith",
-            Some("John"),
-            None,
-            Some("IV"),
+            Color::Black,
+            Some("John Smith IV"),
             Some(12),
             None,
         );
 
         assert_eq!(
             format!("{}", player),
-            String::from("Black: Smith, John IV (no rating)")
+            String::from("Black: John Smith IV (Age 12) (no Elo rating)")
         )
     }
 
     #[test]
-    fn full_name_is_computed_3() {
+    fn full_name_is_computed_name_no_age_rating() {
         let player = Player::new(
-            PieceColor::Black,
-            "Smith",
+            Color::Black,
+            Some("Billy Bob Joe Bob Jr."),
             None,
-            None,
-            None,
-            Some(27),
             Some(2639),
         );
 
         assert_eq!(
             format!("{}", player),
-            String::from("Black: Smith (2639)")
+            String::from("Black: Billy Bob Joe Bob Jr. (2639 Elo)")
+        )
+    }
+
+    #[test]
+    fn full_name_is_computed_name_no_age_no_rating() {
+        let player = Player::new(
+            Color::Black,
+            Some("Smith"),
+            None,
+            None,
+        );
+
+        assert_eq!(
+            format!("{}", player),
+            String::from("Black: Smith (no Elo rating)")
+        )
+    }
+
+    #[test]
+    fn full_name_is_computed_no_name_age_rating() {
+        let player = Player::new(
+            Color::White,
+            None,
+            Some(47),
+            Some(1500)
+        );
+
+        assert_eq!(
+            format!("{}", player),
+            String::from("White: (no name) (Age 47) (1500 Elo)")
+        )
+    }
+
+    #[test]
+    fn full_name_is_computed_no_name_age_no_rating() {
+        let player = Player::new(
+            Color::Black,
+            None,
+            Some(12),
+            None,
+        );
+
+        assert_eq!(
+            format!("{}", player),
+            String::from("Black: (no name) (Age 12) (no Elo rating)")
+        )
+    }
+
+    #[test]
+    fn full_name_is_computed_no_name_no_age_rating() {
+        let player = Player::new(
+            Color::Black,
+            None,
+            None,
+            Some(2639),
+        );
+
+        assert_eq!(
+            format!("{}", player),
+            String::from("Black: (no name) (2639 Elo)")
+        )
+    }
+
+    #[test]
+    fn full_name_is_computed_no_name_no_age_no_rating() {
+        let player = Player::new(
+            Color::Black,
+            None,
+            None,
+            None,
+        );
+
+        assert_eq!(
+            format!("{}", player),
+            String::from("Black: (no name) (no Elo rating)")
         )
     }
 }

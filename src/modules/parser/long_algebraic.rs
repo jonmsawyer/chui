@@ -3,14 +3,14 @@
 //use std::fmt;
 
 use super::Parser;
-use super::super::{Move, Square};
+use super::super::{Move, Piece};
 
 /// A parser that will parse long algebraic chess notation.
 /// Example moves: `e2e4`, `e7e5`, `d2d3`, `Bf8b4+`, `Bb5xc6`, etc.
 pub struct LongAlgebraicParser;
 
 impl Parser for LongAlgebraicParser {
-    fn parse(&self, the_move: &str, _board: &[[Square; 8]; 8]) -> Move {
+    fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
         Move::invalid(
             the_move,
             "Error: LongAlgebraicParser not implemented."

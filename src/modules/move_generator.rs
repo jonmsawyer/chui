@@ -1,7 +1,3 @@
-//! File: `move_generator.rs`
-//!
-//! Module: `move_generator`
-//!
 //! Provides the `MoveGenerator` struct. `MoveGenerator`
 //! generates all possible Algebraic and Coordinate Notation
 //! moves via `MoveGenerator::generate_move_list()`.

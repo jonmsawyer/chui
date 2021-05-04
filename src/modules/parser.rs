@@ -1,6 +1,6 @@
 #![allow(clippy::upper_case_acronyms)]
 
-use super::{Move, Square};
+use super::{Move, Piece};
 
 pub mod algebraic;
 pub mod long_algebraic;
@@ -20,18 +20,18 @@ pub mod iccf;
 /// Example:
 /// 
 /// ```
-/// use chui::{Move, Square, parser::Parser};
+/// use chui::{Move, Piece, parser::Parser};
 /// 
 /// pub struct MyParser;
 /// 
 /// impl Parser for MyParser {
-///     fn parse(&self, the_move: &str, _board: &[[Square; 8]; 8]) -> Move {
+///     fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
 ///         Move::invalid(the_move, "Error: MyParser not implemented.")
 ///     }
 /// }
 /// ```
 pub trait Parser {
-    fn parse(&self, the_move: &str, board: &[[Square; 8]; 8]) -> Move;
+    fn parse(&self, the_move: &str, board: &[[Option<Piece>; 8]; 8]) -> Move;
 }
 
 /// Represents the different available supported parser engines for
@@ -85,24 +85,18 @@ pub enum ParserEngine {
 /// Example:
 /// 
 /// ```
-/// use chui::{Engine, Player, PieceColor, parser::{self, ParserEngine}};
+/// use chui::{Engine, Player, Color, parser::{self, ParserEngine}};
 /// 
 /// let white = Player::new(
-///     PieceColor::White,
-///     "Drummer",
-///     Some("Camina"),
-///     None,
-///     None,
+///     Color::White,
+///     Some("Camina Drummer"),
 ///     Some(37),
 ///     None,
 /// );
 /// 
 /// let black = Player::new(
-///     PieceColor::Black,
-///     "Ashford",
-///     Some("Klaes"),
-///     None,
-///     None,
+///     Color::Black,
+///     Some("Klaes Ashford"),
 ///     Some(72),
 ///     Some(1500),
 /// );
