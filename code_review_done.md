@@ -148,6 +148,8 @@ second square)
 Ok(None) indicates the move was successful and no piece was captured
 Ok(Some(Piece)) indicates the move was successful and Piece was captured
 
+.
+
     1. `Square` has been removed altogether.
     2. "
     3. "
