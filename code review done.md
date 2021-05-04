@@ -163,7 +163,7 @@ can more succinctly place your Pawns
 
     I took a different approach. See code. (engine.rs lines 247:289).
 
-    However, refactoring out `Square` and just using `Option<Piece>`` has made
+    However, refactoring out `Square` and just using `Option<Piece>` has made
     initialization SO much shorter. Tis a blessing in disguise.
 
 -------------------------------------------------------------------------------
