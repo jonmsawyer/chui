@@ -181,6 +181,7 @@ engine.rs: this is the "root" of your actual engine. i'd add sub-modules for
 preprocessors and parsers, as well as any other logic that's ultimately needed.
 
     lib.rs -- I plan on pushing as a bin/lib crate, so keeping lib.rs.
+
     ditch modules -- keeping `modules` for now.
 
     piece.rs -- Now contains `Piece` and `Color`, ditched `Square` altogether.
