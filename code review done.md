@@ -1,5 +1,5 @@
-Code Review Done
-================
+Code Review Done (thanks to https://github.com/Kromey)
+======================================================
 
 https://github.com/jonmsawyer/chui/blob/main/src/modules/player.rs#L39-L53
 ditch these. replace with a single (required) `name` field. your current setup

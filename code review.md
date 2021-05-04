@@ -1,5 +1,5 @@
-Code Review
-===========
+Code Review (thanks to http://github.com/Kromey)
+================================================
 
 in the std library, check out std::io::Result, which is broadly considered to
 be a gold standard of an ergonomic use of Results in a library. short version:
