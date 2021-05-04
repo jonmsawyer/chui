@@ -163,6 +163,8 @@ Ok(Some(Piece)) indicates the move was successful and Piece was captured
 empty board with [None; 64] (or [[None; 8]; 8]), then place pieces. a for loop
 can more succinctly place your Pawns
 
+.
+
     I took a different approach. See code. (engine.rs lines 247:289).
 
     However, refactoring out `Square` and just using `Option<Piece>` has made
