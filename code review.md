@@ -13,10 +13,8 @@ needed in calling code handling them.
 So to save you some Googling, here's std::io::Result
 https://doc.rust-lang.org/std/io/type.Result.html
 
-(((
     Will refactor crate::Result later. Unless you can give me a quick example,
     I'm unsure how to implement this.
-)))
 
 -------------------------------------------------------------------------------
 
@@ -24,7 +22,6 @@ https://github.com/jonmsawyer/chui/blob/main/src/modules/engine.rs#L143-L163
 this more appropriately belongs on Piece or, better yet, as 
 impl From<Piece> for &str
 
-(((
     Not sure what you mean here. Can Piece::from(Piece) produce a &str?
     Investigate.
 
@@ -55,4 +52,3 @@ impl From<Piece> for &str
 
     Besides, I'm not sure if I want Piece::from(Piece) to return &str in the
     long run.
-)))
