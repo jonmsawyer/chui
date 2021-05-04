@@ -16,12 +16,12 @@ fn init_engine() {
         Some(987),
     );
 
-    let engine = Engine::new(white, black);
+    if let Ok(engine) = Engine::new(white, black) {
 
-    // Note the whitespace around the output.
-    assert_eq!(
-        &format!("{}", engine),
-        "White: Nathan Vander Martin (Age 36) (no Elo rating)
+        // Note the whitespace around the output.
+        assert_eq!(
+            &format!("{}", engine),
+            "White: Nathan Vander Martin (Age 36) (no Elo rating)
 Black: Shop Guy. Bob Vila III (Age 57) (987 Elo)
 Position:
 8 | r  n  b  q  k  b  n  r 
@@ -35,5 +35,6 @@ Position:
   +-----------------------
     a  b  c  d  e  f  g  h 
 White to move."
-    );
+        );
+    }
 }

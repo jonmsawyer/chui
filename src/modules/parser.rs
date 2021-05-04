@@ -101,34 +101,42 @@ pub enum ParserEngine {
 ///     Some(1500),
 /// );
 /// 
-/// let engine = Engine::new(white, black);
-/// let parser = parser::new(ParserEngine::Descriptive);
-/// 
-/// println!("the move: {:?}", parser.parse("P-K4", &engine.board));
+/// if let Ok(engine) = Engine::new(white, black) {
+///     let parser = parser::new(ParserEngine::Descriptive);
+///     
+///     println!("the move: {:?}", parser.parse("P-K4", &engine.board));
+/// };
 /// ```
 pub fn new(parser: ParserEngine) -> Box<dyn Parser> {
     match parser {
         ParserEngine::Algebraic => {
             algebraic::AlgebraicParser::new()
         },
+
         ParserEngine::ConciseReversible => {
             concise_reversible::ConciseReversibleParser::new()
         },
+
         ParserEngine::Coordinate => {
             coordinate::CoordinateParser::new()
         },
+
         ParserEngine::Descriptive => {
             descriptive::DescriptiveParser::new()
         },
+
         ParserEngine::ICCF => {
             iccf::ICCFParser::new()
         },
+
         ParserEngine::LongAlgebraic => {
             long_algebraic::LongAlgebraicParser::new()
         },
+
         ParserEngine::ReversibleAlgebraic => {
             reversible_algebraic::ReversibleAlgebraicParser::new()
         },
+        
         ParserEngine::Smith => {
             smith::SmithParser::new()
         },

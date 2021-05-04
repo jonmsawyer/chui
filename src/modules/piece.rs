@@ -2,7 +2,7 @@
 //! `Bishop`, `Queen`, `King`, and `None`.
 
 /// Piece color. Either `White` or `Black` variants.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Color {
     White,
     Black,

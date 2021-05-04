@@ -30,9 +30,9 @@ use super::MoveGenerator;
 ///     Some(1500),
 /// );
 /// 
-/// let mut engine = Engine::new(white, black);
-/// 
-/// println!("{}", engine.white_to_string());
+/// if let Ok(engine) = Engine::new(white, black) {
+///     println!("{}", engine.white_to_string());
+/// };
 /// ```
 #[derive(Debug)]
 pub struct Engine<'a> {
@@ -249,32 +249,41 @@ impl Engine<'static> {
         [None, None, None, None, None, None, None, None]
     }
 
-    /// Return a new instance of `Engine` given a white
+    /// Return a new instance of `Ok<Engine>` given a white
     /// `Player` and a black `Player`.
-    pub fn new(white: Player, black: Player) -> Engine<'static> {
-        Engine {
-            white,
-            black,
-            to_move: Color::White,
-            can_white_castle_kingside: true,
-            can_white_castle_queenside: true,
-            can_black_castle_kingside: true,
-            can_black_castle_queenside: true,
-            pawn_move_or_piece_capture_half_move_counter: 0,
-            half_move_counter: 0,
-            move_counter: 0,
-            enpassant_target_square: ('-', 0),
-            move_generator: MoveGenerator::generate_move_list(),
-            board: [
-                Engine::row_of_pieces(Color::White), // rank 1
-                Engine::row_of_pawns(Color::White),  // rank 2
-                Engine::row_of_none(),               // rank 3
-                Engine::row_of_none(),               // rank 4
-                Engine::row_of_none(),               // rank 5
-                Engine::row_of_none(),               // rank 6
-                Engine::row_of_pawns(Color::Black),  // rank 7
-                Engine::row_of_pieces(Color::Black), // rank 8
-            ],
+    pub fn new(white: Player, black: Player)
+    -> Result<Engine<'static>, String>
+    {
+        if white.color != black.color {
+            Ok(
+                Engine {
+                    white,
+                    black,
+                    to_move: Color::White,
+                    can_white_castle_kingside: true,
+                    can_white_castle_queenside: true,
+                    can_black_castle_kingside: true,
+                    can_black_castle_queenside: true,
+                    pawn_move_or_piece_capture_half_move_counter: 0,
+                    half_move_counter: 0,
+                    move_counter: 0,
+                    enpassant_target_square: ('-', 0),
+                    move_generator: MoveGenerator::generate_move_list(),
+                    board: [
+                        Engine::row_of_pieces(Color::White), // rank 1
+                        Engine::row_of_pawns(Color::White),  // rank 2
+                        Engine::row_of_none(),               // rank 3
+                        Engine::row_of_none(),               // rank 4
+                        Engine::row_of_none(),               // rank 5
+                        Engine::row_of_none(),               // rank 6
+                        Engine::row_of_pawns(Color::Black),  // rank 7
+                        Engine::row_of_pieces(Color::Black), // rank 8
+                    ],
+                }
+            )
+        }
+        else {
+            Err("both players cannot be the same color".to_string())
         }
     }
 }
