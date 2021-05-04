@@ -48,7 +48,7 @@ pub struct Move {
     pub to_index: (u32, u32),
 
     /// The chess piece to move
-    pub piece: Piece,
+    pub piece: Option<Piece>,
 
     /// The parsed move text (e.g., "Pawn on e4 captures e5").
     pub move_text: String,
@@ -102,7 +102,7 @@ impl Move {
             to_coord: ('e', 4),
             from_index: (4, 1),
             to_index: (4, 3),
-            piece: Piece::Pawn(to_move),
+            piece: Some(Piece::Pawn(to_move)),
             move_text: String::from("Pawn from e2 to e4"),
             input_move: the_move.to_string(),
             move_type: Ok(MoveType::Move),
@@ -117,7 +117,7 @@ impl Move {
             to_coord: ('-', 0),
             from_index: (8, 8),
             to_index: (8, 8),
-            piece: Piece::None,
+            piece: None,
             move_text: String::from("invalid move"),
             input_move: the_move.to_string(),
             move_type: Err(ErrorKind::InvalidMove), 

@@ -43,7 +43,4 @@ pub enum Piece {
 
     /// A pawn with its `Color`.
     Pawn(Color),
-
-    /// No piece at all.
-    None,
 }

@@ -134,7 +134,6 @@ impl Engine<'static> {
     /// is returned.
     pub fn match_for_piece(&self, piece: &Piece) -> &str {
         match piece {
-            Piece::None => "·",
             Piece::Pawn(Color::White) => "P",
             Piece::Rook(Color::White) => "R",
             Piece::Knight(Color::White) => "N",
@@ -182,7 +181,10 @@ impl Engine<'static> {
             output = format!("{}{} |", output, numeric_coords[*i as usize]);
             for j in col_vec.iter() {
                 output = match &self.board[*i as usize][*j as usize] {
-                    Some(piece) => format!("{} {} ", output, self.match_for_piece(piece)),
+                    Some(piece) => format!(
+                        "{} {} ",
+                        output, self.match_for_piece(piece)
+                    ),
                     None => format!("{} · ", output),
                 };
             }
@@ -214,6 +216,7 @@ impl Engine<'static> {
         self.to_string(Color::Black)
     }
 
+    /// Produces a row (`[Option<Piece>; 8]`) of pawns according their color.
     pub fn row_of_pawns(color: Color) -> [Option<Piece>; 8] {
         [
             Some(Piece::Pawn(color)),
@@ -227,6 +230,7 @@ impl Engine<'static> {
         ]
     }
 
+    /// Produces a row (`[Option<Piece>; 8]`) of pieces according their color.
     pub fn row_of_pieces(color: Color) -> [Option<Piece>; 8] {
         [
             Some(Piece::Rook(color)),
@@ -240,6 +244,7 @@ impl Engine<'static> {
         ]
     }
 
+    /// Produces a row (`[Option<Piece>; 8]`) of no pieces.
     pub fn row_of_none() -> [Option<Piece>; 8] {
         [None, None, None, None, None, None, None, None]
     }
@@ -261,29 +266,14 @@ impl Engine<'static> {
             enpassant_target_square: ('-', 0),
             move_generator: MoveGenerator::generate_move_list(),
             board: [
-                // rank 1
-                Engine::row_of_pieces(Color::White),
-
-                // rank 2
-                Engine::row_of_pawns(Color::White),
-
-                // rank 3
-                Engine::row_of_none(),
-
-                // rank 4
-                Engine::row_of_none(),
-
-                // rank 5
-                Engine::row_of_none(),
-
-                // rank 6
-                Engine::row_of_none(),
-
-                // rank 7
-                Engine::row_of_pawns(Color::Black),
-
-                // rank 8
-                Engine::row_of_pieces(Color::Black),
+                Engine::row_of_pieces(Color::White), // rank 1
+                Engine::row_of_pawns(Color::White),  // rank 2
+                Engine::row_of_none(),               // rank 3
+                Engine::row_of_none(),               // rank 4
+                Engine::row_of_none(),               // rank 5
+                Engine::row_of_none(),               // rank 6
+                Engine::row_of_pawns(Color::Black),  // rank 7
+                Engine::row_of_pieces(Color::Black), // rank 8
             ],
         }
     }
