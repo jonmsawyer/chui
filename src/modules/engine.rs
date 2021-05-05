@@ -2,6 +2,7 @@
 
 use std::fmt;
 
+use crate::ChuiError;
 use super::chess_move::Move;
 use super::piece::{Piece, Color};
 use super::player::Player;
@@ -50,16 +51,16 @@ pub struct Engine<'a> {
     pub to_move: Color,
 
     /// Can white castle on the king side?
-    pub can_white_castle_kingside: bool,
+    pub white_can_castle_kingside: bool,
 
     /// Can white castle on the queen side?
-    pub can_white_castle_queenside: bool,
+    pub white_can_castle_queenside: bool,
 
     /// Can black castle on the king side?
-    pub can_black_castle_kingside: bool,
+    pub black_can_castle_kingside: bool,
 
     /// Can black castle on the queen side?
-    pub can_black_castle_queenside: bool,
+    pub black_can_castle_queenside: bool,
 
     /// Represents the half-move counter for pawn moves and piece
     /// capture. Needed to declare the "50-move rule" draws in
@@ -83,12 +84,11 @@ pub struct Engine<'a> {
     /// database of possible moves. This will probably be deprecated
     /// later in favor of an actual move parser. For now, this
     /// will do. Access the move list via
-    /// `self.move_generator.move_list`.
+    /// `self.move_generator.move_list` (which is a `Vec<String>`).
     pub move_generator: MoveGenerator<'a>,
 }
 
-/// Implements `Display` for `Engine`. Displays the position for
-/// white.
+/// Formats the position for white.
 impl fmt::Display for Engine<'static> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.white_to_string())
@@ -128,27 +128,6 @@ impl Engine<'static> {
         Move::parse_move(the_move, self.to_move)
     }
 
-    /// Match the `Piece` for the given `&Square` and return
-    /// a `&str` instance of the representation of the piece
-    /// on the chessboard. If the square is empty, a "·" str
-    /// is returned.
-    pub fn match_for_piece(&self, piece: &Piece) -> &str {
-        match piece {
-            Piece::Pawn(Color::White) => "P",
-            Piece::Rook(Color::White) => "R",
-            Piece::Knight(Color::White) => "N",
-            Piece::Bishop(Color::White) => "B",
-            Piece::Queen(Color::White) => "Q",
-            Piece::King(Color::White) => "K",
-            Piece::Pawn(Color::Black) => "p",
-            Piece::Rook(Color::Black) => "r",
-            Piece::Knight(Color::Black) => "n",
-            Piece::Bishop(Color::Black) => "b",
-            Piece::Queen(Color::Black) => "q",
-            Piece::King(Color::Black) => "k",
-        }
-    }
-
     /// Return the formatted board for a given `Color` as a `String`.
     pub fn to_string(&self, color: Color) -> String {
         let alpha_coords: Vec<char> = match color {
@@ -170,10 +149,7 @@ impl Engine<'static> {
 
         let col_vec = row_vec.clone();
 
-        let to_move = match self.to_move {
-            Color::White => "White to move.",
-            Color::Black => "Black to move.",
-        };
+        let to_move = format!("{:?} to move.", self.to_move);
 
         let mut output = String::new();
 
@@ -181,28 +157,29 @@ impl Engine<'static> {
             output = format!("{}{} |", output, numeric_coords[*i as usize]);
             for j in col_vec.iter() {
                 output = match &self.board[*i as usize][*j as usize] {
-                    Some(piece) => format!(
-                        "{} {} ",
-                        output, self.match_for_piece(piece)
-                    ),
+                    Some(piece) => format!("{} {} ", output, piece),
                     None => format!("{} · ", output),
                 };
             }
-            output = format!("{}\n", output);
+            output = format!("{}\n", output.trim());
         }
 
         output = format!("{}  +-----------------------\n   ", output);
 
         for coord in alpha_coords.iter() {
-            output += &format!(" {} ", *coord);
+            output = format!("{} {} ", output, *coord);
         }
+
+        let output = output.trim();
 
         format!(
             "{}\n\
             Position:\n\
             {}\n\
             {}",
-            display_headers, output, to_move,
+            display_headers,
+            output,
+            to_move,
         )
     }
 
@@ -214,20 +191,6 @@ impl Engine<'static> {
     /// Display the chessboard for `Black`.
     pub fn black_to_string(&self) -> String {
         self.to_string(Color::Black)
-    }
-
-    /// Produces a row (`[Option<Piece>; 8]`) of pawns according their color.
-    pub fn row_of_pawns(color: Color) -> [Option<Piece>; 8] {
-        [
-            Some(Piece::Pawn(color)),
-            Some(Piece::Pawn(color)),
-            Some(Piece::Pawn(color)),
-            Some(Piece::Pawn(color)),
-            Some(Piece::Pawn(color)),
-            Some(Piece::Pawn(color)),
-            Some(Piece::Pawn(color)),
-            Some(Piece::Pawn(color)),
-        ]
     }
 
     /// Produces a row (`[Option<Piece>; 8]`) of pieces according their color.
@@ -244,46 +207,122 @@ impl Engine<'static> {
         ]
     }
 
-    /// Produces a row (`[Option<Piece>; 8]`) of no pieces.
-    pub fn row_of_none() -> [Option<Piece>; 8] {
-        [None, None, None, None, None, None, None, None]
-    }
-
     /// Return a new instance of `Ok<Engine>` given a white
     /// `Player` and a black `Player`.
-    pub fn new(white: Player, black: Player)
-    -> Result<Engine<'static>, String>
+    pub fn new(player_1: Player, player_2: Player)
+    -> crate::Result<Engine<'static>>
     {
-        if white.color != black.color {
-            Ok(
-                Engine {
-                    white,
-                    black,
-                    to_move: Color::White,
-                    can_white_castle_kingside: true,
-                    can_white_castle_queenside: true,
-                    can_black_castle_kingside: true,
-                    can_black_castle_queenside: true,
-                    pawn_move_or_piece_capture_half_move_counter: 0,
-                    half_move_counter: 0,
-                    move_counter: 0,
-                    enpassant_target_square: ('-', 0),
-                    move_generator: MoveGenerator::generate_move_list(),
-                    board: [
-                        Engine::row_of_pieces(Color::White), // rank 1
-                        Engine::row_of_pawns(Color::White),  // rank 2
-                        Engine::row_of_none(),               // rank 3
-                        Engine::row_of_none(),               // rank 4
-                        Engine::row_of_none(),               // rank 5
-                        Engine::row_of_none(),               // rank 6
-                        Engine::row_of_pawns(Color::Black),  // rank 7
-                        Engine::row_of_pieces(Color::Black), // rank 8
-                    ],
-                }
-            )
+        if player_1.color == player_2.color {
+            return Err(
+                ChuiError::IncompatibleSides(
+                    "both players cannot be the same color"
+                ),
+            );
+        }
+
+        let white;
+        let black;
+
+        if player_1.color == Color::White {
+            white = player_1;
+            black = player_2;
         }
         else {
-            Err("both players cannot be the same color".to_string())
+            white = player_2;
+            black = player_1;
+        }
+
+        Ok(
+            Engine {
+                white,
+                black,
+                to_move: Color::White,
+                white_can_castle_kingside: true,
+                white_can_castle_queenside: true,
+                black_can_castle_kingside: true,
+                black_can_castle_queenside: true,
+                pawn_move_or_piece_capture_half_move_counter: 0,
+                half_move_counter: 0,
+                move_counter: 0,
+                enpassant_target_square: ('-', 0),
+                move_generator: MoveGenerator::generate_move_list(),
+                board: [
+                    Engine::row_of_pieces(Color::White),  // rank 1
+                    [Some(Piece::Pawn(Color::White)); 8], // rank 2
+                    [None; 8],                            // rank 3
+                    [None; 8],                            // rank 4
+                    [None; 8],                            // rank 5
+                    [None; 8],                            // rank 6
+                    [Some(Piece::Pawn(Color::Black)); 8], // rank 2
+                    Engine::row_of_pieces(Color::Black),  // rank 8
+                ],
+            }
+        )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic]
+    fn engine_init_incompatible_sides() {
+        let white = Player::new(
+            Color::White,
+            Some("Camina Drummer"),
+            Some(37),
+            None,
+        );
+    
+        let white_2 = Player::new(
+            Color::White,
+            Some("Fred Johnson"),
+            None,
+            Some(2483),
+        );
+    
+        if let Err(error) = Engine::new(white, white_2) {
+            panic!("{}", error);
+        }
+
+        let black = Player::new(
+            Color::Black,
+            Some("Camina Drummer"),
+            Some(37),
+            None,
+        );
+    
+        let black_2 = Player::new(
+            Color::Black,
+            Some("Fred Johnson"),
+            None,
+            Some(2483),
+        );
+    
+        if let Err(error) = Engine::new(black, black_2) {
+            panic!("{}", error);
+        }
+    }
+
+    #[test]
+    fn engine_init_correctly() {
+        let white = Player::new(
+            Color::White,
+            Some("Camina Drummer"),
+            Some(37),
+            None,
+        );
+    
+        let black = Player::new(
+            Color::Black,
+            Some("Fred Johnson"),
+            None,
+            Some(2483),
+        );
+    
+        if let Err(error) = Engine::new(black, white) {
+            panic!("{}", error);
         }
     }
 }

@@ -203,3 +203,138 @@ preprocessors and parsers, as well as any other logic that's ultimately needed.
     may make sense to abstract it away from `Engine` for now... Ultimately, not
     sure as of yet. I'll put it within `engine` module if it seems it strictly
     belongs there in the future.
+
+-------------------------------------------------------------------------------
+
+https://github.com/jonmsawyer/chui/blob/main/src/modules/engine.rs#L272-L281
+row_of_pieces is a nice abstraction, but the others are unnecessary and their
+implementations unnecessarily verbose; instead:
+[
+    Engine::row_of_pieces(Color::White),
+    [Some(Pawn(Color::White)); 8],
+    [None; 8],
+    /* snip */
+]
+
+    Good point. Fixed.
+
+-------------------------------------------------------------------------------
+
+impl Display for Piece {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match *self {
+            Piece::Pawn => write!(f, "P"),
+            /* snip */
+       }
+   }
+}
+
+and then you either call piece.to_string(), or do something like format!("{}",
+piece)
+
+(note that to_string has the overhead of allocating a String, so you probably
+want to favor the format! version instead)
+
+you could also just take your Engine::match_for_piece method and move it to a
+Piece::to_str method, though you might find that having the Display trait
+implemented is just more useful anyway. then again, you could have
+Piece::to_str and then use that in your Display trait implementation to get
+both!
+
+(((
+    Excellent observation. I don't know why I didn't think about that.
+    Display has been implemented for Piece and all tests are passing.
+    Thanks dude.
+)))
+
+-------------------------------------------------------------------------------
+
+https://github.com/jonmsawyer/chui/blob/main/src/modules/engine.rs#L143-L163
+this more appropriately belongs on Piece or, better yet, as 
+impl From<Piece> for &str
+
+    Not sure what you mean here. Can Piece::from(Piece) produce a &str?
+    Investigate.
+
+    ```
+    impl From<Piece> for &str {
+        fn from(piece: Piece) -> &'static str {
+            match piece {
+                Piece::None => "·",
+                Piece::Pawn(PieceColor::White) => "P",
+                Piece::Rook(PieceColor::White) => "R",
+                Piece::Knight(PieceColor::White) => "N",
+                Piece::Bishop(PieceColor::White) => "B",
+                Piece::Queen(PieceColor::White) => "Q",
+                Piece::King(PieceColor::White) => "K",
+                Piece::Pawn(PieceColor::Black) => "p",
+                Piece::Rook(PieceColor::Black) => "r",
+                Piece::Knight(PieceColor::Black) => "n",
+                Piece::Bishop(PieceColor::Black) => "b",
+                Piece::Queen(PieceColor::Black) => "q",
+                Piece::King(PieceColor::Black) => "k",
+            }
+        }
+    }
+    ```
+
+    When used, the compiler says that Piece::from(Piece) returns a Piece,
+    not a &str... Help? Not able to get this to work...
+
+    Besides, I'm not sure if I want Piece::from(Piece) to return &str in the
+    long run.
+
+    However, this is all taken care of becaise Display has been implemented
+    for Piece.
+
+    I do have a stub in my code for:
+
+    impl From<&str> for Piece {
+        fn from(piece: &str) -> Piece {
+            match piece {
+                "P" => Piece::Pawn(Color::White),
+                "R" => Piece::Rook(Color::White),
+                "N" => Piece::Knight(Color::White),
+                "B" => Piece::Bishop(Color::White),
+                "Q" => Piece::Queen(Color::White),
+                "K" => Piece::King(Color::White),
+                "p" => Piece::Pawn(Color::Black),
+                "r" => Piece::Rook(Color::Black),
+                "n" => Piece::Knight(Color::Black),
+                "b" => Piece::Bishop(Color::Black),
+                "q" => Piece::Queen(Color::Black),
+                "k" => Piece::King(Color::Black),
+                _ => Piece::None, // This is one of the reasons why I
+                                  // implemented a `Piece::None` variant in
+                                  // the first place. How can I exhaust this
+                                  // arm without returning a Piece? I've tried
+                                  // fn from(piece: &str) -> Option<Piece>
+                                  // but the compiler complains.
+            }
+        }
+
+        Have implemented `Piece::None` for this reason. It won't be used in
+        most logic though, it's primarily for the use case of exhaustive
+        pattern matching on &str.
+
+        Not sure if this will have further implications down the road. Will
+        keep an eye on it.
+    }
+
+-------------------------------------------------------------------------------
+
+in the std library, check out std::io::Result, which is broadly considered to
+be a gold standard of an ergonomic use of Results in a library. short version:
+declare your own Result type which specifies that the Err variant will be your
+own error type, which makes using your Result as simple as, well, `use
+crate::Result`, and then your function signatures just declare they return
+`Result<T>` for whatever T they need to return. your error type can include a
+string message, but better yet would be to create an ErrorKind enum with
+distinct variants for each type of error, and messages generated only when
+needed in calling code handling them.
+
+So to save you some Googling, here's std::io::Result
+https://doc.rust-lang.org/std/io/type.Result.html
+
+    Have implemented my own `Result` type alias. Uses `ChuiError` type which
+    is an enum of the various errors that can show up during processing.

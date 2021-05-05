@@ -1,6 +1,6 @@
 use chui::{
     Player, Color, Engine,
-    parser::{self, ParserEngine}
+    parser::{self, ParserEngine},
 };
 
 fn main() {
@@ -24,7 +24,7 @@ fn main() {
 
         println!("{}", engine.black_to_string());
         println!();
-        
+
         let parser = parser::new(ParserEngine::Algebraic);
         println!("the move: {:?}", parser.parse("abc 123", &engine.board));
     
@@ -48,5 +48,5 @@ fn main() {
     
         let parser = parser::new(ParserEngine::LongAlgebraic);
         println!("the move: {:?}", parser.parse("vwx 22-23-24", &engine.board));
-        }
+    }
 }
