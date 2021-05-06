@@ -312,14 +312,18 @@ impl From<Piece> for &str
                                   // but the compiler complains.
             }
         }
-
-        Have implemented `Piece::None` for this reason. It won't be used in
-        most logic though, it's primarily for the use case of exhaustive
-        pattern matching on &str.
-
-        Not sure if this will have further implications down the road. Will
-        keep an eye on it.
     }
+
+    Have implemented `Piece::None` for this reason. It won't be used in
+    most logic though, it's primarily for the use case of exhaustive
+    pattern matching on &str.
+
+    Not sure if this will have further implications down the road. Will
+    keep an eye on it.
+
+    Update: I have now implemented the TryFrom trait for Piece.
+    Piece::try_from("K").unwrap() == Piece::King(Color::White)
+
 
 -------------------------------------------------------------------------------
 

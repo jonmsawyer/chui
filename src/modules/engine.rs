@@ -215,7 +215,7 @@ impl Engine<'static> {
         if player_1.color == player_2.color {
             return Err(
                 ChuiError::IncompatibleSides(
-                    "both players cannot be the same color"
+                    "both players cannot be the same color".to_string()
                 ),
             );
         }

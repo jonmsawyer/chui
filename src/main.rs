@@ -1,5 +1,7 @@
+use std::convert::TryFrom;
+
 use chui::{
-    Player, Color, Engine,
+    Player, Color, Engine, Piece,
     parser::{self, ParserEngine},
 };
 
@@ -49,4 +51,16 @@ fn main() {
         let parser = parser::new(ParserEngine::LongAlgebraic);
         println!("the move: {:?}", parser.parse("vwx 22-23-24", &engine.board));
     }
+
+    let piece = Piece::try_from("K").unwrap();
+    println!("Piece is {:?}", piece);
+
+    let piece = match Piece::try_from("~") {
+        Ok(piece) => piece,
+        Err(error) => {
+            println!("{}", error);
+            Piece::Pawn(Color::White)
+        }
+    };
+    println!("Piece is {:?}", piece);
 }

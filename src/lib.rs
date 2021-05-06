@@ -19,22 +19,32 @@ pub enum ChuiError {
     /// 1. Player's king would get into check
     /// 1. The move is simply invalid according to the rules
     /// 1. etc.
-    InvalidMove(&'static str),
+    InvalidMove(String),
+
+    /// An invalid piece. This variant shows up when the consumer of this
+    /// crate tries to intialize a `Piece` using the `try_from(&str)`
+    /// method using an invalid `&str`. `&str` must be one of
+    /// \[PKQRBNpkqrbn\].
+    InvalidPiece(String),
 
     /// Incompatible sides. This variant shows up when an `Engine` is
-    /// initialized with `white` and `black` being the same `Color`.
-    IncompatibleSides(&'static str),
+    /// initialized with `player_1` and `player_2` being the same `Color`.
+    IncompatibleSides(String),
 }
 
+/// Returns a string representing the particular `ChuiError` variant.
 impl fmt::Display for ChuiError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ChuiError::InvalidMove(reason) => {
                 write!(f, "Error (Invalid Move): {}.", reason)
             },
+            ChuiError::InvalidPiece(reason) => {
+                write!(f, "Error (Invalid Piece): {}.", reason)
+            },
             ChuiError::IncompatibleSides(reason) => {
                 write!(f, "Error (Incompatible Sides): {}.", reason)
-            }
+            },
         }
     }
 }

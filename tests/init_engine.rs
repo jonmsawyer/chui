@@ -18,7 +18,6 @@ fn init_engine() {
 
     if let Ok(engine) = Engine::new(white, black) {
 
-        // Note the whitespace around the output.
         assert_eq!(
             &format!("{}", engine),
             "White: Nathan Vander Martin (Age 36) (no Elo rating)

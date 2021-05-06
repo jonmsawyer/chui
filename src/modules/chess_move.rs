@@ -3,12 +3,13 @@
 //! original move text and interpreted move text. If the move is
 //! invalid, `MoveType::Invalid` will occupy `self.move_type`.
 //!
-//! Also provides the `MoveType` and `MoveState` enums.
+//! Also provides the `MoveType` enum.
 
 use std::fmt;
 //use std::ops;
 
 use super::{Piece, Color};
+use crate::ChuiError;
 
 /// Represents the type of move to be performed. If the move
 /// is a simple move, then `Move` is represented. If the move
@@ -23,13 +24,6 @@ pub enum MoveType {
     /// Represents that the desired move is a capture, not just
     /// a move.
     Capture,
-}
-
-/// I plan on refactoring this later, so it's defined here for now
-/// to accomodate the Result<T, ErrorKind> types in future modules.
-#[derive(Debug)]
-pub enum ErrorKind {
-    InvalidMove,
 }
 
 /// Represents a chess move.
@@ -59,10 +53,7 @@ pub struct Move {
     /// Represents the type of move to be performed. A `Move`
     /// or a `Capture`. An `ErrorKind` is returned if the move is
     /// invalid.
-    pub move_type: Result<MoveType, ErrorKind>,
-
-    /// The reason if the error state of the move is invalid.
-    pub reason: String,
+    pub move_type: crate::Result<MoveType>,
 }
 
 
@@ -72,8 +63,8 @@ impl fmt::Display for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "({}) {} ({})",
-            self.input_move, self.move_text, self.reason
+            "({}) {}",
+            self.input_move, self.move_text
         )
     }
 }
@@ -106,7 +97,6 @@ impl Move {
             move_text: String::from("Pawn from e2 to e4"),
             input_move: the_move.to_string(),
             move_type: Ok(MoveType::Move),
-            reason: String::new(),
         }
     }
 
@@ -120,8 +110,7 @@ impl Move {
             piece: None,
             move_text: String::from("invalid move"),
             input_move: the_move.to_string(),
-            move_type: Err(ErrorKind::InvalidMove), 
-            reason: reason.to_string(),
+            move_type: Err(ChuiError::InvalidMove(reason.to_string())), 
         }
     }
 }
