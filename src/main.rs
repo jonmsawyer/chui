@@ -1,8 +1,11 @@
-use std::convert::TryFrom;
+//use std::convert::TryFrom;
+
+use std::io;
 
 use chui::{
-    Player, Color, Engine, Piece,
+    Player, Color, Engine,
     parser::{self, ParserEngine},
+    //ChuiError,
 };
 
 fn main() {
@@ -20,47 +23,35 @@ fn main() {
         Some(1500),
     );
     
-    if let Ok(engine) = Engine::new(white, black) {
-        println!("{}", engine.white_to_string());
-        println!();
+    let engine = Engine::new(white, black).unwrap();
 
-        println!("{}", engine.black_to_string());
-        println!();
+    println!("{}", engine.white_to_string());
+    println!();
 
-        let parser = parser::new(ParserEngine::Algebraic);
-        println!("the move: {:?}", parser.parse("abc 123", &engine.board));
-    
-        let parser = parser::new(ParserEngine::Coordinate);
-        println!("the move: {:?}", parser.parse("def 456", &engine.board));
-    
-        let parser = parser::new(ParserEngine::ConciseReversible);
-        println!("the move: {:?}", parser.parse("ghi 789", &engine.board));
-    
-        let parser = parser::new(ParserEngine::Descriptive);
-        println!("the move: {:?}", parser.parse("jkl 10-11-12", &engine.board));
-    
-        let parser = parser::new(ParserEngine::ICCF);
-        println!("the move: {:?}", parser.parse("mno 13-14-15", &engine.board));
-    
-        let parser = parser::new(ParserEngine::ReversibleAlgebraic);
-        println!("the move: {:?}", parser.parse("pqr 16-17-18", &engine.board));
-    
-        let parser = parser::new(ParserEngine::Smith);
-        println!("the move: {:?}", parser.parse("stu 19-20-21", &engine.board));
-    
-        let parser = parser::new(ParserEngine::LongAlgebraic);
-        println!("the move: {:?}", parser.parse("vwx 22-23-24", &engine.board));
-    }
+    let parser = parser::new(ParserEngine::Algebraic);
 
-    let piece = Piece::try_from("K").unwrap();
-    println!("Piece is {:?}", piece);
+    loop {
+        println!("Please input your move. (q to quit)");
+        
+        let mut input_move = String::new();
+        
+        io::stdin().read_line(&mut input_move)
+                   .expect("Failed to read line.");
+        
 
-    let piece = match Piece::try_from("~") {
-        Ok(piece) => piece,
-        Err(error) => {
-            println!("{}", error);
-            Piece::Pawn(Color::White)
+        let the_move = input_move.trim().to_string();
+        
+        if *"q".to_string() == the_move ||
+           *"quit".to_string() == the_move
+        {
+            break;
         }
-    };
-    println!("Piece is {:?}", piece);
+
+        println!("Your move: {}", the_move);
+        
+        match parser.parse(&the_move, &engine) {
+            Ok(the_move) => println!("Ok! The move: {}", the_move),
+            Err(error) => println!("{}", error),
+        }
+    }
 }

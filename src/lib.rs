@@ -2,23 +2,23 @@ use std::fmt;
 
 mod modules;
 pub use modules::{
-    Engine, Move, MoveGenerator, Player,
+    Engine, Move, MoveType, MoveGenerator, Player,
     piece::{Piece, Color},
     parser::{self, ParserEngine},
 };
 
 #[non_exhaustive]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ChuiError {
     /// An invalid move. This variant shows up when the user tries to
     /// make an invalid move on the chess board, usually in these ways:
     /// 
     /// 1. There's no piece in the "from" square
-    /// 1. There's a friendly piece blocking the move
-    /// 1. Player's king is in check
-    /// 1. Player's king would get into check
-    /// 1. The move is simply invalid according to the rules
-    /// 1. etc.
+    /// 2. There's a friendly piece blocking the move
+    /// 3. Player's king is in check
+    /// 4. Player's king would get into check
+    /// 5. The move is simply invalid according to the rules
+    /// 6. etc.
     InvalidMove(String),
 
     /// An invalid piece. This variant shows up when the consumer of this
@@ -30,6 +30,15 @@ pub enum ChuiError {
     /// Incompatible sides. This variant shows up when an `Engine` is
     /// initialized with `player_1` and `player_2` being the same `Color`.
     IncompatibleSides(String),
+
+    /// When parsing a move, this variant shows up when a token's processing
+    /// logic has not been satisfied. When writing a parser, the goal is to
+    /// never see this error.
+    TokenNotSatisfied(String),
+
+    /// Something is not implemented completely. Raise this error when in
+    /// development/testing.
+    NotImplemented(String),
 }
 
 /// Returns a string representing the particular `ChuiError` variant.
@@ -39,14 +48,34 @@ impl fmt::Display for ChuiError {
             ChuiError::InvalidMove(reason) => {
                 write!(f, "Error (Invalid Move): {}.", reason)
             },
+
             ChuiError::InvalidPiece(reason) => {
                 write!(f, "Error (Invalid Piece): {}.", reason)
             },
+
             ChuiError::IncompatibleSides(reason) => {
                 write!(f, "Error (Incompatible Sides): {}.", reason)
             },
+
+            ChuiError::TokenNotSatisfied(reason) => {
+                write!(f, "Error (Token Not Satisfied): {}.", reason)
+            },
+
+            ChuiError::NotImplemented(reason) => {
+                write!(f, "Error (Not Implemented): {}.", reason)
+            }
         }
     }
 }
 
-type Result<T> = std::result::Result<T, ChuiError>;
+pub type ChuiResult<T> = std::result::Result<T, ChuiError>;
+
+// Keep for now. May never need it anymore.
+// #[macro_export]
+// macro_rules! hashmap {
+//     ($( $key: expr => $val: expr ),*) => {{
+//          let mut map = ::std::collections::HashMap::new();
+//          $( map.insert($key, $val); )*
+//          map
+//     }}
+// }

@@ -2,8 +2,7 @@
 
 use std::fmt;
 
-use crate::ChuiError;
-use super::chess_move::Move;
+use crate::{ChuiResult, ChuiError};
 use super::piece::{Piece, Color};
 use super::player::Player;
 use super::MoveGenerator;
@@ -121,13 +120,6 @@ impl Engine<'static> {
         format!("{}\n{}", self.black, self.white)
     }
 
-    /// Make the specified move. If the move is valid, the
-    /// chessboard will be modified accordingly. If the move
-    /// is invalid, an invalid `Move` will be returned.
-    pub fn make_move(&self, the_move: &str) -> Move {
-        Move::parse_move(the_move, self.to_move)
-    }
-
     /// Return the formatted board for a given `Color` as a `String`.
     pub fn to_string(&self, color: Color) -> String {
         let alpha_coords: Vec<char> = match color {
@@ -210,7 +202,7 @@ impl Engine<'static> {
     /// Return a new instance of `Ok<Engine>` given a white
     /// `Player` and a black `Player`.
     pub fn new(player_1: Player, player_2: Player)
-    -> crate::Result<Engine<'static>>
+    -> ChuiResult<Engine<'static>>
     {
         if player_1.color == player_2.color {
             return Err(
@@ -253,7 +245,7 @@ impl Engine<'static> {
                     [None; 8],                            // rank 4
                     [None; 8],                            // rank 5
                     [None; 8],                            // rank 6
-                    [Some(Piece::Pawn(Color::Black)); 8], // rank 2
+                    [Some(Piece::Pawn(Color::Black)); 8], // rank 7
                     Engine::row_of_pieces(Color::Black),  // rank 8
                 ],
             }
@@ -283,24 +275,6 @@ mod tests {
         );
     
         if let Err(error) = Engine::new(white, white_2) {
-            panic!("{}", error);
-        }
-
-        let black = Player::new(
-            Color::Black,
-            Some("Camina Drummer"),
-            Some(37),
-            None,
-        );
-    
-        let black_2 = Player::new(
-            Color::Black,
-            Some("Fred Johnson"),
-            None,
-            Some(2483),
-        );
-    
-        if let Err(error) = Engine::new(black, black_2) {
             panic!("{}", error);
         }
     }

@@ -57,6 +57,9 @@ pub struct MoveGenerator<'a> {
     /// (O-O, 0-0, O-O-O, 0-0-0).
     pub castle: [&'a str; 4],
 
+    /// Raw castling notation (0 or O).
+    pub castle_notation: [&'a str; 3],
+
     /// A vector containing Strings of the resulting generated
     /// move list.
     pub move_list: Vec<String>,
@@ -193,6 +196,7 @@ impl<'a> MoveGenerator<'a> {
     ///         move_notation: "-",
     ///         capture: "x",
     ///         castle: ["O-O", "0-0", "O-O-O", "0-0-0"],
+    ///         castle_notation: ["0", "O", "o"],
     ///         move_list: Vec::<String>::new(),
     ///     }
     /// );
@@ -214,6 +218,7 @@ impl<'a> MoveGenerator<'a> {
                 "O-O-O", // Queen side (valid)
                 "0-0-0", // Queen side (invalid, but supported)
             ],
+            castle_notation: ["0", "O", "o"],
             move_list: Vec::<String>::new(),
         }
     }

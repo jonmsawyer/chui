@@ -2,18 +2,24 @@
 
 //use std::fmt;
 
+use crate::{ChuiResult, ChuiError};
 use super::Parser;
-use super::super::{Move, Piece};
+use super::super::{Move, Engine};
 
 /// A parser that will parse English descriptive chess notation.
 /// Example moves: `P-K4`, `NxN`, `QxRch`, `Q-KR4 mate`, `O-O`, etc.
 pub struct DescriptiveParser;
 
 impl Parser for DescriptiveParser {
-    fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
-        Move::invalid(
-            the_move,
-            "Error: DescriptiveParser not implemented."
+    /// Parse the chess move, return `Ok(Move)` on success,
+    /// `ChuiError::InvalidMove(reason)` on failure.
+    fn parse(&self, _the_move: &str, _engine: &Engine)
+    -> ChuiResult<Move>
+    {
+        Err(
+            ChuiError::InvalidMove(
+                "DescriptiveParser not implemented.".to_string()
+            )
         )
     }
 }

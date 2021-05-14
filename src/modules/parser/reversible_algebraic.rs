@@ -2,18 +2,24 @@
 
 //use std::fmt;
 
+use crate::{ChuiResult, ChuiError};
 use super::Parser;
-use super::super::{Move, Piece};
+use super::super::{Move, Engine};
 
 /// A parser that will parse reversible algebraic chess notation.
 /// Example moves: `e2-e4`, `e7-e5`, `Bb5xNc6`, `Bf8-b4#`, etc.
 pub struct ReversibleAlgebraicParser;
 
 impl Parser for ReversibleAlgebraicParser {
-    fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
-        Move::invalid(
-            the_move,
-            "Error: ReversibleAlgebraicParser not implemented."
+    /// Parse the chess move, return `Ok(Move)` on success,
+    /// `ChuiError::InvalidMove(reason)` on failure.
+    fn parse(&self, _the_move: &str, _engine: &Engine)
+    -> ChuiResult<Move>
+    {
+        Err(
+            ChuiError::InvalidMove(
+                "ReversibleAlgebraicParser not implemented.".to_string()
+            )
         )
     }
 }

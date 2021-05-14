@@ -2,18 +2,24 @@
 
 //use std::fmt;
 
+use crate::{ChuiResult, ChuiError};
 use super::Parser;
-use super::super::{Move, Piece};
+use super::super::{Move, Engine};
 
 /// A parser that will parse coordinate chess notation.
 /// Example moves: `E2-E4`, `e7-e5`, `G1-F3`, `B8-c6`, `f1-b5`, etc.
 pub struct CoordinateParser;
 
 impl Parser for CoordinateParser {
-    fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
-        Move::invalid(
-            the_move,
-            "Error: CoordinateParser not implemented."
+    /// Parse the chess move, return `Ok(Move)` on success,
+    /// `ChuiError::InvalidMove(reason)` on failure.
+    fn parse(&self, _the_move: &str, _engine: &Engine)
+    -> ChuiResult<Move>
+    {
+        Err(
+            ChuiError::InvalidMove(
+                "CoordinateParser not implemented.".to_string()
+            )
         )
     }
 }

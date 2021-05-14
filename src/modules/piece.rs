@@ -3,7 +3,7 @@
 use std::fmt;
 use std::convert::TryFrom;
 
-use crate::ChuiError;
+use crate::{ChuiResult, ChuiError};
 
 /// Piece color. Either `White` or `Black` variants.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -71,12 +71,10 @@ impl fmt::Display for Piece {
 }
 
 /// Returns a `Piece` given a `&str` if `&str` is one of \[PKQRBNpkqrbn\].
-/// May never be needed within the crate, but here for convenience if
-/// necessary.
 impl TryFrom<&str> for Piece {
     type Error = ChuiError;
 
-    fn try_from(piece: &str) -> crate::Result<Piece> {
+    fn try_from(piece: &str) -> ChuiResult<Piece> {
         match piece {
             "P" => Ok(Piece::Pawn(Color::White)),
             "R" => Ok(Piece::Rook(Color::White)),

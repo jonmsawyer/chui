@@ -6,43 +6,64 @@
 //! Also provides the `MoveType` enum.
 
 use std::fmt;
-//use std::ops;
 
-use super::{Piece, Color};
-use crate::ChuiError;
+use super::Piece;
 
 /// Represents the type of move to be performed. If the move
 /// is a simple move, then `Move` is represented. If the move
 /// is a piece or pawn capture, `Capture` is represented. If the
 /// move is invalid, `Invalid` is represented.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MoveType {
-    /// Represents that the desired move is just a move, not
-    /// a capture.
-    Move,
+    PawnMove,
 
-    /// Represents that the desired move is a capture, not just
-    /// a move.
-    Capture,
+    PawnCapture,
+
+    PieceMove,
+
+    PieceCapture,
+
+    Castle,
 }
 
 /// Represents a chess move.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Move {
     /// Represents a move's "from" coordinate (e.g., ('a', 1)).
-    pub from_coord: (char, u32),
+    pub from_coord: (char, u8),
 
     /// Represents a move's "to" coordinate (e.g., ('b' 8)).
-    pub to_coord: (char, u32),
+    pub to_coord: (char, u8),
 
     /// Represents a move's "from" index (e.g., (0, 0) \[a1\]).
-    pub from_index: (u32, u32),
+    pub from_index: (u8, u8),
 
     /// Represents a move's "to" index (e.g., (1, 7) \[b8\]).
-    pub to_index: (u32, u32),
+    pub to_index: (u8, u8),
 
     /// The chess piece to move
     pub piece: Option<Piece>,
+
+    /// In check.
+    pub check: bool,
+
+    /// In checkmate.
+    pub check_mate: bool,
+
+    /// Is move promotion?
+    pub promotion: bool,
+
+    /// Promotion piece
+    pub promotion_piece: Option<Piece>,
+
+    /// Is castling move
+    pub is_castling: bool,
+
+    /// Is castling king side
+    pub is_castling_king: bool,
+
+    /// Is castling quuen side
+    pub is_castling_queen: bool,
 
     /// The parsed move text (e.g., "Pawn on e4 captures e5").
     pub move_text: String,
@@ -53,64 +74,75 @@ pub struct Move {
     /// Represents the type of move to be performed. A `Move`
     /// or a `Capture`. An `ErrorKind` is returned if the move is
     /// invalid.
-    pub move_type: crate::Result<MoveType>,
+    pub move_type: Option<MoveType>,
 }
 
-
-/// Implement `Display` for `Move`. Displays the input move,
-/// the move text, and the reason for an invalid move.
+/// Displays the input move and move text.
 impl fmt::Display for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "({}) {}",
-            self.input_move, self.move_text
-        )
+        let output = format!("{{
+    from_coord: {:?},
+    to_coord: {:?},
+    from_index: {:?},
+    to_index: {:?},
+    piece: {:?},
+    check: {:?},
+    check_mate: {:?},
+    promotion: {:?},
+    promotion_piece: {:?},
+    is_castling: {:?},
+    is_castling_king: {:?},
+    is_castling_queen: {:?},
+    move_text: {:?},
+    input_move: {:?},
+    move_type: {:?}
+}}",
+            self.from_coord,
+            self.to_coord,
+            self.from_index,
+            self.to_index,
+            self.piece,
+            self.check,
+            self.check_mate,
+            self.promotion,
+            self.promotion_piece,
+            self.is_castling,
+            self.is_castling_king,
+            self.is_castling_queen,
+            self.move_text,
+            self.input_move,
+            self.move_type,
+        );
+
+        write!(f, "Move {}", output)
+    }
+}
+
+impl Default for Move {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
 impl Move {
-    /// Parse the input move.
-    /// 
-    /// TODO: implement a real parser.
-    pub fn parse_move(the_move: &str, to_move: Color) -> Move {
-        // Trim the whitespace from `the_move`, then check if
-        // it contains a whitespace character. If so, the move
-        // is invalid.
-        let the_move = the_move.trim();
-
-        if the_move == String::new() {
-            return Move::invalid(the_move, "invalid empty input");
-        }
-
-        if the_move.contains(char::is_whitespace) {
-            return Move::invalid(the_move, "contains whitespace");
-        }
-
-        // Just for development. A parser will be implemented soon.
+    /// Return a new default `Move`.
+    pub fn new() -> Move {
         Move {
-            from_coord: ('e', 2),
-            to_coord: ('e', 4),
-            from_index: (4, 1),
-            to_index: (4, 3),
-            piece: Some(Piece::Pawn(to_move)),
-            move_text: String::from("Pawn from e2 to e4"),
-            input_move: the_move.to_string(),
-            move_type: Ok(MoveType::Move),
-        }
-    }
-
-    /// Return an invalid move.
-    pub fn invalid(the_move: &str, reason: &str) -> Move {
-        Move {
-            from_coord: ('-', 0),
-            to_coord: ('-', 0),
+            from_coord: ('-', 8),
+            to_coord: ('-', 8),
             from_index: (8, 8),
             to_index: (8, 8),
             piece: None,
-            move_text: String::from("invalid move"),
-            input_move: the_move.to_string(),
-            move_type: Err(ChuiError::InvalidMove(reason.to_string())), 
+            check:false,
+            check_mate: false,
+            promotion: false,
+            promotion_piece: None,
+            is_castling: false,
+            is_castling_king: false,
+            is_castling_queen: false,
+            move_text: String::new(),
+            input_move: String::new(),
+            move_type: None,
         }
     }
 }

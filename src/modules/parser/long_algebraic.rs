@@ -2,18 +2,24 @@
 
 //use std::fmt;
 
+use crate::{ChuiResult, ChuiError};
 use super::Parser;
-use super::super::{Move, Piece};
+use super::super::{Move, Engine};
 
 /// A parser that will parse long algebraic chess notation.
 /// Example moves: `e2e4`, `e7e5`, `d2d3`, `Bf8b4+`, `Bb5xc6`, etc.
 pub struct LongAlgebraicParser;
 
 impl Parser for LongAlgebraicParser {
-    fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
-        Move::invalid(
-            the_move,
-            "Error: LongAlgebraicParser not implemented."
+    /// Parse the chess move, return `Ok(Move)` on success,
+    /// `ChuiError::InvalidMove(reason)` on failure.
+    fn parse(&self, _the_move: &str, _engine: &Engine)
+    -> ChuiResult<Move>
+    {
+        Err(
+            ChuiError::InvalidMove(
+                "LongAlgebraicParser not implemented.".to_string()
+            )
         )
     }
 }

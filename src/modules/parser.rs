@@ -1,6 +1,7 @@
 #![allow(clippy::upper_case_acronyms)]
 
-use super::{Move, Piece};
+use crate::{ChuiResult, ChuiError};
+use super::{Move, Engine};
 
 pub mod algebraic;
 pub mod long_algebraic;
@@ -20,18 +21,82 @@ pub mod iccf;
 /// Example:
 /// 
 /// ```
-/// use chui::{Move, Piece, parser::Parser};
+/// use chui::{Move, Piece, parser::Parser, ChuiResult, ChuiError, Engine};
 /// 
 /// pub struct MyParser;
 /// 
 /// impl Parser for MyParser {
-///     fn parse(&self, the_move: &str, _board: &[[Option<Piece>; 8]; 8]) -> Move {
-///         Move::invalid(the_move, "Error: MyParser not implemented.")
+///     fn parse(&self, the_move: &str, _engine: &Engine)
+///     -> ChuiResult<Move>
+///     {
+///         Err(
+///             ChuiError::InvalidMove(
+///                 "MyParser not implemented.".to_string()
+///             )
+///         )
 ///     }
 /// }
 /// ```
 pub trait Parser {
-    fn parse(&self, the_move: &str, board: &[[Option<Piece>; 8]; 8]) -> Move;
+    /// Parse the chess move, return `Ok(Move)` on success,
+    /// `ChuiError::InvalidMove(reason)` on failure.
+    fn parse(&self, the_move: &str, engine: &Engine)
+    -> ChuiResult<Move>;
+
+    /// Trim the whitespace from `the_move` and check to see that
+    /// the move doesn't contain any whitespace after the trim.
+    fn trim_and_check_whitespace<'a>(&self, the_move: &'a str)
+    -> ChuiResult<&'a str>
+    {
+        let the_move = the_move.trim();
+
+        println!("Trimmed move: \"{}\"", the_move);
+
+        if the_move.contains(char::is_whitespace) {
+            return Err(
+                ChuiError::InvalidMove(
+                    format!(
+                        "Move `{}` contains whitespace. \
+                        Hint: don't put any spaces (or whitespace in \
+                        general) in your move",
+                        the_move
+                    )
+                )
+            );
+        }
+
+        Ok(the_move)
+    }
+
+    /// Match the given file (`char`) to it's index (`u8`).
+    fn match_file_to_index(&self, file: char) -> Option<u8> {
+        match file {
+            'a' => Some(0),
+            'b' => Some(1),
+            'c' => Some(2),
+            'd' => Some(3),
+            'e' => Some(4),
+            'f' => Some(5),
+            'g' => Some(6),
+            'h' => Some(7),
+            _ => None,
+        }
+    }
+
+    /// Match the given rank (`char`) to it's index (`u8`).
+    fn match_rank_to_index(&self, rank: char) -> Option<u8> {
+        match rank {
+            '1' => Some(0),
+            '2' => Some(1),
+            '3' => Some(2),
+            '4' => Some(3),
+            '5' => Some(4),
+            '6' => Some(5),
+            '7' => Some(6),
+            '8' => Some(7),
+            _ => None,
+        }
+    }
 }
 
 /// Represents the different available supported parser engines for
@@ -104,7 +169,7 @@ pub enum ParserEngine {
 /// if let Ok(engine) = Engine::new(white, black) {
 ///     let parser = parser::new(ParserEngine::Descriptive);
 ///     
-///     println!("the move: {:?}", parser.parse("P-K4", &engine.board));
+///     println!("the move: {:?}", parser.parse("P-K4", &engine));
 /// };
 /// ```
 pub fn new(parser: ParserEngine) -> Box<dyn Parser> {
