@@ -97,8 +97,6 @@ impl<'a> Parser for AlgebraicParser<'a> {
     ///         check (mate)
     ///     )
     fn parse(&mut self, the_move: &str, _engine: &Engine) -> ChuiResult<Move> {
-        println!("Parsing: `{}` with AlgebraicParser...", the_move);
-
         // Check the move to see it's valid. No whitespace allowed. At
         // the same time, trim any surrounding whitespace.
         let the_move = self.trim_and_check_whitespace(the_move)?;
@@ -166,10 +164,6 @@ impl<'a> AlgebraicParser<'a> {
                 return Ok(());
             }
         }
-
-        println!(
-            " >> No piece (move must be a pawn move), assigning White Pawn"
-        );
 
         self.move_obj.set_pawn_move();
 
