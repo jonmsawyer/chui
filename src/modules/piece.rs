@@ -100,6 +100,37 @@ impl TryFrom<&str> for Piece {
     }
 }
 
+/// Returns a `Piece` given a `&str` if `&str` is one of \[PKQRBNpkqrbn\].
+impl TryFrom<char> for Piece {
+    type Error = ChuiError;
+
+    fn try_from(piece: char) -> ChuiResult<Piece> {
+        match piece {
+            'P' => Ok(Piece::Pawn(Color::White)),
+            'R' => Ok(Piece::Rook(Color::White)),
+            'N' => Ok(Piece::Knight(Color::White)),
+            'B' => Ok(Piece::Bishop(Color::White)),
+            'Q' => Ok(Piece::Queen(Color::White)),
+            'K' => Ok(Piece::King(Color::White)),
+            'p' => Ok(Piece::Pawn(Color::Black)),
+            'r' => Ok(Piece::Rook(Color::Black)),
+            'n' => Ok(Piece::Knight(Color::Black)),
+            'b' => Ok(Piece::Bishop(Color::Black)),
+            'q' => Ok(Piece::Queen(Color::Black)),
+            'k' => Ok(Piece::King(Color::Black)),
+            _ => Err(
+                ChuiError::InvalidPiece(
+                    format!(
+                        "`{}` is an invalid piece.\
+                        Expected one of [PRNBQKprnbqk]",
+                        piece
+                    )
+                )
+            ),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

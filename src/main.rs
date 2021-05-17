@@ -28,22 +28,21 @@ fn main() {
     println!("{}", engine.white_to_string());
     println!();
 
-    let parser = parser::new(ParserEngine::Algebraic);
+    let mut parser = parser::new(ParserEngine::Algebraic);
 
     loop {
         println!("Please input your move. (q to quit)");
         
         let mut input_move = String::new();
         
-        io::stdin().read_line(&mut input_move)
-                   .expect("Failed to read line.");
+        io::stdin()
+            .read_line(&mut input_move)
+            .expect("Failed to read input move.");
         
 
         let the_move = input_move.trim().to_string();
         
-        if *"q".to_string() == the_move ||
-           *"quit".to_string() == the_move
-        {
+        if the_move.eq("q") || the_move.eq("quit") {
             break;
         }
 

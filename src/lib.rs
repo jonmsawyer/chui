@@ -7,9 +7,14 @@ pub use modules::{
     parser::{self, ParserEngine},
 };
 
+
 #[non_exhaustive]
 #[derive(Debug, PartialEq)]
 pub enum ChuiError {
+    /// Invalid input if the input string is too small or too large, or
+    /// if the input move has any interim whitespace.
+    InvalidInput(String),
+
     /// An invalid move. This variant shows up when the user tries to
     /// make an invalid move on the chess board, usually in these ways:
     /// 
@@ -45,6 +50,10 @@ pub enum ChuiError {
 impl fmt::Display for ChuiError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            ChuiError::InvalidInput(reason) => {
+                write!(f, "Error (Invalid Input): {}.", reason)
+            },
+
             ChuiError::InvalidMove(reason) => {
                 write!(f, "Error (Invalid Move): {}.", reason)
             },
@@ -63,7 +72,7 @@ impl fmt::Display for ChuiError {
 
             ChuiError::NotImplemented(reason) => {
                 write!(f, "Error (Not Implemented): {}.", reason)
-            }
+            },
         }
     }
 }

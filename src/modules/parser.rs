@@ -26,7 +26,7 @@ pub mod iccf;
 /// pub struct MyParser;
 /// 
 /// impl Parser for MyParser {
-///     fn parse(&self, the_move: &str, _engine: &Engine)
+///     fn parse(&mut self, the_move: &str, _engine: &Engine)
 ///     -> ChuiResult<Move>
 ///     {
 ///         Err(
@@ -40,7 +40,7 @@ pub mod iccf;
 pub trait Parser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&self, the_move: &str, engine: &Engine)
+    fn parse(&mut self, the_move: &str, engine: &Engine)
     -> ChuiResult<Move>;
 
     /// Trim the whitespace from `the_move` and check to see that
@@ -50,19 +50,8 @@ pub trait Parser {
     {
         let the_move = the_move.trim();
 
-        println!("Trimmed move: \"{}\"", the_move);
-
         if the_move.contains(char::is_whitespace) {
-            return Err(
-                ChuiError::InvalidMove(
-                    format!(
-                        "Move `{}` contains whitespace. \
-                        Hint: don't put any spaces (or whitespace in \
-                        general) in your move",
-                        the_move
-                    )
-                )
-            );
+            self.invalid_input()?
         }
 
         Ok(the_move)
@@ -97,6 +86,16 @@ pub trait Parser {
             _ => None,
         }
     }
+
+    fn invalid_input(&self) -> ChuiResult<()> {
+        Err(
+            ChuiError::InvalidInput(
+                "Input move is either too small in length, \
+                too large in length, or contains whitespace".to_string()
+            )
+        )
+    }
+
 }
 
 /// Represents the different available supported parser engines for
@@ -167,7 +166,7 @@ pub enum ParserEngine {
 /// );
 /// 
 /// if let Ok(engine) = Engine::new(white, black) {
-///     let parser = parser::new(ParserEngine::Descriptive);
+///     let mut parser = parser::new(ParserEngine::Descriptive);
 ///     
 ///     println!("the move: {:?}", parser.parse("P-K4", &engine));
 /// };

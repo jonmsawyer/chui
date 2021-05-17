@@ -6,13 +6,16 @@ use std::convert::TryFrom;
 
 use crate::{ChuiResult, ChuiError};
 use super::Parser;
-use super::super::{Move, MoveType, Piece, MoveGenerator, Color, Engine};
+use super::super::{Move, Piece, MoveGenerator, Color, Engine};
 
 /// A parser that will parse algebraic chess notation.
 /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
-pub struct AlgebraicParser;
+pub struct AlgebraicParser<'a>{
+    pub move_generator: MoveGenerator<'a>,
+    pub move_obj: Move,
+}
 
-impl Parser for AlgebraicParser {
+impl<'a> Parser for AlgebraicParser<'a> {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
     /// 
@@ -64,7 +67,7 @@ impl Parser for AlgebraicParser {
     ///     )
     /// 
     ///     Token 2: f, 4, x, - (
-    ///         file, rank, capture, castle king
+    ///         file, rank, capture, castle king continuation
     ///     )
     /// 
     ///     Token 3: f, 4, +, #, Q, =, 0 (
@@ -73,11 +76,13 @@ impl Parser for AlgebraicParser {
     ///     )
     /// 
     ///     Token 4: 4, +, #, Q, - (
-    ///         rank, check, mate, promotion piece, castle queen
+    ///         rank, check, mate, promotion piece,
+    ///         castle queen continuation
     ///     )
     /// 
     ///     Token 5: +, #, Q, =, 0 (
-    ///         check, mate, promotion piece, promotion notation, castle queen
+    ///         check, mate, promotion piece, promotion notation,
+    ///         castle queen
     ///     )
     /// 
     ///     Token 6: +, #, Q (
@@ -91,9 +96,7 @@ impl Parser for AlgebraicParser {
     ///     Token 8: + (
     ///         check (mate)
     ///     )
-    fn parse(&self, the_move: &str, _engine: &Engine)
-    -> ChuiResult<Move>
-    {
+    fn parse(&mut self, the_move: &str, _engine: &Engine) -> ChuiResult<Move> {
         println!("Parsing: `{}` with AlgebraicParser...", the_move);
 
         // Check the move to see it's valid. No whitespace allowed. At
@@ -101,61 +104,50 @@ impl Parser for AlgebraicParser {
         let the_move = self.trim_and_check_whitespace(the_move)?;
 
         if the_move.len() < 2 || the_move.len() > 8 {
-            return Err(
-                ChuiError::InvalidMove(
-                    "Input move is either too small or too large in length"
-                        .to_string()
-                )
-            );
+            self.invalid_input()?
         }
-        let mut move_obj = Move::new();
 
         // Record the input move.
-        move_obj.input_move = the_move.to_string();
+        self.move_obj.set_input_move(the_move);
 
+        // Parse each character in the move.
         for (move_idx, token) in the_move.chars().enumerate() {
-            println!("\n > move_idx = {}, token = `{}`", move_idx, token);
-
             match move_idx {
-                0 => self.process_token_1(token, &mut move_obj)?,
-                1 => self.process_token_2(token, &mut move_obj)?,
-                2 => self.process_token_3(token, &mut move_obj)?,
-                3 => self.process_token_4(token, &mut move_obj)?,
-                4 => self.process_token_5(token, &mut move_obj)?,
-                5 => self.process_token_6(token, &mut move_obj)?,
-                6 => self.process_token_7(token, &mut move_obj)?,
-                7 => self.process_token_8(token, &mut move_obj)?,
-                _ => {
-                    println!(" >> Move index `{}` not implemented", move_idx);
-                    break;
-                },
+                0 => self.parse_token_1(token)?,
+                1 => self.parse_token_2(token)?,
+                2 => self.parse_token_3(token)?,
+                3 => self.parse_token_4(token)?,
+                4 => self.parse_token_5(token)?,
+                5 => self.parse_token_6(token)?,
+                6 => self.parse_token_7(token)?,
+                7 => self.parse_token_8(token)?,
+                _ => self.move_index_not_implemented(move_idx)?,
             }
-
-            continue;
         }
 
+        // When we're done parsing, return an owned instance of
+        // `self.move_obj` and reset `self.move_obj` to a new
+        // instance of `Move`.
+        let move_obj = self.move_obj.to_owned();
+        self.move_obj = Move::new();
+        
         Ok(move_obj)
     }
 }
 
-impl AlgebraicParser {
+impl<'a> AlgebraicParser<'a> {
     /// Return a new dynamic parser that implements the `Parser` trait.
     pub fn new() -> Box<dyn Parser> {
-        Box::new(AlgebraicParser { })
-    }
-
-    fn token_not_satisfied(token: char) -> ChuiError {
-        ChuiError::TokenNotSatisfied(
-            format!("`{}` token is not satisfied", token)
+        Box::new(
+            AlgebraicParser {
+                move_generator: MoveGenerator::new(),
+                move_obj: Move::new(),
+            }
         )
     }
 
-    fn try_piece(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        if let Ok(piece) = Piece::try_from(&*format!("{}", token)) {
+    fn try_piece(&mut self, token: char) -> ChuiResult<()> {
+        if let Ok(piece) = Piece::try_from(token) {
             if let Piece::King(Color::White) |
                    Piece::Queen(Color::White) |
                    Piece::Rook(Color::White) |
@@ -163,24 +155,14 @@ impl AlgebraicParser {
                    Piece::Knight(Color::White) |
                    Piece::Pawn(Color::White) = piece
             {
-                println!(" >> Found piece: {:?}", piece);
-
-                move_obj.piece = Some(piece);
-                move_obj.move_type = Some(MoveType::PieceMove);
-
+                self.move_obj.set_piece_move(piece);
                 return Ok(());
             }
         }
 
-        for castle_notation in g.castle_notation.iter() {
-            if &&*format!("{}", token) == castle_notation {
-                println!(" >> Found piece: King for castle");
-
-                move_obj.piece = Some(Piece::King(Color::White));
-                move_obj.move_type = Some(MoveType::Castle);
-                move_obj.is_castling = true;
-                move_obj.is_castling_king = true;
-
+        for castle_notation in self.move_generator.castle_notation.iter() {
+            if castle_notation.starts_with(token) {
+                self.move_obj.set_castling_king();
                 return Ok(());
             }
         }
@@ -189,244 +171,136 @@ impl AlgebraicParser {
             " >> No piece (move must be a pawn move), assigning White Pawn"
         );
 
-        move_obj.piece = Some(Piece::Pawn(Color::White));
-        move_obj.move_type = Some(MoveType::PawnMove);
+        self.move_obj.set_pawn_move();
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_file(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
+    fn try_file(&mut self, token: char) -> ChuiResult<()> {
         if let Some(index) = self.match_file_to_index(token) {
-            println!(" >> to_coord.0 = {}", token);
-            move_obj.to_coord = (
-                token,
-                move_obj.to_coord.1
-            );
-
-            println!(" >> to_index.0 = {}", index);
-            move_obj.to_index = (
-                index,
-                move_obj.to_index.1
-            );
-
+            self.move_obj.set_to_coord_file(token);
+            self.move_obj.set_to_index_file(index);
             return Ok(());
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_capture(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        if format!("{}", token) == *g.capture.to_string() {
-            println!(" >> Found capture move");
-
-            move_obj.move_type = match move_obj.move_type {
-                Some(MoveType::PawnMove) => Some(MoveType::PawnCapture),
-                Some(MoveType::PieceMove) => Some(MoveType::PieceCapture),
-                move_type => {
-                    return Err(
-                        ChuiError::InvalidMove(
-                            format!(
-                                "`{:?}` move type is invalid for capture",
-                                move_type
-                            )
-                        )
-                    );
-                },
-            };
-
+    fn try_capture(&mut self, token: char) -> ChuiResult<()> {
+        if self.move_generator.capture.starts_with(token) {
+            self.move_obj.set_capture()?;
             return Ok(());
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_rank(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
+    fn try_rank(&mut self, token: char) -> ChuiResult<()> {
         if let Some(index) = self.match_rank_to_index(token) {
-            println!(" >> to_coord.1 = {}", index + 1);
-            move_obj.to_coord = (
-                move_obj.to_coord.0,
-                index + 1,
-            );
-
-            println!(" >> to_index.1 = {}", index);
-            move_obj.to_index = (
-                move_obj.to_index.0,
-                index
-            );
-
+            self.move_obj.set_to_coord_rank(index + 1);
+            self.move_obj.set_to_index_rank(index);
             return Ok(());
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_check(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        if format!("{}", token) == *g.check.to_string() {
-            if move_obj.check {
-                println!(" >> Found check mate");
-
-                move_obj.check = false;
-                move_obj.check_mate = true;
+    fn try_check(&mut self, token: char) -> ChuiResult<()> {
+        if self.move_generator.check.starts_with(token) {
+            if self.move_obj.is_check() {
+                self.move_obj.set_check_mate();
             }
             else {
-                println!(" >> Found check");
-
-                move_obj.check = true;
-                move_obj.check_mate = false;
+                self.move_obj.set_check();
             }
-
             return Ok(());
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_check_mate(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        for check_mate in g.check_mate.iter() {
-            if format!("{}", token) == *check_mate.to_string() {
-                println!(" >> Found check mate");
-
-                move_obj.check = false;
-                move_obj.check_mate = true;
-
+    fn try_check_mate(&mut self, token: char) -> ChuiResult<()> {
+        for check_mate in self.move_generator.check_mate.iter() {
+            if check_mate.starts_with(token) {
+                self.move_obj.set_check_mate();
                 return Ok(());
             }
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_promotion_notation(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        for notation in g.promotion_notation.iter() {
-            if format!("{}", token) == *notation.to_string() {
-                println!(" >> Found promotion notation: {:?}", notation);
-                move_obj.promotion = true;
-
+    fn try_promotion_notation(&mut self, token: char) -> ChuiResult<()> {
+        for notation in self.move_generator.promotion_notation.iter() {
+            if notation.starts_with(token) {
+                self.move_obj.set_promotion();
                 return Ok(());
             }
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_promotion_piece(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        if let Ok(piece) = Piece::try_from(&*format!("{}", token)) {
+    fn try_promotion_piece(&mut self, token: char) -> ChuiResult<()> {
+        if let Ok(piece) = Piece::try_from(token) {
             if let Piece::King(Color::White) |
                    Piece::Queen(Color::White) |
                    Piece::Rook(Color::White) |
                    Piece::Bishop(Color::White) |
                    Piece::Knight(Color::White) = piece
             {
-                println!(" >> Found promotion piece: {:?}", piece);
-
-                move_obj.promotion = true;
-                move_obj.promotion_piece = Some(piece);
-
+                self.move_obj.set_promotion_piece(piece);
                 return Ok(());
             }
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_castle_king(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        for castle in g.castle_notation.iter() {
-            if format!("{}", token) == *castle.to_string() &&
-               move_obj.is_castling
+    fn try_castle_king(&mut self, token: char) -> ChuiResult<()> {
+        for castle_notation in self.move_generator.castle_notation.iter() {
+            if castle_notation.starts_with(token) &&
+               self.move_obj.is_castling()
             {
-                println!(" >> Found castle king side");
-
-                move_obj.is_castling_king = true;
-                move_obj.is_castling_queen = false;
-
+                self.move_obj.set_castling_king();
                 return Ok(());
             }
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_castle_king_continuation(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        if format!("{}", token) == *g.move_notation.to_string() &&
-           move_obj.is_castling &&
-           move_obj.is_castling_king
+    fn try_castle_king_continuation(&self, token: char) -> ChuiResult<()> {
+        if self.move_generator.move_notation.starts_with(token) &&
+           self.move_obj.is_castling_king()
         {
-            println!(" >> Found castle king side continuation");
-
             return Ok(());
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_castle_queen_continuation(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        if format!("{}", token) == *g.move_notation.to_string() &&
-           move_obj.is_castling &&
-           move_obj.is_castling_king
+    fn try_castle_queen_continuation(&mut self, token: char) -> ChuiResult<()> {
+        if self.move_generator.move_notation.starts_with(token) &&
+           self.move_obj.is_castling_king()
         {
-            println!(" >> Found castle queen side continuation");
-
-            move_obj.is_castling_king = false;
-            move_obj.is_castling_queen = true;
-
+            self.move_obj.set_castling_queen();
             return Ok(());
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
-    fn try_castle_queen(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        let g = MoveGenerator::new();
-
-        for castle in g.castle_notation.iter() {
-            if format!("{}", token) == *castle.to_string() &&
-               move_obj.is_castling &&
-               !move_obj.is_castling_king &&
-               move_obj.is_castling_queen
+    fn try_castle_queen(&self, token: char) -> ChuiResult<()> {
+        for castle_notation in self.move_generator.castle_notation.iter() {
+            if castle_notation.starts_with(token) &&
+               self.move_obj.is_castling_queen()
             {
-                println!(" >> Found castle queen side");
-
                 return Ok(());
             }
         }
 
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.token_not_satisfied(token)
     }
 
     /// * e4
@@ -473,68 +347,21 @@ impl AlgebraicParser {
     ///     Token 1: e, B, 0 (
     ///         file, piece, castle king
     ///     )
-    fn process_token_1(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        // * Bf4
-        // * Bf4+
-        // * Bf4++
-        // * Bf4#
-        // * Bxf4
-        // * Bxf4+
-        // * Bxf4++
-        // * Bxf4#
-        // * 0-0
-        // * 0-0+
-        // * 0-0++
-        // * 0-0#
-        // * 0-0-0
-        // * 0-0-0+
-        // * 0-0-0++
-        // * 0-0-0#
+    fn parse_token_1(&mut self, token: char) -> ChuiResult<()> {
         // Try to parse the first token as a `Piece`. All pieces
         // will parse as a `White` piece. The first valid piece
         // from the move string gets registered as the piece to
-        // move.
-        if self.try_piece(token, move_obj).is_ok() {
-            return Ok(());
-        }
-
-        // * e4
-        // * e4+
-        // * e4++
-        // * e4#
-        // * e8Q
-        // * e8Q+
-        // * e8Q++
-        // * e8Q#
-        // * e8=Q
-        // * e8=Q+
-        // * e8=Q++
-        // * e8=Q#
-        // * exf4
-        // * exf4+
-        // * exf4++
-        // * exf4#
-        // * exf8Q
-        // * exf8Q+
-        // * exf8Q++
-        // * exf8Q#
-        // * exf8=Q
-        // * exf8=Q+
-        // * exf8=Q++
-        // * exf8=Q#
-        // A pawn was registered in this token. This
+        // move;
+        //
+        // Else, a pawn was registered in this token. This
         // token should be a valid file.
-        if self.try_file(token, move_obj).is_ok() {
+        if self.try_piece(token).is_ok() ||
+           self.try_file(token).is_ok()
+        {
             return Ok(());
         }
 
-        Err(
-            ChuiError::InvalidMove(
-                format!("`{}` is not a valid pawn or piece move", token)
-            )
-        )
+        self.invalid_pawn_or_piece_move(token)
     }
 
     /// * e4
@@ -581,101 +408,30 @@ impl AlgebraicParser {
     ///     Token 2: f, 4, x, - (
     ///         file, rank, capture, castle king
     ///     )
-    fn process_token_2(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        // * exf4
-        // * exf4+
-        // * exf4++
-        // * exf4#
-        // * exf8Q
-        // * exf8Q+
-        // * exf8Q++
-        // * exf8Q#
-        // * exf8=Q
-        // * exf8=Q++
-        // * exf8=Q#
-        // * Bxf4
-        // * Bxf4+
-        // * Bxf4++
-        // * Bxf4#
-        // This token can be a capture move in any variation.
-        if self.try_capture(token, move_obj).is_ok() {
+    fn parse_token_2(&mut self, token: char) -> ChuiResult<()> {
+        // This token can be a capture move in any variation, or is
+        // already castling.
+        if self.try_capture(token).is_ok() ||
+           self.try_castle_king_continuation(token).is_ok()
+        {
             return Ok(());
         }
 
-        // * e4
-        // * e4+
-        // * e4++
-        // * e4#
-        // * e8Q
-        // * e8Q+
-        // * e8Q++
-        // * e8Q#
-        // * e8=Q
-        // * e8=Q+
-        // * e8=Q++
-        // * e8=Q#
-        // If move is Pawn move, then this token is to-rank.
-        if let Some(MoveType::PawnMove) = move_obj.move_type {
-            if self.try_rank(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            return Err(
-                ChuiError::InvalidMove(
-                    format!(
-                        "`{}` is not a valid rank for piece `{:?}`",
-                        token,
-                        move_obj.piece.unwrap(),
-                    )
-                )
-            );
-        }
-
-        // * Bf4
-        // * Bf4+
-        // * Bf4++
-        // * Bf4#
-        // If move is a Piece move, then this token is to-file.
-        if let Some(MoveType::PieceMove) = move_obj.move_type {
-            if self.try_file(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            return Err(
-                ChuiError::InvalidMove(
-                    format!(
-                        "`{}` is not a valid file for piece `{:?}`",
-                        token,
-                        move_obj.piece.unwrap(),
-                    )
-                )
-            )
-        }
-
-        // * 0-0
-        // * 0-0+
-        // * 0-0#
-        // * 0-0++
-        // * 0-0-0
-        // * 0-0-0+
-        // * 0-0-0#
-        // * 0-0-0++
-        // Must already be castling.
-        if self.try_castle_king_continuation(token, move_obj).is_ok() {
+        // If move is pawn move, then this token is to-rank.
+        if self.move_obj.is_pawn_move() &&
+           self.try_rank(token).is_ok()
+        {
             return Ok(());
         }
 
-        Err(
-            ChuiError::InvalidMove(
-                format!(
-                    "`{}` is not a valid for {:?}",
-                    token,
-                    move_obj.piece.unwrap()
-                )
-            )
-        )
+        // If move is a piece move, then this token is to-file.
+        if self.move_obj.is_piece_move() &&
+           self.try_file(token).is_ok()
+        {
+            return Ok(());
+        }
+
+        self.invalid_for_piece(token)
     }
 
     /// * e4+
@@ -722,141 +478,41 @@ impl AlgebraicParser {
     ///         file, rank, check, mate, promotiom piece,
     ///         promotion notatiomn, castle king
     ///     )
-    fn process_token_3(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        // * exf4
-        // * exf4+
-        // * exf4#
-        // * exf4++
-        // * exf8Q+
-        // * exf8Q#
-        // * exf8=Q
-        // * exf8Q
-        // * exf8=Q#
-        // * exf8=Q+
-        // * exf8Q++
-        // * Bxf4
-        // * Bxf4+
-        // * Bxf4#
-        // * Bxf4++
-        // * exf8=Q++
+    fn parse_token_3(&mut self, token: char) -> ChuiResult<()> {
         // If move is a capture, this token is to-file.
-        if let Some(MoveType::PawnCapture) |
-               Some(MoveType::PieceCapture) = move_obj.move_type
+        if (
+               self.move_obj.is_pawn_capture() ||
+               self.move_obj.is_piece_capture()
+           ) &&
+           self.try_file(token).is_ok()
         {
-            if self.try_file(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            return Err(
-                ChuiError::InvalidMove(
-                    format!(
-                        "`{}` is an invalid file for {:?} capture",
-                        token,
-                        move_obj.piece.unwrap(),
-                    )
-                )
-            );
-        }
-
-        // * e4+
-        // * e4++
-        // * e4#
-        // * e8=Q
-        // * e8=Q+
-        // * e8=Q#
-        // * e8=Q++
-        // * e8Q
-        // * e8Q+
-        // * e8Q#
-        // * e8Q++
-        // If move is a pawn move, this token can be check, check
-        // mate, promotion notation, or promotion piece.
-        if let Some(MoveType::PawnMove) = move_obj.move_type {
-            // * e4+
-            // * e4++
-            // Check.
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * e4#
-            // Check mate.
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * e8=Q
-            // * e8=Q+
-            // * e8=Q#
-            // * e8=Q++
-            // Promotion notation.
-            if self.try_promotion_notation(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * e8Q
-            // * e8Q+
-            // * e8Q#
-            // * e8Q++
-            // If white piece results, then found Pawn promotion.
-            if self.try_promotion_piece(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            return Err(
-                ChuiError::InvalidMove(
-                    format!(
-                        "`{}` is an invalid for {:?}",
-                        token,
-                        move_obj.piece.unwrap(),
-                    )
-                )
-            );
-        }
-
-        // * Bf4
-        // * Bf4+
-        // * Bf4#
-        // * Bf4++
-        // If move is Piece move, this token is to-rank.
-        if let Some(MoveType::PieceMove) = move_obj.move_type {
-            if self.try_rank(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            return Err(
-                ChuiError::InvalidMove(
-                    format!(
-                        "`{}` is an invalid to-rank for {:?} move",
-                        token,
-                        move_obj.piece.unwrap(),
-                    )
-                )
-            );
-        }
-
-        // * 0-0
-        // * 0-0+
-        // * 0-0#
-        // * 0-0++
-        // * 0-0-0
-        // * 0-0-0+
-        // * 0-0-0#
-        // * 0-0-0++
-        // Castling move, king side.
-        if self.try_castle_king(token, move_obj).is_ok() {
             return Ok(());
         }
 
-        Err(
-            ChuiError::InvalidMove(
-                format!(
-                    "`{}` is invalid for {:?}", token, move_obj.piece.unwrap(),
-                )
-            )
-        )
+        // If move is a pawn move, this token can be check, check
+        // mate, promotion notation, or promotion piece.
+        if self.move_obj.is_pawn_move() &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok() ||
+               self.try_promotion_notation(token).is_ok() ||
+               self.try_promotion_piece(token).is_ok()
+           )
+        {
+            return Ok(());
+        }
+
+        // If move is Piece move, then this token is to-rank.
+        if self.move_obj.is_piece_move() &&
+           self.try_rank(token).is_ok()
+        {
+            return Ok(());
+        }
+
+        // Castling move, king side.
+        if self.try_castle_king(token).is_ok() { return Ok(()); }
+
+        self.invalid_for_piece(token)
     }
 
     /// * e4++
@@ -897,146 +553,52 @@ impl AlgebraicParser {
     ///     Token 4: 4, +, #, Q, - (
     ///         rank, check, mate, promotion piece, castle queen
     ///     )
-    fn process_token_4(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        // * exf4
-        // * exf4+
-        // * exf4++
-        // * exf4#
-        // * exf8Q
-        // * exf8Q+
-        // * exf8Q++
-        // * exf8Q#
-        // * exf8=Q
-        // * exf8=Q+
-        // * exf8=Q++
-        // * exf8=Q#
-        // * Bxf4
-        // * Bxf4+
-        // * Bxf4++
-        // * Bxf4#
+    fn parse_token_4(&mut self, token: char) -> ChuiResult<()> {
         // If move is a capture, this token is to-rank.
-        if let Some(MoveType::PawnCapture) |
-               Some(MoveType::PieceCapture) = move_obj.move_type
+        if (
+               self.move_obj.is_pawn_capture() ||
+               self.move_obj.is_piece_capture()
+           ) && self.try_rank(token).is_ok()
         {
-            if self.try_rank(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            return Err(
-                ChuiError::InvalidMove(
-                    format!(
-                        "`{}` is an invalid rank for {:?} capture",
-                        token,
-                        move_obj.piece.unwrap(),
-                    )
-                )
-            );
+            return Ok(());
         }
 
-        // * e4++
-        // If move is a Pawn move, this token can be check mate if
-        // `move_obj.check` is already set.
-        if let Some(MoveType::PawnMove) = move_obj.move_type {
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-        }
-
-        // * e8Q+
-        // * e8Q#
-        // * e8=Q
-        // * e8Q++
-        // * e8=Q+
-        // * e8=Q#
-        // * e8=Q++
         // If move is pawn move, this token is check, check mate,
         // or pawn promotion.
-        if let Some(MoveType::PawnMove) = move_obj.move_type {
-            // * e8Q+
-            // * e8Q++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * e8Q#
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * e8=Q
-            // * e8=Q+
-            // * e8=Q#
-            // * e8=Q++
-            if self.try_promotion_piece(token, move_obj).is_ok() {
-                return Ok(());
-            }
+        if self.move_obj.is_pawn_move() &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok() ||
+               self.try_promotion_piece(token).is_ok()
+           )
+        {
+            return Ok(());
         }
 
-        // * Bf4+
-        // * Bf4#
-        // * Bf4++
         // If move is a piece move, then this token is check or
         // check mate.
-        if let Some(MoveType::PieceMove) = move_obj.move_type {
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            return Err(
-                ChuiError::InvalidMove(
-                    format!(
-                        "`{}` is an invalid check or check mate move",
-                        token
-                    )
-                )
-            )
+        if self.move_obj.is_piece_move() &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok()
+           )
+        {
+            return Ok(());
         }
 
-        // * 0-0+
-        // * 0-0++
-        // * 0-0#
-        // * 0-0-0
-        // * 0-0-0+
-        // * 0-0-0#
-        // * 0-0-0++
-        // If move is a castling move, this token is check, check mate
-        // or queen side castle.
-        if let Some(MoveType::Castle) = move_obj.move_type {
-            // * 0-0+
-            // * 0-0++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * 0-0#
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * 0-0-0
-            // * 0-0-0+
-            // * 0-0-0#
-            // * 0-0-0++
-            if self.try_castle_queen_continuation(token, move_obj).is_ok() {
-                return Ok(());
-            }
+        // If move is a castling move, this token is check, check
+        // mate, or queen side castle continuation.
+        if self.move_obj.is_castle() &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok() ||
+               self.try_castle_queen_continuation(token).is_ok()
+           )
+        {
+            return Ok(());
         }
 
-        Err(
-            ChuiError::InvalidMove(
-                format!(
-                    "`{}` is an invalid for {:?} move",
-                    token,
-                    move_obj.piece.unwrap(),
-                )
-            )
-        )
+        self.invalid_for_piece(token)
     }
 
     /// * e8Q++
@@ -1067,118 +629,53 @@ impl AlgebraicParser {
     ///     Token 5: +, #, Q, 0, = (
     ///         check, mate, promotion piece, castle queen
     ///     )
-    fn process_token_5(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        // * exf4+
-        // * exf4++
-        // * exf4#
-        // * exf8Q
-        // * exf8Q+
-        // * exf8Q++
-        // * exf8Q#
-        // * exf8=Q
-        // * exf8=Q+
-        // * exf8=Q++
-        // * exf8=Q#
-        // If move is pawn capture, token is either check, check mate
-        // piece promotion, or promotion notation.
-        if let Some(MoveType::PawnCapture) = move_obj.move_type {
-            // * exf4+
-            // * exf4++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * exf4#
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * exf8Q
-            // * exf8Q+
-            // * exf8Q++
-            // * exf8Q#
-            if self.try_promotion_piece(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * exf8=Q
-            // * exf8=Q+
-            // * exf8=Q++
-            // * exf8=Q#
-            if self.try_promotion_notation(token, move_obj).is_ok() {
-                return Ok(());
-            }
+    fn parse_token_5(&mut self, token: char) -> ChuiResult<()> {
+        // If move is pawn capture, token is either check, check
+        // mate, piece promotion, or promotion notation.
+        if self.move_obj.is_pawn_capture() &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok() ||
+               self.try_promotion_piece(token).is_ok() ||
+               self.try_promotion_notation(token).is_ok()
+           )
+        {
+            return Ok(());
         }
 
-        // * Bxf4+
-        // * Bxf4++
-        // * Bxf4#
-        if let Some(MoveType::PieceCapture) = move_obj.move_type {
-            // * Bxf4+
-            // * Bxf4++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * Bxf4#
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
+        // If move is a pawn move or piece capture, then this
+        // token is either check or check mate.
+        if (
+               self.move_obj.is_piece_capture() ||
+               self.move_obj.is_pawn_move()
+           ) &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok()
+           )
+        {
+            return Ok(());
         }
 
-        // * e8Q++
-        // * e8=Q+
-        // * e8=Q++
-        // * e8=Q#
-        if let Some(MoveType::PawnMove) = move_obj.move_type {
-            // * e8Q++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * e8=Q+
-            // * e8=Q++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * e8=Q#
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
+        // If move is a piece move, then this token is check.
+        if self.move_obj.is_piece_move() &&
+           self.try_check(token).is_ok()
+        {
+            return Ok(());
         }
 
-        // * Bf4++
-        if let Some(MoveType::PieceMove) = move_obj.move_type {
-            // * Bf4++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
+        // If move is a castling move, this token is either
+        // check or castling queen.
+        if self.move_obj.is_castle() &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_castle_queen(token).is_ok()
+           )
+        {
+            return Ok(());
         }
 
-        // * 0-0++
-        // * 0-0-0
-        // * 0-0-0+
-        // * 0-0-0++
-        // * 0-0-0#
-        if let Some(MoveType::Castle) = move_obj.move_type {
-            // * 0-0++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * 0-0-0
-            // * 0-0-0+
-            // * 0-0-0++
-            // * 0-0-0#
-            if self.try_castle_queen(token, move_obj).is_ok() {
-                return Ok(());
-            }
-        }
-
-        Err(AlgebraicParser::token_not_satisfied(token))
+        self.invalid_for_piece(token)
     }
 
     /// * exf4++
@@ -1198,73 +695,42 @@ impl AlgebraicParser {
     ///     Token 6: +, #, Q (
     ///         check, mate, promotion piece
     ///     )
-    fn process_token_6(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        // * exf4++
-        // * exf8Q+
-        // * exf8Q++
-        // * exf8Q#
-        // * exf8=Q+
-        // * exf8=Q++
-        // * exf8=Q#
-        if let Some(MoveType::PawnCapture) = move_obj.move_type {
-            // * exf4++
-            // * exf8Q+
-            // * exf8Q++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * exf8Q#
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * exf8=Q
-            // * exf8=Q+
-            // * exf8=Q++
-            // * exf8=Q#
-            if self.try_promotion_piece(token, move_obj).is_ok() {
-                return Ok(());
-            }
+    fn parse_token_6(&mut self, token: char) -> ChuiResult<()> {
+        // If move is a pawn capture, then this token is either
+        // check, check mate, or promotion piece.
+        if self.move_obj.is_pawn_capture() &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok() ||
+               self.try_promotion_piece(token).is_ok()
+           )
+        {
+            return Ok(());
         }
 
-        // * e8=Q++
-        // * Bxf4++
-        if let Some(MoveType::PawnMove) |
-               Some(MoveType::PieceCapture) = move_obj.move_type
+        // If move is pawn move or piece capture, then this token
+        // is check.
+        if (
+            self.move_obj.is_pawn_move() ||
+            self.move_obj.is_piece_capture()
+           ) &&
+           self.try_check(token).is_ok()
         {
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
+            return Ok(());
         }
         
-        // * 0-0-0+
-        // * 0-0-0++
-        // * 0-0-0#
-        if let Some(MoveType::Castle) = move_obj.move_type {
-            // * 0-0-0+
-            // * 0-0-0++
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            // * 0-0-0#
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
+        // If move is a castling move, then this token is either
+        // check or check mate.
+        if self.move_obj.is_castle() &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok()
+           )
+        {
+            return Ok(());
         }
 
-        Err(
-            ChuiError::InvalidMove(
-                format!(
-                    "`{}` is an invalid for {:?} move",
-                    token,
-                    move_obj.piece.unwrap(),
-                )
-            )
-        )
+        self.invalid_for_piece(token)
     }
 
     /// * exf8Q++
@@ -1276,36 +742,22 @@ impl AlgebraicParser {
     ///     Token 7: +, # (
     ///         check, mate
     ///     )
-    fn process_token_7(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        // * exf8Q++
-        // * exf8=Q+
-        // * exf8=Q++
-        // * exf8=Q#
-        // * 0-0-0++
-        if let Some(MoveType::PawnCapture) |
-               Some(MoveType::Castle) = move_obj.move_type
+    fn parse_token_7(&mut self, token: char) -> ChuiResult<()> {
+        // If move is a pawn capture or a castling move, this
+        // token is either check or check mate.
+        if (
+               self.move_obj.is_pawn_capture() ||
+               self.move_obj.is_castle()
+           ) &&
+           (
+               self.try_check(token).is_ok() ||
+               self.try_check_mate(token).is_ok()
+           )
         {
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
-
-            if self.try_check_mate(token, move_obj).is_ok() {
-                return Ok(());
-            }
+            return Ok(());
         }
-
         
-        Err(
-            ChuiError::InvalidMove(
-                format!(
-                    "`{}` is an invalid for {:?} move",
-                    token,
-                    move_obj.piece.unwrap(),
-                )
-            )
-        )
+        self.invalid_for_piece(token)
     }
 
     /// * exf8=Q++
@@ -1313,23 +765,49 @@ impl AlgebraicParser {
     ///     Token 8: + (
     ///         check (mate)
     ///     )
-    fn process_token_8(&self, token: char, move_obj: &mut Move)
-    -> ChuiResult<()>
-    {
-        // * exf8=Q++
-        if let Some(MoveType::PawnCapture) = move_obj.move_type {
-            if self.try_check(token, move_obj).is_ok() {
-                return Ok(());
-            }
+    fn parse_token_8(&mut self, token: char) -> ChuiResult<()> {
+        // If move is pawn capture, then this token is check mate.
+        if self.move_obj.is_pawn_capture() &&
+           self.try_check(token).is_ok()
+        {
+            return Ok(());
         }
 
+        self.invalid_for_piece(token)
+    }
+
+    fn invalid_for_piece(&self, token: char) -> ChuiResult<()> {
         Err(
             ChuiError::InvalidMove(
                 format!(
-                    "`{}` is an invalid for {:?} move",
+                    "`{}` is not a valid for {:?}",
                     token,
-                    move_obj.piece.unwrap(),
+                    self.move_obj.get_piece().unwrap()
                 )
+            )
+        )
+    }
+
+    fn invalid_pawn_or_piece_move(&self, token: char) -> ChuiResult<()> {
+        Err(
+            ChuiError::InvalidMove(
+                format!("`{}` is not a valid pawn or piece move", token)
+            )
+        )
+    }
+
+    fn token_not_satisfied(&self, token: char) -> ChuiResult<()> {
+        Err(
+            ChuiError::TokenNotSatisfied(
+                format!("`{}` token is not satisfied", token)
+            )
+        )
+    }
+
+    fn move_index_not_implemented(&self, move_idx: usize) -> ChuiResult<()> {
+        Err(
+            ChuiError::NotImplemented(
+                format!("move index `{}` not implemented", move_idx)
             )
         )
     }
@@ -1367,7 +845,7 @@ mod test {
     }
 
     fn parse_the_move(the_move: &str) -> ChuiResult<()> {
-        let (parser, engine) = parser();
+        let (mut parser, engine) = parser();
         match parser.parse(the_move, &engine) {
             Ok(_) => Ok(()),
             Err(error) => Err(error),

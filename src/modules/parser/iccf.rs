@@ -13,7 +13,7 @@ pub struct ICCFParser;
 impl Parser for ICCFParser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&self, _the_move: &str, _engine: &Engine)
+    fn parse(&mut self, _the_move: &str, _engine: &Engine)
     -> ChuiResult<Move>
     {
         Err(
