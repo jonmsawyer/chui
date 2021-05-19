@@ -5,6 +5,7 @@ use std::convert::TryFrom;
 // use std::collections::HashMap;
 
 use crate::{ChuiResult, ChuiError};
+
 use super::Parser;
 use super::super::{Move, Piece, MoveGenerator, Color, Engine};
 
@@ -128,7 +129,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
         // instance of `Move`.
         let move_obj = self.move_obj.to_owned();
         self.move_obj = Move::new();
-        
+
         Ok(move_obj)
     }
 }
@@ -705,14 +706,14 @@ impl<'a> AlgebraicParser<'a> {
         // If move is pawn move or piece capture, then this token
         // is check.
         if (
-            self.move_obj.is_pawn_move() ||
-            self.move_obj.is_piece_capture()
+               self.move_obj.is_pawn_move() ||
+               self.move_obj.is_piece_capture()
            ) &&
            self.try_check(token).is_ok()
         {
             return Ok(());
         }
-        
+
         // If move is a castling move, then this token is either
         // check or check mate.
         if self.move_obj.is_castle() &&
@@ -750,7 +751,7 @@ impl<'a> AlgebraicParser<'a> {
         {
             return Ok(());
         }
-        
+
         self.invalid_for_piece(token)
     }
 
@@ -825,16 +826,16 @@ mod test {
             Some(37),
             None,
         );
-    
+
         let black = Player::new(
             Color::Black,
             Some("Klaes Ashford"),
             Some(72),
             Some(1500),
         );
-        
+
         let engine = Engine::new(white, black).unwrap();
-    
+
         (parser::new(ParserEngine::Algebraic), engine)
     }
 
@@ -855,132 +856,132 @@ mod test {
     fn test_e4_check() -> ChuiResult<()> {
         parse_the_move("e4+")
     }
-    
+
     #[test]
     fn test_e4_mate() -> ChuiResult<()> {
         parse_the_move("e4#")
     }
-    
+
     #[test]
     fn test_e4_queen() -> ChuiResult<()> {
         parse_the_move("e4Q")
     }
-    
+
     #[test]
     fn test_e4_check_check() -> ChuiResult<()> {
         parse_the_move("e4++")
     }
-    
+
     #[test]
     fn test_e8_queen_check() -> ChuiResult<()> {
         parse_the_move("e8Q+")
     }
-    
+
     #[test]
     fn test_e8_queen_mate() -> ChuiResult<()> {
         parse_the_move("e8Q#")
     }
-    
+
     #[test]
     fn test_e8_equals_queen() -> ChuiResult<()> {
         parse_the_move("e8=Q")
     }
-    
+
     #[test]
     fn test_e4_takes_f4() -> ChuiResult<()> {
         parse_the_move("exf4")
     }
-    
+
     #[test]
     fn test_e8_queen_check_check() -> ChuiResult<()> {
         parse_the_move("e8Q++")
     }
-    
+
     #[test]
     fn test_e8_equals_queen_check() -> ChuiResult<()> {
         parse_the_move("e8=Q+")
     }
-    
+
     #[test]
     fn test_e8_equals_queen_mate() -> ChuiResult<()> {
         parse_the_move("e8=Q#")
     }
-    
+
     #[test]
     fn test_e_takes_f4_check() -> ChuiResult<()> {
         parse_the_move("exf4+")
     }
-    
+
     #[test]
     fn test_e_takes_f4_mate() -> ChuiResult<()> {
         parse_the_move("exf4#")
     }
-    
+
     #[test]
     fn test_e_takes_f8_queen() -> ChuiResult<()> {
         parse_the_move("exf8Q")
     }
-    
+
     #[test]
     fn test_e8_equals_queen_check_check() -> ChuiResult<()> {
         parse_the_move("e8=Q++")
     }
-    
+
     #[test]
     fn test_e_takes_f4_check_check() -> ChuiResult<()> {
         parse_the_move("exf4++")
     }
-    
+
     #[test]
     fn test_e_takes_f8_queen_check() -> ChuiResult<()> {
         parse_the_move("exf8Q+")
     }
-    
+
     #[test]
     fn test_e_takes_f8_queen_mate() -> ChuiResult<()> {
         parse_the_move("exf8Q#")
     }
-    
+
     #[test]
     fn test_e_takes_f8_equals_queen() -> ChuiResult<()> {
         parse_the_move("exf8=Q")
     }
-    
+
     #[test]
     fn test_e_takes_f8_equals_queen_mate() -> ChuiResult<()> {
         parse_the_move("exf8=Q#")
     }
-    
+
     #[test]
     fn test_e_takes_f8_equals_queen_check() -> ChuiResult<()> {
         parse_the_move("exf8=Q+")
     }
-    
+
     #[test]
     fn test_e_takes_f8_queen_check_check() -> ChuiResult<()> {
         parse_the_move("exf8Q++")
     }
-    
+
     #[test]
     fn test_e_takes_f8_equals_queen_check_check() -> ChuiResult<()> {
         parse_the_move("exf8=Q++")
     }
-    
+
     #[test]
     fn test_bishop_f4() -> ChuiResult<()> {
         parse_the_move("Bf4")
     }
-    
+
     #[test]
     fn test_bishop_f4_check() -> ChuiResult<()> {
         parse_the_move("Bf4+")
     }
-    
+
     #[test]
     fn test_bishop_f4_mate() -> ChuiResult<()> {
         parse_the_move("Bf4#")
     }
-    
+
     #[test]
     fn test_bishop_takes_f4() -> ChuiResult<()> {
         parse_the_move("Bxf4")
