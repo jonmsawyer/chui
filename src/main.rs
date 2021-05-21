@@ -23,7 +23,11 @@ fn main() {
         Some(1500),
     );
     
-    let engine = Engine::new(white, black).unwrap();
+    let engine = Engine::new(
+        white,
+        black,
+        ParserEngine::Algebraic,
+    ).unwrap();
 
     println!("{}", engine.white_to_string());
     println!();
@@ -31,19 +35,24 @@ fn main() {
     let mut parser = parser::new(ParserEngine::Algebraic);
 
     loop {
-        println!("Please input your move. (q to quit)");
+        println!("Please input your move. (q to quit, h for help)");
         
         let mut input_move = String::new();
         
         io::stdin()
             .read_line(&mut input_move)
-            .expect("Failed to read input move.");
+            .expect("Failed to read input move or command.");
         
 
         let the_move = input_move.trim().to_string();
         
         if the_move.eq("q") || the_move.eq("quit") {
             break;
+        }
+
+        if the_move.eq("h") || the_move.eq("help") {
+            display_help(&engine);
+            continue
         }
 
         println!("Your move: {}", the_move);
@@ -53,4 +62,8 @@ fn main() {
             Err(error) => println!("{}", error),
         }
     }
+}
+
+fn display_help(engine: &Engine) {
+    println!("Parser Engine: {:?}", engine.parser);
 }

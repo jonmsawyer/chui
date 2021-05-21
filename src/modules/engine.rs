@@ -6,6 +6,7 @@ use crate::{ChuiResult, ChuiError};
 use super::piece::{Piece, Color};
 use super::player::Player;
 use super::MoveGenerator;
+use super::parser::{self, Parser, ParserEngine};
 
 /// Represents the engine of the chess game. Moves will be input
 /// and output from this object. `Engine` captures and changes
@@ -45,6 +46,9 @@ pub struct Engine<'a> {
     /// Represents the board as an array of arrays each containing
     /// a `Square`.
     pub board: [[Option<Piece>; 8]; 8],
+
+    /// Represents the current move parser.
+    pub parser: Box<dyn Parser>,
 
     /// The `Color` to move.
     pub to_move: Color,
@@ -201,7 +205,7 @@ impl Engine<'static> {
 
     /// Return a new instance of `Ok<Engine>` given a white
     /// `Player` and a black `Player`.
-    pub fn new(player_1: Player, player_2: Player)
+    pub fn new(player_1: Player, player_2: Player, parser_engine: ParserEngine)
     -> ChuiResult<Engine<'static>>
     {
         if player_1.color == player_2.color {
@@ -238,6 +242,7 @@ impl Engine<'static> {
                 move_counter: 0,
                 enpassant_target_square: ('-', 0),
                 move_generator: MoveGenerator::generate_move_list(),
+                parser: parser::new(parser_engine),
                 board: [
                     Engine::row_of_pieces(Color::White),  // rank 1
                     [Some(Piece::Pawn(Color::White)); 8], // rank 2

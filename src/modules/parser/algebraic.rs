@@ -8,9 +8,11 @@ use crate::{ChuiResult, ChuiError};
 
 use super::Parser;
 use super::super::{Move, Piece, MoveGenerator, Color, Engine};
+//use super::super::parser::ParserEngine;
 
 /// A parser that will parse algebraic chess notation.
 /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
+#[derive(Debug)]
 pub struct AlgebraicParser<'a>{
     pub move_generator: MoveGenerator<'a>,
     pub move_obj: Move,
@@ -145,7 +147,14 @@ impl<'a> AlgebraicParser<'a> {
         )
     }
 
+    /// In algebraic notation, there's no differentiation between
+    /// white and black pieces. Try to obtain a piece from this token
+    /// which should end up being a white piece. During processing,
+    /// the color of the piece will be ignored. If the token begins
+    /// with a castling move, the piece is a `King`. If no piece matches
+    /// then the move is presumably a `Pawn` move.
     fn try_piece(&mut self, token: char) -> ChuiResult<()> {
+        // Try to obtain a piece from the token.
         if let Ok(piece) = Piece::try_from(token) {
             if let Piece::King(Color::White) |
                    Piece::Queen(Color::White) |
@@ -159,6 +168,7 @@ impl<'a> AlgebraicParser<'a> {
             }
         }
 
+        // Try to obtain a `King` from a castling move.
         for castle_notation in self.move_generator.castle_notation.iter() {
             if castle_notation.starts_with(token) {
                 self.move_obj.set_castling_king();
@@ -166,11 +176,17 @@ impl<'a> AlgebraicParser<'a> {
             }
         }
 
+        // The only other option is a `Pawn` move.
         self.move_obj.set_pawn_move();
 
+        // If all else fails, this token could not be parsed
+        // (i.e., invalid file such as 's').
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a valid file. Must
+    /// be one of \[abcdefgh\]. If a valid file is found, record
+    /// it in the move.
     fn try_file(&mut self, token: char) -> ChuiResult<()> {
         if let Some(index) = self.match_file_to_index(token) {
             self.move_obj.set_to_coord_file(token);
@@ -181,6 +197,8 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a capture. Must be
+    /// 'x'. If a valid capture is found, record it in the move.
     fn try_capture(&mut self, token: char) -> ChuiResult<()> {
         if self.move_generator.capture.starts_with(token) {
             self.move_obj.set_capture()?;
@@ -190,6 +208,9 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a valid rank. Must
+    /// be one of \[12345678\]. If a valid rank is found, record
+    /// it in the move.
     fn try_rank(&mut self, token: char) -> ChuiResult<()> {
         if let Some(index) = self.match_rank_to_index(token) {
             self.move_obj.set_to_coord_rank(index + 1);
@@ -200,6 +221,10 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a valid check. Must
+    /// be '+'. If valid check is found, record it in the move.
+    /// If the move's check flag is already set, record this
+    /// move as a check mate.
     fn try_check(&mut self, token: char) -> ChuiResult<()> {
         if self.move_generator.check.starts_with(token) {
             if self.move_obj.is_check() {
@@ -214,6 +239,8 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a valid check mate.
+    /// If a valid check mate is found, record it in the move.
     fn try_check_mate(&mut self, token: char) -> ChuiResult<()> {
         for check_mate in self.move_generator.check_mate.iter() {
             if check_mate.starts_with(token) {
@@ -225,6 +252,11 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a valid promotion
+    /// notation. If a valid promotion notation is move, record
+    /// it in the move. Note, we don't yet known what the
+    /// promotion piece is. Next token should be the proper
+    /// promotion piece.
     fn try_promotion_notation(&mut self, token: char) -> ChuiResult<()> {
         for notation in self.move_generator.promotion_notation.iter() {
             if notation.starts_with(token) {
@@ -236,6 +268,9 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a promotion piece. The
+    /// move's promotion flag need not be set. If a valid promotion
+    /// is found, flag the move as a promotion and record the piece.
     fn try_promotion_piece(&mut self, token: char) -> ChuiResult<()> {
         if let Ok(piece) = Piece::try_from(token) {
             if let Piece::King(Color::White) |
@@ -252,6 +287,9 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a castle move. Note: this
+    /// is the first attempt at parsing a castling move, so
+    /// tentatively  set this move to be castling king side.
     fn try_castle_king(&mut self, token: char) -> ChuiResult<()> {
         for castle_notation in self.move_generator.castle_notation.iter() {
             if castle_notation.starts_with(token) &&
@@ -265,6 +303,10 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a castle king side
+    /// continuation. Must have already found castle king side
+    /// notation. If token is a valid castling continuation notation,
+    /// do nothing (as there's nothing to do).
     fn try_castle_king_continuation(&self, token: char) -> ChuiResult<()> {
         if self.move_generator.move_notation.starts_with(token) &&
            self.move_obj.is_castling_king()
@@ -275,6 +317,11 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a castle queen side
+    /// continuation. Must have already found castle king side
+    /// notation. If token is a valid castling continuation notation,
+    /// flag the move as castling queen side. Next token must be
+    /// the final castling notation.
     fn try_castle_queen_continuation(&mut self, token: char) -> ChuiResult<()> {
         if self.move_generator.move_notation.starts_with(token) &&
            self.move_obj.is_castling_king()
@@ -286,6 +333,9 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Try to parse the current token as a castle queen side.
+    /// Must have already found castle queen side continuation
+    /// notation. If a valid castle move is found, do nothing.
     fn try_castle_queen(&self, token: char) -> ChuiResult<()> {
         for castle_notation in self.move_generator.castle_notation.iter() {
             if castle_notation.starts_with(token) &&
@@ -298,6 +348,14 @@ impl<'a> AlgebraicParser<'a> {
         self.token_not_satisfied(token)
     }
 
+    /// Parse the first token in the input move.
+    /// 
+    ///     Token 1: e, B, 0 (
+    ///         file, piece, castle king
+    ///     )
+    /// 
+    /// Valid move types for this token:
+    /// 
     /// * e4
     /// * e4+
     /// * e4#
@@ -338,10 +396,6 @@ impl<'a> AlgebraicParser<'a> {
     /// * 0-0-0+
     /// * 0-0-0#
     /// * 0-0-0++
-    /// 
-    ///     Token 1: e, B, 0 (
-    ///         file, piece, castle king
-    ///     )
     fn parse_token_1(&mut self, token: char) -> ChuiResult<()> {
         // Try to parse the first token as a `Piece`. All pieces
         // will parse as a `White` piece. The first valid piece
@@ -359,6 +413,14 @@ impl<'a> AlgebraicParser<'a> {
         self.invalid_pawn_or_piece_move(token)
     }
 
+    /// Parse the second token in the input move.
+    /// 
+    ///     Token 2: f, 4, x, - (
+    ///         file, rank, capture, castle king
+    ///     )
+    /// 
+    /// Valid move types for this token:
+    /// 
     /// * e4
     /// * e4+
     /// * e4#
@@ -399,10 +461,6 @@ impl<'a> AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
-    ///     Token 2: f, 4, x, - (
-    ///         file, rank, capture, castle king
-    ///     )
     fn parse_token_2(&mut self, token: char) -> ChuiResult<()> {
         // This token can be a capture move in any variation, or is
         // already castling.
@@ -429,6 +487,15 @@ impl<'a> AlgebraicParser<'a> {
         self.invalid_for_piece(token)
     }
 
+    /// Parse the third token in the input move.
+    /// 
+    ///     Token 3: f, 4, +, #, Q, =, 0 (
+    ///         file, rank, check, mate, promotiom piece,
+    ///         promotion notatiomn, castle king
+    ///     )
+    /// 
+    /// Valid move types for this token:
+    /// 
     /// * e4+
     /// * e4#
     /// * e8Q
@@ -468,11 +535,6 @@ impl<'a> AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
-    ///     Token 3: f, 4, +, #, Q, =, 0 (
-    ///         file, rank, check, mate, promotiom piece,
-    ///         promotion notatiomn, castle king
-    ///     )
     fn parse_token_3(&mut self, token: char) -> ChuiResult<()> {
         // If move is a capture, this token is to-file.
         if (
@@ -510,6 +572,14 @@ impl<'a> AlgebraicParser<'a> {
         self.invalid_for_piece(token)
     }
 
+    /// Parse the fourth token in the input move.
+    /// 
+    ///     Token 4: 4, +, #, Q, - (
+    ///         rank, check, mate, promotion piece, castle queen
+    ///     )
+    /// 
+    /// Valid move types for this token:
+    /// 
     /// * e4++
     /// * e8Q+
     /// * Bf4+
@@ -544,10 +614,6 @@ impl<'a> AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
-    ///     Token 4: 4, +, #, Q, - (
-    ///         rank, check, mate, promotion piece, castle queen
-    ///     )
     fn parse_token_4(&mut self, token: char) -> ChuiResult<()> {
         // If move is a capture, this token is to-rank.
         if (
@@ -596,6 +662,14 @@ impl<'a> AlgebraicParser<'a> {
         self.invalid_for_piece(token)
     }
 
+    /// Parse the fifth token in the input move.
+    /// 
+    ///     Token 5: +, #, Q, 0, = (
+    ///         check, mate, promotion piece, castle queen
+    ///     )
+    /// 
+    /// Valid move types for this token:
+    /// 
     /// * e8Q++
     /// * e8=Q+
     /// * e8=Q#
@@ -620,10 +694,6 @@ impl<'a> AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
-    ///     Token 5: +, #, Q, 0, = (
-    ///         check, mate, promotion piece, castle queen
-    ///     )
     fn parse_token_5(&mut self, token: char) -> ChuiResult<()> {
         // If move is pawn capture, token is either check, check
         // mate, piece promotion, or promotion notation.
@@ -673,6 +743,14 @@ impl<'a> AlgebraicParser<'a> {
         self.invalid_for_piece(token)
     }
 
+    /// Parse the sixth token in the input move.
+    ///
+    ///     Token 6: +, #, Q (
+    ///         check, mate, promotion piece
+    ///     )
+    /// 
+    /// Valid move types for this token:
+    /// 
     /// * exf4++
     /// * exf8Q+
     /// * exf8Q++
@@ -686,10 +764,6 @@ impl<'a> AlgebraicParser<'a> {
     /// * 0-0-0+
     /// * 0-0-0#
     /// * 0-0-0++
-    ///
-    ///     Token 6: +, #, Q (
-    ///         check, mate, promotion piece
-    ///     )
     fn parse_token_6(&mut self, token: char) -> ChuiResult<()> {
         // If move is a pawn capture, then this token is either
         // check, check mate, or promotion piece.
@@ -728,15 +802,19 @@ impl<'a> AlgebraicParser<'a> {
         self.invalid_for_piece(token)
     }
 
+    /// Parse the seventh token in the input move.
+    ///
+    ///     Token 7: +, # (
+    ///         check, mate
+    ///     )
+    /// 
+    /// Valid move types for this token:
+    /// 
     /// * exf8Q++
     /// * exf8=Q+
     /// * exf8=Q++
     /// * exf8=Q#
     /// * 0-0-0++
-    ///
-    ///     Token 7: +, # (
-    ///         check, mate
-    ///     )
     fn parse_token_7(&mut self, token: char) -> ChuiResult<()> {
         // If move is a pawn capture or a castling move, this
         // token is either check or check mate.
@@ -755,11 +833,15 @@ impl<'a> AlgebraicParser<'a> {
         self.invalid_for_piece(token)
     }
 
-    /// * exf8=Q++
+    /// Parse the eigth token in the input move.
     ///
     ///     Token 8: + (
     ///         check (mate)
     ///     )
+    /// 
+    /// Valid move type for this token:
+    /// 
+    /// * exf8=Q++
     fn parse_token_8(&mut self, token: char) -> ChuiResult<()> {
         // If move is pawn capture, then this token is check mate.
         if self.move_obj.is_pawn_capture() &&
@@ -771,6 +853,8 @@ impl<'a> AlgebraicParser<'a> {
         self.invalid_for_piece(token)
     }
 
+    /// Return `ChuiError::InvalidMove` indicating that the input
+    /// move is invalid for the given piece.
     fn invalid_for_piece(&self, token: char) -> ChuiResult<()> {
         Err(
             ChuiError::InvalidMove(
@@ -783,6 +867,8 @@ impl<'a> AlgebraicParser<'a> {
         )
     }
 
+    /// Return `ChuiError::InvalidMove` indicating that the move
+    /// is an invalid pawn or piece move.
     fn invalid_pawn_or_piece_move(&self, token: char) -> ChuiResult<()> {
         Err(
             ChuiError::InvalidMove(
@@ -791,6 +877,10 @@ impl<'a> AlgebraicParser<'a> {
         )
     }
 
+    /// Return `ChuiError::TokenNotSatisfied` indicating that
+    /// the input token has not been reasonably satisfied in any
+    /// given context. This usually indicates that further processing
+    /// of the token is necessary.
     fn token_not_satisfied(&self, token: char) -> ChuiResult<()> {
         Err(
             ChuiError::TokenNotSatisfied(
@@ -799,6 +889,9 @@ impl<'a> AlgebraicParser<'a> {
         )
     }
 
+    /// Return `ChuiError:NotImplemented` indicating that the move
+    /// index of the current token has not been implemented. This
+    /// means there are more tokens to process than are accounted for.
     fn move_index_not_implemented(&self, move_idx: usize) -> ChuiResult<()> {
         Err(
             ChuiError::NotImplemented(
