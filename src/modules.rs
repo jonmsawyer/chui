@@ -13,4 +13,7 @@ pub use chess_move::{Move, MoveType};
 pub mod move_generator;
 pub use move_generator::MoveGenerator;
 
+pub mod command;
+pub use command::{Command, CommandContext, CommandKind};
+
 pub mod parser;

@@ -2,9 +2,11 @@ use std::fmt;
 
 mod modules;
 pub use modules::{
-    Engine, Move, MoveType, MoveGenerator, Player,
+    Engine, Player,
+    Move, MoveType, MoveGenerator,
     piece::{Piece, Color},
     parser::{self, ParserEngine},
+    Command, CommandContext, CommandKind,
 };
 
 
@@ -44,6 +46,9 @@ pub enum ChuiError {
     /// Something is not implemented completely. Raise this error when in
     /// development/testing.
     NotImplemented(String),
+
+    // /// Unknown error. Used for testing.
+    // Unknown(String),
 }
 
 /// Returns a string representing the particular `ChuiError` variant.
@@ -73,6 +78,10 @@ impl fmt::Display for ChuiError {
             ChuiError::NotImplemented(reason) => {
                 write!(f, "Error (Not Implemented): {}.", reason)
             },
+
+            // ChuiError::Unknown(reason) => {
+            //     write!(f, "Error (Unknown): {}", reason)
+            // }
         }
     }
 }

@@ -1,4 +1,4 @@
-use chui::{Engine, Player, Color};
+use chui::{Engine, Player, Color, ParserEngine};
 
 #[test]
 fn init_engine() {
@@ -16,7 +16,7 @@ fn init_engine() {
         Some(987),
     );
 
-    if let Ok(engine) = Engine::new(white, black) {
+    if let Ok(engine) = Engine::new(white, black, ParserEngine::Algebraic) {
 
         assert_eq!(
             &format!("{}", engine),

@@ -4,7 +4,7 @@
 
 use crate::{ChuiResult, ChuiError};
 use super::Parser;
-use super::super::{Move, Engine};
+use super::super::Move;
 
 /// A parser that will parse Smith chess notation.
 /// Example moves: `e1g1c`, `b4c3n`, `b5c6n`, `d7c6b`, `e2e4`, etc.
@@ -13,14 +13,22 @@ pub struct SmithParser;
 impl Parser for SmithParser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, _the_move: &str, _engine: &Engine)
+    fn parse(&mut self, _the_move: &str)
     -> ChuiResult<Move>
     {
         Err(
             ChuiError::InvalidMove(
-                "AlgebraicParser not implemented.".to_string()
+                "SmithParser not implemented".to_string()
             )
         )
+    }
+
+    fn name(&self) -> String {
+        "Smith Parser".to_string()
+    }
+
+    fn eg(&self) -> String {
+        format!("Examples for {}", self.name())
     }
 }
 

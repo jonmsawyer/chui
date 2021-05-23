@@ -31,52 +31,51 @@ pub enum MoveType {
 /// Represents a chess move.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Move {
-    /// Represents a move's "from" coordinate (e.g., ('a', 1)).
-    from_coord: (char, u8),
+    /// Represents a move's "from" coordinate (e.g., `('a', 1)`).
+    pub from_coord: (char, u8),
 
-    /// Represents a move's "to" coordinate (e.g., ('b' 8)).
-    to_coord: (char, u8),
+    /// Represents a move's "to" coordinate (e.g., `('b' 8)`).
+    pub to_coord: (char, u8),
 
-    /// Represents a move's "from" index (e.g., (0, 0) \[a1\]).
-    from_index: (u8, u8),
+    /// Represents a move's "from" index (e.g., `(0, 0)` \[a1\]).
+    pub from_index: (u8, u8),
 
-    /// Represents a move's "to" index (e.g., (1, 7) \[b8\]).
-    to_index: (u8, u8),
+    /// Represents a move's "to" index (e.g., `(1, 7)` \[b8\]).
+    pub to_index: (u8, u8),
 
-    /// The chess piece to move
-    piece: Option<Piece>,
+    /// The chess piece to move.
+    pub piece: Option<Piece>,
 
-    /// In check.
-    check: bool,
+    /// In check?
+    pub check: bool,
 
-    /// In checkmate.
-    check_mate: bool,
+    /// In check mate?
+    pub check_mate: bool,
 
     /// Is move promotion?
-    promotion: bool,
+    pub promotion: bool,
 
-    /// Promotion piece
-    promotion_piece: Option<Piece>,
+    /// Promotion piece.
+    pub promotion_piece: Option<Piece>,
 
-    /// Is castling move
-    is_castling: bool,
+    /// Is castling move?
+    pub is_castling: bool,
 
-    /// Is castling king side
-    is_castling_king: bool,
+    /// Is castling king side?
+    pub is_castling_king: bool,
 
-    /// Is castling quuen side
-    is_castling_queen: bool,
+    /// Is castling queen side?
+    pub is_castling_queen: bool,
 
-    /// The parsed move text (e.g., "Pawn on e4 captures e5").
-    move_text: String,
+    /// The parsed move text (e.g., `Pawn on e4 captures e5`).
+    pub move_text: String,
 
-    /// The user's input move text (e.g., "Be5").
-    input_move: String,
+    /// The user's input move text (e.g., `Be5`).
+    pub input_move: String,
 
-    /// Represents the type of move to be performed. A `Move`
-    /// or a `Capture`. An `ErrorKind` is returned if the move is
-    /// invalid.
-    move_type: Option<MoveType>,
+    /// Represents the type of move to be performed. A `Some(Move)`
+    /// or a `Some(Capture)`. A `None` if the move is invalid.
+    pub move_type: Option<MoveType>,
 }
 
 /// Displays the input move and move text.
@@ -135,7 +134,7 @@ impl Move {
             from_index: (8, 8),
             to_index: (8, 8),
             piece: None,
-            check:false,
+            check: false,
             check_mate: false,
             promotion: false,
             promotion_piece: None,
@@ -152,47 +151,47 @@ impl Move {
     // boolean checks
     //
 
-    /// Check if move is pawn move
+    /// Is pawn move?
     pub fn is_pawn_move(&self) -> bool {
         matches!(self.move_type, Some(MoveType::PawnMove))
     }
 
-    /// Check if move is pawn capture
+    /// Is pawn capture?
     pub fn is_pawn_capture(&self) -> bool {
         matches!(self.move_type, Some(MoveType::PawnCapture))
     }
 
-    /// Check if move is piece move
+    /// Is piece move?
     pub fn is_piece_move(&self) -> bool {
         matches!(self.move_type, Some(MoveType::PieceMove))
     }
 
-    /// Check if move is piece capture
+    /// Is piece capture?
     pub fn is_piece_capture(&self) -> bool {
         matches!(self.move_type, Some(MoveType::PieceCapture))
     }
 
-    /// Check if move is a castle
+    /// Is castle?
     pub fn is_castle(&self) -> bool {
         matches!(self.move_type, Some(MoveType::Castle))
     }
 
-    /// Check if check
+    /// Is check?
     pub fn is_check(&self) -> bool {
         self.check
     }
 
-    /// Is castling
+    /// Is castling?
     pub fn is_castling(&self) -> bool {
         self.is_castling && (self.is_castling_king || self.is_castling_queen)
     }
 
-    /// Check if castling king side
+    /// Is castling king side?
     pub fn is_castling_king(&self) -> bool {
         self.is_castling && self.is_castling_king && !self.is_castling_queen
     }
 
-    /// Check if castling queen side
+    /// Is castling queen side?
     pub fn is_castling_queen(&self) -> bool {
         self.is_castling && !self.is_castling_king && self.is_castling_queen
     }
@@ -201,7 +200,7 @@ impl Move {
     // Getters
     //
 
-    /// Get moving piece
+    /// Get moving piece.
     pub fn get_piece(&self) -> Option<Piece> {
         self.piece
     }
@@ -210,22 +209,22 @@ impl Move {
     // Setters
     //
 
-    /// Set the input move
+    /// Set the input move.
     pub fn set_input_move(&mut self, the_move: &str) {
         self.input_move = the_move.to_string();
     }
 
-    /// Set the moving piece
+    /// Set the moving piece.
     pub fn set_piece(&mut self, piece: Piece) {
         self.piece = Some(piece)
     }
 
-    /// Set the move type
+    /// Set the move type.
     pub fn set_move_type(&mut self, move_type: MoveType) {
         self.move_type = Some(move_type)
     }
 
-    /// Set castling king
+    /// Set castling king.
     pub fn set_castling_king(&mut self) {
         self.is_castling = true;
         self.is_castling_king = true;
@@ -234,7 +233,7 @@ impl Move {
         self.set_move_type(MoveType::Castle);
     }
 
-    /// Set castling queen
+    /// Set castling queen.
     pub fn set_castling_queen(&mut self) {
         self.is_castling = true;
         self.is_castling_king = false;
@@ -243,13 +242,13 @@ impl Move {
         self.set_move_type(MoveType::Castle);
     }
 
-    /// Set pawn move
+    /// Set pawn move.
     pub fn set_pawn_move(&mut self) {
         self.set_piece(Piece::Pawn(Color::White));
         self.set_move_type(MoveType::PawnMove);
     }
 
-    /// Set piece move
+    /// Set piece move.
     pub fn set_piece_move(&mut self, piece: Piece) {
         self.set_piece(piece);
         self.set_move_type(MoveType::PieceMove);
@@ -277,42 +276,50 @@ impl Move {
         Ok(())
     }
 
-    /// Set check
+    /// Set check.
     pub fn set_check(&mut self) {
         self.check = true;
         self.check_mate = false;
     }
 
-    /// Set check mate
+    /// Set check mate.
     pub fn set_check_mate(&mut self) {
         self.check = false;
         self.check_mate = true;
     }
 
-    /// Set promotion
+    /// Set promotion.
     pub fn set_promotion(&mut self) {
         self.promotion = true;
     }
 
-    /// Set promotion piece
+    /// Set promotion piece.
     pub fn set_promotion_piece(&mut self, piece: Piece) {
         self.set_promotion();
         self.promotion_piece = Some(piece);
     }
 
+    /// Set the `to_coord` file.
     pub fn set_to_coord_file(&mut self, file: char) {
+        self.from_coord = (self.to_coord.0, self.from_coord.1);
         self.to_coord = (file, self.to_coord.1);
     }
 
+    /// Set the `to_coord` rank.
     pub fn set_to_coord_rank(&mut self, rank: u8) {
+        self.from_coord = (self.from_coord.0, self.to_coord.1);
         self.to_coord = (self.to_coord.0, rank);
     }
 
+    /// Set the `to_index` file.
     pub fn set_to_index_file(&mut self, file: u8) {
+        self.from_index = (self.to_index.0, self.to_index.1);
         self.to_index = (file, self.to_index.1);
     }
 
+    /// Set the `to_index` rank.
     pub fn set_to_index_rank(&mut self, rank: u8) {
+        self.from_index = (self.from_index.0, self.to_index.1);
         self.to_index = (self.to_index.0, rank);
     }
 }

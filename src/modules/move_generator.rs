@@ -25,39 +25,39 @@ use std::collections::HashSet;
 /// ```
 #[derive(Debug, Default, PartialEq)]
 pub struct MoveGenerator<'a> {
-    /// The 8 files (e.g., a, b, c, d, e, f, g, h).
+    /// The 8 files (e.g., `a`, `b`, `c`, `d`, `e`, `f`, `g`, `h`).
     pub files: [&'a str; 8],
 
-    /// The 8 ranks (e.g., 1, 2, 3, 4, 5, 6, 7, 8).
+    /// The 8 ranks (e.g., `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`).
     pub ranks: [&'a str; 8],
 
-    /// The 5 pieces (excluding pawn) (e.g., K, Q, R, B, N).
+    /// The 5 pieces (excluding pawn) (e.g., `K`, `Q`, `R`, `B`, `N`).
     pub pieces: [&'a str; 5],
 
     /// The various supported promotion notations
-    /// (e.g., /, =, \, etc.).
+    /// (e.g., `/`, `=`, `\`, etc.).
     pub promotion_notation: [&'a str; 4],
 
-    /// The 4 promotion pieces (e.g., Q, R, B, N).
+    /// The 4 promotion pieces (e.g., `Q`, `R`, `B`, `N`).
     pub promotion_pieces: [&'a str; 4],
 
-    /// The check notation (+).
+    /// The check notation (`+`).
     pub check: &'a str,
 
-    /// The 2 check mate notations (++, #).
+    /// The 2 check mate notations (`++`, `#`).
     pub check_mate: [&'a str; 4],
 
-    /// The move notation (-).
+    /// The move notation (`-`).
     pub move_notation: &'a str,
 
-    /// The capture notation (x).
+    /// The capture notation (`x`).
     pub capture: &'a str,
 
     /// The 4 castling notations (2 valid, 2 invalid)
-    /// (O-O, 0-0, O-O-O, 0-0-0).
+    /// (`O-O`, `0-0`, `O-O-O`, `0-0-0`).
     pub castle: [&'a str; 4],
 
-    /// Raw castling notation (0 or O).
+    /// Raw castling notation (`0` or `O`).
     pub castle_notation: [&'a str; 3],
 
     /// A vector containing Strings of the resulting generated
