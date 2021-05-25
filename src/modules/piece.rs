@@ -29,10 +29,10 @@ pub enum PieceKind {
 /// Example:
 ///
 /// ```
-/// use chui::{Piece, Color};
+/// use chui::{Piece, PieceKind, Color};
 /// 
-/// let white_pawn = Piece::Pawn(Color::White);
-/// let black_queen = Piece::Queen(Color::Black);
+/// let white_pawn = Piece::new(PieceKind::Pawn, Color::White);
+/// let black_queen = Piece::new(PieceKind::Queen, Color::Black);
 /// 
 /// println!("White pawn: {:?}", white_pawn);
 /// println!("Black queen: {:?}", black_queen);
@@ -55,7 +55,7 @@ impl Piece {
     }
 
     /// Get the kind of the piece.
-    pub fn get_kind(&self) -> PieceKind {
+    pub fn get_piece(&self) -> PieceKind {
         self.piece
     }
 
