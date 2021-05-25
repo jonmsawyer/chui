@@ -4,7 +4,7 @@
 
 use crate::{ChuiResult, ChuiError};
 use super::Parser;
-use super::super::Move;
+use super::super::{Move, Color};
 
 /// A parser that will parse concise reversible chess notation.
 /// Example moves: `e24`, `e75`, `Ng1f3`, `Nb8c6`, `Bb5:Nc6`, etc.
@@ -13,7 +13,7 @@ pub struct ConciseReversibleParser;
 impl Parser for ConciseReversibleParser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, _the_move: &str)
+    fn parse(&mut self, _the_move: &str, _to_move: Color)
     -> ChuiResult<Move>
     {
         Err(

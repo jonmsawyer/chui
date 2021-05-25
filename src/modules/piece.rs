@@ -12,10 +12,19 @@ pub enum Color {
     Black,
 }
 
-/// Represents a piece on the chessboard. One of `King`, `Queen`,
-/// `Rook`, `Knight`, `Bishop`, `Knight`, `Pawn`, or `None`.
-///
-/// Each chess piece has a `Color`.
+/// Piece kind. One of `King`, `Queen`, `Rook`, `Knight`,
+/// `Bishop`, `Knight`, `Pawn`.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum PieceKind {
+    King,
+    Queen,
+    Rook,
+    Bishop,
+    Knight,
+    Pawn
+}
+/// Represents a piece on the chessboard. Each chess piece has
+/// a `PieceKind` and `Color`.
 ///
 /// Example:
 ///
@@ -29,43 +38,93 @@ pub enum Color {
 /// println!("Black queen: {:?}", black_queen);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Piece {
-    /// A king with its `Color`.
-    King(Color),
+pub struct Piece {
+    /// The kind of piece.
+    piece: PieceKind,
 
-    /// A queen with its `Color`.
-    Queen(Color),
+    /// The color of the piece.
+    color: Color,
+}
 
-    /// A rook with its `Color`.
-    Rook(Color),
+impl Piece {
+    pub fn new(piece: PieceKind, color: Color) -> Piece {
+        Piece {
+            piece,
+            color,
+        }
+    }
 
-    /// A bishop with its `Color`.
-    Bishop(Color),
+    /// Get the kind of the piece.
+    pub fn get_kind(&self) -> PieceKind {
+        self.piece
+    }
 
-    /// A knight with its `Color`.
-    Knight(Color),
+    /// Get the color of the piece.
+    pub fn get_color(&self) -> Color {
+        self.color
+    }
 
-    /// A pawn with its `Color`.
-    Pawn(Color),
+    /// Set the piece kind.
+    pub fn set_piece(&mut self, piece: PieceKind) {
+        self.piece = piece;
+    }
+
+    /// Set the piece color.
+    pub fn set_color(&mut self, color: Color) {
+        self.color = color;
+    }
+
+    /// Get the rendered `String` representation of the piece.
+    /// E.g., `"White King".to_string()`.
+    pub fn get_text(&self) -> String {
+        // let color = match self.color {
+        //     Color::White => "White",
+        //     Color::Black => "Black",
+        // };
+
+        // let piece = match self.piece {
+        //     PieceKind::King => "King",
+        //     PieceKind::Queen => "Queen",
+
+        // }
+        // let piece_text = match self {
+        //     Piece::King(Color::White) => "White King",
+        //     Piece::King(Color::Black) => "Black King",
+        //     Piece::Queen(Color::White) => "White Queen",
+        //     Piece::Queen(Color::Black) => "Black Queen",
+        //     Piece::Rook(Color::White) => "White Rook",
+        //     Piece::Rook(Color::Black) => "Black Rook",
+        //     Piece::Bishop(Color::White) => "White Bishop",
+        //     Piece::Bishop(Color::Black) => "Black Bishop",
+        //     Piece::Knight(Color::White) => "White Knight",
+        //     Piece::Knight(Color::Black) => "Black Knight",
+        //     Piece::Pawn(Color::White) => "White Pawn",
+        //     Piece::Pawn(Color::Black) => "Black Pawn",
+        // };
+
+        // piece_text.to_string()
+        format!("{:?} {:?}", self.color, self.piece)
+    }
 }
 
 /// Returns a string containing the string representation of the chess piece.
 /// (e.g., "P" for a White Pawn.)
 impl fmt::Display for Piece {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Piece::Pawn(Color::White) => write!(f, "P"),
-            Piece::Rook(Color::White) => write!(f, "R"),
-            Piece::Knight(Color::White) => write!(f, "N"),
-            Piece::Bishop(Color::White) => write!(f, "B"),
-            Piece::Queen(Color::White) => write!(f, "Q"),
-            Piece::King(Color::White) => write!(f, "K"),
-            Piece::Pawn(Color::Black) => write!(f, "p"),
-            Piece::Rook(Color::Black) => write!(f, "r"),
-            Piece::Knight(Color::Black) => write!(f, "n"),
-            Piece::Bishop(Color::Black) => write!(f, "b"),
-            Piece::Queen(Color::Black) => write!(f, "q"),
-            Piece::King(Color::Black) => write!(f, "k"),
+        let piece = match self.piece {
+            PieceKind::King => "k",
+            PieceKind::Queen => "q",
+            PieceKind::Rook => "r",
+            PieceKind::Bishop => "b",
+            PieceKind::Knight => "n",
+            PieceKind::Pawn => "p",
+       };
+
+       if let Color::White = self.color {
+           write!(f, "{}", piece.to_uppercase())
+       }
+       else {
+           write!(f, "{}", piece)
        }
    }
 }
@@ -76,18 +135,20 @@ impl TryFrom<&str> for Piece {
 
     fn try_from(piece: &str) -> ChuiResult<Piece> {
         match piece {
-            "P" => Ok(Piece::Pawn(Color::White)),
-            "R" => Ok(Piece::Rook(Color::White)),
-            "N" => Ok(Piece::Knight(Color::White)),
-            "B" => Ok(Piece::Bishop(Color::White)),
-            "Q" => Ok(Piece::Queen(Color::White)),
-            "K" => Ok(Piece::King(Color::White)),
-            "p" => Ok(Piece::Pawn(Color::Black)),
-            "r" => Ok(Piece::Rook(Color::Black)),
-            "n" => Ok(Piece::Knight(Color::Black)),
-            "b" => Ok(Piece::Bishop(Color::Black)),
-            "q" => Ok(Piece::Queen(Color::Black)),
-            "k" => Ok(Piece::King(Color::Black)),
+            "K" => Ok(Piece::new(PieceKind::King, Color::White)),
+            "Q" => Ok(Piece::new(PieceKind::Queen, Color::White)),
+            "R" => Ok(Piece::new(PieceKind::Rook, Color::White)),
+            "B" => Ok(Piece::new(PieceKind::Bishop, Color::White)),
+            "N" => Ok(Piece::new(PieceKind::Knight, Color::White)),
+            "P" => Ok(Piece::new(PieceKind::Pawn, Color::White)),
+
+            "k" => Ok(Piece::new(PieceKind::King, Color::Black)),
+            "q" => Ok(Piece::new(PieceKind::Queen, Color::Black)),
+            "r" => Ok(Piece::new(PieceKind::Rook, Color::Black)),
+            "b" => Ok(Piece::new(PieceKind::Bishop, Color::Black)),
+            "n" => Ok(Piece::new(PieceKind::Knight, Color::Black)),
+            "p" => Ok(Piece::new(PieceKind::Pawn, Color::Black)),
+
             _ => Err(
                 ChuiError::InvalidPiece(
                     format!(
@@ -100,29 +161,30 @@ impl TryFrom<&str> for Piece {
     }
 }
 
-/// Returns a `Piece` given a `&str` if `&str` is one of \[PKQRBNpkqrbn\].
+/// Returns a `Piece` given a `char` if `char` is one of \[PKQRBNpkqrbn\].
 impl TryFrom<char> for Piece {
     type Error = ChuiError;
 
     fn try_from(piece: char) -> ChuiResult<Piece> {
         match piece {
-            'P' => Ok(Piece::Pawn(Color::White)),
-            'R' => Ok(Piece::Rook(Color::White)),
-            'N' => Ok(Piece::Knight(Color::White)),
-            'B' => Ok(Piece::Bishop(Color::White)),
-            'Q' => Ok(Piece::Queen(Color::White)),
-            'K' => Ok(Piece::King(Color::White)),
-            'p' => Ok(Piece::Pawn(Color::Black)),
-            'r' => Ok(Piece::Rook(Color::Black)),
-            'n' => Ok(Piece::Knight(Color::Black)),
-            'b' => Ok(Piece::Bishop(Color::Black)),
-            'q' => Ok(Piece::Queen(Color::Black)),
-            'k' => Ok(Piece::King(Color::Black)),
+            'K' => Ok(Piece::new(PieceKind::King, Color::White)),
+            'Q' => Ok(Piece::new(PieceKind::Queen, Color::White)),
+            'R' => Ok(Piece::new(PieceKind::Rook, Color::White)),
+            'B' => Ok(Piece::new(PieceKind::Bishop, Color::White)),
+            'N' => Ok(Piece::new(PieceKind::Knight, Color::White)),
+            'P' => Ok(Piece::new(PieceKind::Pawn, Color::White)),
+
+            'k' => Ok(Piece::new(PieceKind::King, Color::Black)),
+            'q' => Ok(Piece::new(PieceKind::Queen, Color::Black)),
+            'r' => Ok(Piece::new(PieceKind::Rook, Color::Black)),
+            'b' => Ok(Piece::new(PieceKind::Bishop, Color::Black)),
+            'n' => Ok(Piece::new(PieceKind::Knight, Color::Black)),
+            'p' => Ok(Piece::new(PieceKind::Pawn, Color::Black)),
+
             _ => Err(
                 ChuiError::InvalidPiece(
                     format!(
-                        "`{}` is an invalid piece.\
-                        Expected one of [PRNBQKprnbqk]",
+                        "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk]",
                         piece
                     )
                 )
@@ -137,34 +199,36 @@ mod tests {
 
     #[test]
     fn format_pieces() {
-        assert_eq!("P", &format!("{}", Piece::Pawn(Color::White)));
-        assert_eq!("K", &format!("{}", Piece::King(Color::White)));
-        assert_eq!("Q", &format!("{}", Piece::Queen(Color::White)));
-        assert_eq!("R", &format!("{}", Piece::Rook(Color::White)));
-        assert_eq!("B", &format!("{}", Piece::Bishop(Color::White)));
-        assert_eq!("N", &format!("{}", Piece::Knight(Color::White)));
-        assert_eq!("p", &format!("{}", Piece::Pawn(Color::Black)));
-        assert_eq!("k", &format!("{}", Piece::King(Color::Black)));
-        assert_eq!("q", &format!("{}", Piece::Queen(Color::Black)));
-        assert_eq!("r", &format!("{}", Piece::Rook(Color::Black)));
-        assert_eq!("b", &format!("{}", Piece::Bishop(Color::Black)));
-        assert_eq!("n", &format!("{}", Piece::Knight(Color::Black)));
+        assert_eq!("K", &format!("{}", Piece::new(PieceKind::King, Color::White)));
+        assert_eq!("Q", &format!("{}", Piece::new(PieceKind::Queen, Color::White)));
+        assert_eq!("R", &format!("{}", Piece::new(PieceKind::Rook, Color::White)));
+        assert_eq!("B", &format!("{}", Piece::new(PieceKind::Bishop, Color::White)));
+        assert_eq!("N", &format!("{}", Piece::new(PieceKind::Knight, Color::White)));
+        assert_eq!("P", &format!("{}", Piece::new(PieceKind::Pawn, Color::White)));
+
+        assert_eq!("k", &format!("{}", Piece::new(PieceKind::King, Color::Black)));
+        assert_eq!("q", &format!("{}", Piece::new(PieceKind::Queen, Color::Black)));
+        assert_eq!("r", &format!("{}", Piece::new(PieceKind::Rook, Color::Black)));
+        assert_eq!("b", &format!("{}", Piece::new(PieceKind::Bishop, Color::Black)));
+        assert_eq!("n", &format!("{}", Piece::new(PieceKind::Knight, Color::Black)));
+        assert_eq!("p", &format!("{}", Piece::new(PieceKind::Pawn, Color::Black)));
     }
 
     #[test]
     fn valid_try_from_pieces() {
-        assert_eq!(Piece::Pawn(Color::White), Piece::try_from("P").unwrap());
-        assert_eq!(Piece::King(Color::White), Piece::try_from("K").unwrap());
-        assert_eq!(Piece::Queen(Color::White), Piece::try_from("Q").unwrap());
-        assert_eq!(Piece::Rook(Color::White), Piece::try_from("R").unwrap());
-        assert_eq!(Piece::Bishop(Color::White), Piece::try_from("B").unwrap());
-        assert_eq!(Piece::Knight(Color::White), Piece::try_from("N").unwrap());
-        assert_eq!(Piece::Pawn(Color::Black), Piece::try_from("p").unwrap());
-        assert_eq!(Piece::King(Color::Black), Piece::try_from("k").unwrap());
-        assert_eq!(Piece::Queen(Color::Black), Piece::try_from("q").unwrap());
-        assert_eq!(Piece::Rook(Color::Black), Piece::try_from("r").unwrap());
-        assert_eq!(Piece::Bishop(Color::Black), Piece::try_from("b").unwrap());
-        assert_eq!(Piece::Knight(Color::Black), Piece::try_from("n").unwrap());
+        assert_eq!(Piece::new(PieceKind::King, Color::White), Piece::try_from("K").unwrap());
+        assert_eq!(Piece::new(PieceKind::Queen, Color::White), Piece::try_from("Q").unwrap());
+        assert_eq!(Piece::new(PieceKind::Rook, Color::White), Piece::try_from("R").unwrap());
+        assert_eq!(Piece::new(PieceKind::Bishop, Color::White), Piece::try_from("B").unwrap());
+        assert_eq!(Piece::new(PieceKind::Knight, Color::White), Piece::try_from("N").unwrap());
+        assert_eq!(Piece::new(PieceKind::Pawn, Color::White), Piece::try_from("P").unwrap());
+
+        assert_eq!(Piece::new(PieceKind::King, Color::Black), Piece::try_from("k").unwrap());
+        assert_eq!(Piece::new(PieceKind::Queen, Color::Black), Piece::try_from("q").unwrap());
+        assert_eq!(Piece::new(PieceKind::Rook, Color::Black), Piece::try_from("r").unwrap());
+        assert_eq!(Piece::new(PieceKind::Bishop, Color::Black), Piece::try_from("b").unwrap());
+        assert_eq!(Piece::new(PieceKind::Knight, Color::Black), Piece::try_from("n").unwrap());
+        assert_eq!(Piece::new(PieceKind::Pawn, Color::Black), Piece::try_from("p").unwrap());
     }
 
     #[test]

@@ -4,7 +4,7 @@ mod modules;
 pub use modules::{
     Engine, Player,
     Move, MoveType, MoveGenerator,
-    piece::{Piece, Color},
+    piece::{Piece, PieceKind, Color},
     parser::{self, ParserEngine},
     Command, CommandContext, CommandKind,
 };

@@ -4,7 +4,7 @@ use std::fmt;
 use std::io;
 
 use crate::{ChuiResult, ChuiError};
-use super::piece::{Piece, Color};
+use super::piece::{Piece, PieceKind, Color};
 use super::player::Player;
 use super::chess_move::Move;
 use super::MoveGenerator;
@@ -143,8 +143,11 @@ impl Engine<'static> {
                     println!();
                     println!("Input move: {}", the_move);
             
-                    match self.parse(&the_move) {
-                        Ok(the_move) => println!("Ok! The move: {}", the_move),
+                    match self.parse(&the_move, self.to_move) {
+                        Ok(move_obj) => {
+                            println!("Ok! The move: {}", move_obj)
+                        },
+
                         Err(error) => println!("{}", error),
                     }
                 },
@@ -160,7 +163,7 @@ impl Engine<'static> {
 
         loop {
             println!();
-            println!("Current parser: {:?}", self.parser.name());
+            println!("Current parser: {}", self.parser.name());
             command.display_help(context);
             println!();
             println!("Select option. (1-8, b to go back, h for help)");
@@ -240,8 +243,8 @@ impl Engine<'static> {
     
     /// Parse the move. Returns am Ok(Move) is the parsing of the
     /// move is successful, otherwise a `ChuiError` will result.
-    pub fn parse(&mut self, the_move: &str) -> ChuiResult<Move> {
-        self.parser.parse(the_move)
+    pub fn parse(&mut self, the_move: &str, to_move: Color) -> ChuiResult<Move> {
+        self.parser.parse(the_move, to_move)
     }
 
     /// Set a new parser based on `ParserEngine`.
@@ -363,14 +366,14 @@ impl Engine<'static> {
     /// Produces a row (`[Option<Piece>; 8]`) of pieces according their color.
     pub fn row_of_pieces(color: Color) -> [Option<Piece>; 8] {
         [
-            Some(Piece::Rook(color)),
-            Some(Piece::Knight(color)),
-            Some(Piece::Bishop(color)),
-            Some(Piece::Queen(color)),
-            Some(Piece::King(color)),
-            Some(Piece::Bishop(color)),
-            Some(Piece::Knight(color)),
-            Some(Piece::Rook(color)),
+            Some(Piece::new(PieceKind::Rook, color)),
+            Some(Piece::new(PieceKind::Knight, color)),
+            Some(Piece::new(PieceKind::Bishop, color)),
+            Some(Piece::new(PieceKind::Queen, color)),
+            Some(Piece::new(PieceKind::King, color)),
+            Some(Piece::new(PieceKind::Bishop, color)),
+            Some(Piece::new(PieceKind::Knight, color)),
+            Some(Piece::new(PieceKind::Rook, color)),
         ]
     }
 
@@ -416,12 +419,12 @@ impl Engine<'static> {
                 parser: parser::new(parser_engine),
                 board: [
                     Engine::row_of_pieces(Color::White),  // rank 1
-                    [Some(Piece::Pawn(Color::White)); 8], // rank 2
+                    [Some(Piece::new(PieceKind::Pawn, Color::White)); 8], // rank 2
                     [None; 8],                            // rank 3
                     [None; 8],                            // rank 4
                     [None; 8],                            // rank 5
                     [None; 8],                            // rank 6
-                    [Some(Piece::Pawn(Color::Black)); 8], // rank 7
+                    [Some(Piece::new(PieceKind::Pawn, Color::Black)); 8], // rank 7
                     Engine::row_of_pieces(Color::Black),  // rank 8
                 ],
             }

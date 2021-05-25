@@ -9,12 +9,9 @@ use std::fmt;
 
 use crate::{ChuiResult, ChuiError};
 
-use super::{Piece, Color};
+use super::{Piece, PieceKind, Color};
 
-/// Represents the type of move to be performed. If the move
-/// is a simple move, then `Move` is represented. If the move
-/// is a piece or pawn capture, `Capture` is represented. If the
-/// move is invalid, `Invalid` is represented.
+/// Represents the type of move to be performed.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MoveType {
     PawnMove,
@@ -224,12 +221,24 @@ impl Move {
         self.move_type = Some(move_type)
     }
 
+    /// Set the color of the pieces (after they have already been
+    /// parsed).
+    pub fn set_color(&mut self, color: Color) {
+        if let Some(mut piece) = self.piece {
+            piece.set_color(color);
+        }
+
+        if let Some(mut piece) = self.promotion_piece {
+            piece.set_color(color);
+        }
+    }
+
     /// Set castling king.
     pub fn set_castling_king(&mut self) {
         self.is_castling = true;
         self.is_castling_king = true;
         self.is_castling_queen = false;
-        self.set_piece(Piece::King(Color::White));
+        self.set_piece(Piece::new(PieceKind::King, Color::White));
         self.set_move_type(MoveType::Castle);
     }
 
@@ -238,13 +247,13 @@ impl Move {
         self.is_castling = true;
         self.is_castling_king = false;
         self.is_castling_queen = true;
-        self.set_piece(Piece::King(Color::White));
+        self.set_piece(Piece::new(PieceKind::King, Color::White));
         self.set_move_type(MoveType::Castle);
     }
 
     /// Set pawn move.
     pub fn set_pawn_move(&mut self) {
-        self.set_piece(Piece::Pawn(Color::White));
+        self.set_piece(Piece::new(PieceKind::Pawn, Color::White));
         self.set_move_type(MoveType::PawnMove);
     }
 
@@ -321,5 +330,100 @@ impl Move {
     pub fn set_to_index_rank(&mut self, rank: u8) {
         self.from_index = (self.from_index.0, self.to_index.1);
         self.to_index = (self.to_index.0, rank);
+    }
+
+    //
+    // Updaters
+    //
+
+    /// Update the move text.
+    pub fn update_move_text(&mut self) -> bool {
+        if self.piece.is_none() || self.move_type.is_none() {
+            return false;
+        }
+
+        // E.g., "White King"
+        self.move_text = self.piece.unwrap().get_text();
+
+        let mut is_capture = false;
+
+        // Is moving, capturing, or castling?
+        let move_verb = match self.move_type {
+            Some(MoveType::PawnMove) |
+            Some(MoveType::PieceMove) => "moves",
+            Some(MoveType::PawnCapture) |
+            Some(MoveType::PieceCapture) => { is_capture = true; "captures" },
+            Some(MoveType::Castle) => "castles",
+            _ => "", // should never match
+        };
+
+        self.move_text = format!("{} {}", self.move_text, move_verb);
+
+        // Is castling King or Queen side?
+        if self.is_castling && self.is_castling_king {
+            self.move_text = format!("{} King side", self.move_text);
+            return true;
+        }
+        else if self.is_castling && self.is_castling_queen {
+            self.move_text = format!("{} Queen side", self.move_text);
+            return true;
+        }
+
+        let (from_file, from_rank) = self.from_coord;
+
+        let mut is_from = false;
+        if from_file != '-' || from_rank <= 8 {
+            is_from = true;
+            self.move_text = format!("{} from ", self.move_text);
+        }
+
+        if from_file != '-' {
+            self.move_text = format!("{}{}", self.move_text, from_file);
+        }
+
+        if from_rank <= 8 {
+            self.move_text = format!("{}{}", self.move_text, from_rank);
+        }
+
+        let (to_file, to_rank) = self.to_coord;
+
+        if to_file != '-' || from_rank <= 8 {
+            if is_capture && !is_from {
+                self.move_text = format!("{} ", self.move_text);
+            }
+            else {
+                self.move_text = format!("{} to ", self.move_text);
+            }
+        }
+
+        if to_file != '-' {
+            self.move_text = format!("{}{}", self.move_text, to_file);
+        }
+
+        if to_rank <= 8 {
+            self.move_text = format!("{}{}", self.move_text, to_rank);
+        }
+
+        if self.promotion {
+            if let Some(piece) = self.promotion_piece {
+                self.move_text = format!(
+                    "{} promotes to {}",
+                    self.move_text,
+                    piece.get_text()
+                );
+            }
+        }
+
+        if self.check {
+            self.move_text = format!("{} check", self.move_text);
+        }
+        else if self.check_mate {
+            self.move_text = format!("{} check mate", self.move_text);
+        }
+
+        // let (from_file, to_file) = self.from_coord;
+        // if (from_file != '-') {}
+
+        true
     }
 }

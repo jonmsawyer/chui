@@ -1,5 +1,5 @@
 pub mod piece;
-pub use piece::{Piece, Color};
+pub use piece::{Piece, PieceKind, Color};
 
 pub mod player;
 pub use player::Player;

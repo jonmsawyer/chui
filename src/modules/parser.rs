@@ -7,9 +7,7 @@
 use std::fmt;
 
 use crate::{ChuiResult, ChuiError};
-//use crate::parser::ParserEngine;
-
-use super::Move;
+use super::{Move, Color};
 
 pub mod algebraic;
 pub mod long_algebraic;
@@ -29,12 +27,15 @@ pub mod iccf;
 /// Example:
 /// 
 /// ```
-/// use chui::{Move, Piece, parser::Parser, ChuiResult, ChuiError, Engine};
+/// use chui::{
+///     Move, Color, Piece, parser::Parser,
+///     ChuiResult, ChuiError, Engine
+/// };
 /// 
 /// pub struct MyParser;
 /// 
 /// impl Parser for MyParser {
-///     fn parse(&mut self, the_move: &str)
+///     fn parse(&mut self, _the_move: &str, _color: Color)
 ///     -> ChuiResult<Move>
 ///     {
 ///         Err(
@@ -56,7 +57,7 @@ pub mod iccf;
 pub trait Parser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, the_move: &str)
+    fn parse(&mut self, the_move: &str, to_move: Color)
     -> ChuiResult<Move>;
 
     /// The name of the parser. Used in help messages and debug.
@@ -195,7 +196,7 @@ pub enum ParserEngine {
 /// let mut parser_engine = parser::new(ParserEngine::Algebraic);
 /// 
 /// if let Ok(engine) = Engine::new(white, black, ParserEngine::Algebraic) {
-///     println!("the move: {:?}", parser_engine.parse("P-K4"));
+///     println!("the move: {:?}", parser_engine.parse("P-K4", Color::White));
 /// };
 /// ```
 pub fn new(parser: ParserEngine) -> Box<dyn Parser> {
