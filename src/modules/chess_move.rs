@@ -26,7 +26,7 @@ pub enum MoveType {
 }
 
 /// Represents a chess move.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 pub struct Move {
     /// Represents a move's "from" coordinate (e.g., `('a', 1)`).
     pub from_coord: (char, u8),
@@ -64,9 +64,6 @@ pub struct Move {
     /// Is castling queen side?
     pub is_castling_queen: bool,
 
-    /// The parsed move text (e.g., `Pawn on e4 captures e5`).
-    pub move_text: String,
-
     /// The user's input move text (e.g., `Be5`).
     pub input_move: String,
 
@@ -76,7 +73,7 @@ pub struct Move {
 }
 
 /// Displays the input move and move text.
-impl fmt::Display for Move {
+impl fmt::Debug for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let output = format!("{{
     from_coord: {:?},
@@ -91,7 +88,6 @@ impl fmt::Display for Move {
     is_castling: {:?},
     is_castling_king: {:?},
     is_castling_queen: {:?},
-    move_text: {:?},
     input_move: {:?},
     move_type: {:?}
 }}",
@@ -107,7 +103,6 @@ impl fmt::Display for Move {
             self.is_castling,
             self.is_castling_king,
             self.is_castling_queen,
-            self.move_text,
             self.input_move,
             self.move_type,
         );
@@ -138,7 +133,6 @@ impl Move {
             is_castling: false,
             is_castling_king: false,
             is_castling_queen: false,
-            move_text: String::new(),
             input_move: String::new(),
             move_type: None,
         }
@@ -224,12 +218,16 @@ impl Move {
     /// Set the color of the pieces (after they have already been
     /// parsed).
     pub fn set_color(&mut self, color: Color) {
-        if let Some(mut piece) = self.piece {
+        if self.piece.is_some() {
+            let piece = self.piece.as_mut().unwrap();
             piece.set_color(color);
+            self.piece = Some(*piece);
         }
 
-        if let Some(mut piece) = self.promotion_piece {
+        if self.promotion_piece.is_some() {
+            let piece = self.promotion_piece.as_mut().unwrap();
             piece.set_color(color);
+            self.promotion_piece = Some(*piece);
         }
     }
 
@@ -336,14 +334,14 @@ impl Move {
     // Updaters
     //
 
-    /// Update the move text.
-    pub fn update_move_text(&mut self) -> bool {
+    /// Return the verbose move text.
+    pub fn get_move_text(&self) -> String {
         if self.piece.is_none() || self.move_type.is_none() {
-            return false;
+            return String::new();
         }
 
         // E.g., "White King"
-        self.move_text = self.piece.unwrap().get_text();
+        let mut move_text = self.piece.unwrap().get_text();
 
         let mut is_capture = false;
 
@@ -357,16 +355,14 @@ impl Move {
             _ => "", // should never match
         };
 
-        self.move_text = format!("{} {}", self.move_text, move_verb);
+        move_text = format!("{} {}", move_text, move_verb);
 
         // Is castling King or Queen side?
         if self.is_castling && self.is_castling_king {
-            self.move_text = format!("{} King side", self.move_text);
-            return true;
+            return format!("{} King side", move_text);
         }
         else if self.is_castling && self.is_castling_queen {
-            self.move_text = format!("{} Queen side", self.move_text);
-            return true;
+            return format!("{} Queen side", move_text);
         }
 
         let (from_file, from_rank) = self.from_coord;
@@ -374,56 +370,53 @@ impl Move {
         let mut is_from = false;
         if from_file != '-' || from_rank <= 8 {
             is_from = true;
-            self.move_text = format!("{} from ", self.move_text);
+            move_text = format!("{} from ", move_text);
         }
 
         if from_file != '-' {
-            self.move_text = format!("{}{}", self.move_text, from_file);
+            move_text = format!("{}{}", move_text, from_file);
         }
 
         if from_rank <= 8 {
-            self.move_text = format!("{}{}", self.move_text, from_rank);
+            move_text = format!("{}{}", move_text, from_rank);
         }
 
         let (to_file, to_rank) = self.to_coord;
 
         if to_file != '-' || from_rank <= 8 {
             if is_capture && !is_from {
-                self.move_text = format!("{} ", self.move_text);
+                move_text = format!("{} ", move_text);
             }
             else {
-                self.move_text = format!("{} to ", self.move_text);
+                move_text = format!("{} to ", move_text);
             }
         }
 
         if to_file != '-' {
-            self.move_text = format!("{}{}", self.move_text, to_file);
+            move_text = format!("{}{}", move_text, to_file);
         }
 
         if to_rank <= 8 {
-            self.move_text = format!("{}{}", self.move_text, to_rank);
+            move_text = format!("{}{}", move_text, to_rank);
         }
 
         if self.promotion {
             if let Some(piece) = self.promotion_piece {
-                self.move_text = format!(
+                move_text = format!(
                     "{} promotes to {}",
-                    self.move_text,
+                    move_text,
                     piece.get_text()
                 );
             }
         }
 
         if self.check {
-            self.move_text = format!("{} check", self.move_text);
+            move_text = format!("{} check", move_text);
         }
         else if self.check_mate {
-            self.move_text = format!("{} check mate", self.move_text);
+            move_text = format!("{} check mate", move_text);
         }
 
-        // let (from_file, to_file) = self.from_coord;
-        // if (from_file != '-') {}
-
-        true
+        move_text
     }
 }

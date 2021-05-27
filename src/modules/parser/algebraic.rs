@@ -162,7 +162,6 @@ impl<'a> Parser for AlgebraicParser<'a> {
         // instance of `Move`.
         let mut move_obj = self.move_obj.to_owned();
         move_obj.set_color(to_move);
-        move_obj.update_move_text();
         self.move_obj = Move::new();
 
         Ok(move_obj)
@@ -1195,7 +1194,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1226,7 +1224,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1257,7 +1254,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1290,7 +1286,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1321,7 +1316,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1352,7 +1346,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1383,7 +1376,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1414,7 +1406,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1445,7 +1436,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1476,7 +1466,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1507,7 +1496,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1538,7 +1526,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1569,7 +1556,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1600,7 +1586,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1631,7 +1616,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1662,7 +1646,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnMove),
                 }
@@ -1693,7 +1676,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1724,7 +1706,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1755,7 +1736,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1786,7 +1766,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1817,7 +1796,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1848,7 +1826,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1879,7 +1856,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1910,7 +1886,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PawnCapture),
                 }
@@ -1941,7 +1916,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -1972,7 +1946,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2003,7 +1976,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2034,7 +2006,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2065,7 +2036,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2096,7 +2066,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2127,7 +2096,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2158,7 +2126,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2189,7 +2156,6 @@ mod test {
                     is_castling: true,
                     is_castling_king: true,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::Castle),
                 }
@@ -2220,7 +2186,6 @@ mod test {
                     is_castling: true,
                     is_castling_king: true,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::Castle),
                 }
@@ -2251,7 +2216,6 @@ mod test {
                     is_castling: true,
                     is_castling_king: true,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::Castle),
                 }
@@ -2282,7 +2246,6 @@ mod test {
                     is_castling: true,
                     is_castling_king: true,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::Castle),
                 }
@@ -2313,7 +2276,6 @@ mod test {
                     is_castling: true,
                     is_castling_king: false,
                     is_castling_queen: true,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::Castle),
                 }
@@ -2344,7 +2306,6 @@ mod test {
                     is_castling: true,
                     is_castling_king: false,
                     is_castling_queen: true,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::Castle),
                 }
@@ -2375,7 +2336,6 @@ mod test {
                     is_castling: true,
                     is_castling_king: false,
                     is_castling_queen: true,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::Castle),
                 }
@@ -2406,7 +2366,6 @@ mod test {
                     is_castling: true,
                     is_castling_king: false,
                     is_castling_queen: true,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::Castle),
                 }
@@ -2437,7 +2396,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2468,7 +2426,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2499,7 +2456,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2530,7 +2486,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2561,7 +2516,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2592,7 +2546,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2623,7 +2576,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2654,7 +2606,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2685,7 +2636,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2716,7 +2666,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2747,7 +2696,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2778,7 +2726,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2809,7 +2756,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2840,7 +2786,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2871,7 +2816,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2902,7 +2846,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -2933,7 +2876,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2964,7 +2906,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -2995,7 +2936,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -3026,7 +2966,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -3057,7 +2996,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -3088,7 +3026,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }
@@ -3119,7 +3056,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceMove),
                 }
@@ -3150,7 +3086,6 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    move_text: the_parsed_move.move_text.clone(),
                     input_move: the_move.to_string(),
                     move_type: Some(MoveType::PieceCapture),
                 }

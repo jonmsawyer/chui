@@ -4,12 +4,14 @@ use std::fmt;
 use std::io;
 
 use crate::{ChuiResult, ChuiError};
-use super::piece::{Piece, PieceKind, Color};
+use super::piece::Color;
 use super::player::Player;
+use super::board::{ChessVariant, Board};
 use super::chess_move::Move;
 use super::MoveGenerator;
 use super::parser::{self, Parser, ParserEngine};
 use super::{Command, CommandContext, CommandKind};
+use super::Fen;
 
 /// Represents the engine of the chess game. Moves will be input
 /// and output from this object. `Engine` captures and changes
@@ -48,7 +50,7 @@ pub struct Engine<'a> {
 
     /// Represents the board as an array of arrays each containing
     /// an `Option<Piece>`.
-    pub board: [[Option<Piece>; 8]; 8],
+    pub board: Board,
 
     /// Represents the current move parser.
     pub parser: Box<dyn Parser>,
@@ -68,21 +70,25 @@ pub struct Engine<'a> {
     /// Can black castle on the queen side?
     pub black_can_castle_queenside: bool,
 
-    /// Represents the half-move counter for pawn moves and piece
-    /// capture. Needed to declare the "50-move rule" draws in
-    /// chess games.
-    pub pawn_move_or_piece_capture_half_move_counter: u32,
-
     /// The "ply", or number of half-moves, recorded in this game.
-    pub half_move_counter: u32,
+    pub half_move_counter: usize,
+
+    /// The "ply", or number of half-moves, since last piece
+    /// capture or pawn move.
+    pub half_move_clock: usize,
 
     /// The number of full moves made in this game.
-    pub move_counter: u32,
+    pub move_counter: usize,
 
     /// When a pawn is moved, the en passant target square is
     /// noted, even if there's no en passant move possible. This
     /// comes from the FEN layout of the game.
-    pub enpassant_target_square: (char, u32),
+    pub enpassant_target_square: (char, usize),
+
+    /// When a pawn is moved, the en passant target square is
+    /// noted, only if there's an en passant move possible. This
+    /// comes from the X-FEN layout of the game.
+    pub true_enpassant_target_square: (char, usize),
 
     /// The `MoveGenerator` object representing the move list
     /// of all possible supported chess notations. Useful for
@@ -102,6 +108,52 @@ impl fmt::Display for Engine<'static> {
 }
 
 impl Engine<'static> {
+    /// Return a new instance of `Ok<Engine>` given a white
+    /// `Player` and a black `Player`.
+    pub fn new(player_1: Player, player_2: Player, parser_engine: ParserEngine)
+    -> ChuiResult<Engine<'static>>
+    {
+        if player_1.color == player_2.color {
+            return Err(
+                ChuiError::IncompatibleSides(
+                    "both players cannot be the same color".to_string()
+                ),
+            );
+        }
+
+        let white;
+        let black;
+
+        if player_1.color == Color::White {
+            white = player_1;
+            black = player_2;
+        }
+        else {
+            white = player_2;
+            black = player_1;
+        }
+
+        Ok(
+            Engine {
+                white,
+                black,
+                board: Board::new(ChessVariant::StandardChess),
+                to_move: Color::White,
+                white_can_castle_kingside: true,
+                white_can_castle_queenside: true,
+                black_can_castle_kingside: true,
+                black_can_castle_queenside: true,
+                half_move_counter: 0,
+                half_move_clock: 0,
+                move_counter: 1,
+                enpassant_target_square: ('-', 9),
+                true_enpassant_target_square: ('-', 9),
+                move_generator: MoveGenerator::generate_move_list(),
+                parser: parser::new(parser_engine),
+            }
+        )
+    }
+
     /// Run the engine.
     pub fn run(&mut self) -> ChuiResult<()> {
         let mut command = Command::new(&self);
@@ -127,6 +179,12 @@ impl Engine<'static> {
                     continue;
                 },
 
+                Some(CommandKind::DisplayToMove) => {
+                    println!();
+                    println!("{}", self.to_move_to_string());
+                    continue;
+                },
+
                 Some(CommandKind::DisplayForWhite) => {
                     println!();
                     println!("{}", self.white_to_string());
@@ -139,13 +197,27 @@ impl Engine<'static> {
                     continue;
                 },
 
+                Some(CommandKind::DisplayFEN) => {
+                    println!();
+                    println!("{}", self.get_fen());
+                    continue;
+                }
+
                 _ => {
                     println!();
                     println!("Input move: {}", the_move);
             
                     match self.parse(&the_move, self.to_move) {
                         Ok(move_obj) => {
-                            println!("Ok! The move: {}", move_obj)
+                            println!("Ok! The move: {:?}", move_obj);
+                            if self.apply_move(&move_obj).is_ok() {
+                                println!("{}", move_obj.get_move_text());
+                                println!();
+                                println!("{}", self.to_move_to_string())
+                            }
+                            else {
+                                println!("Move not applied.")
+                            }
                         },
 
                         Err(error) => println!("{}", error),
@@ -243,7 +315,9 @@ impl Engine<'static> {
     
     /// Parse the move. Returns am Ok(Move) is the parsing of the
     /// move is successful, otherwise a `ChuiError` will result.
-    pub fn parse(&mut self, the_move: &str, to_move: Color) -> ChuiResult<Move> {
+    pub fn parse(&mut self, the_move: &str, to_move: Color)
+    -> ChuiResult<Move>
+    {
         self.parser.parse(the_move, to_move)
     }
 
@@ -263,6 +337,71 @@ impl Engine<'static> {
         input.trim().to_string()
     }
 
+    /// Get the FEN to move character.
+    pub fn get_fen_to_move(&self) -> String {
+        match self.to_move {
+            Color::White => "w".to_string(),
+            Color::Black => "b".to_string(),
+        }
+    }
+
+    /// Get the FEN for castle characters.
+    pub fn get_fen_castle(&self) -> String {
+        let mut castle = String::new();
+
+        if self.white_can_castle_kingside {
+            castle = format!("{}{}", castle, "K");
+        }
+
+        if self.white_can_castle_queenside {
+            castle = format!("{}{}", castle, "Q");
+        }
+
+        if self.black_can_castle_kingside {
+            castle = format!("{}{}", castle, "k");
+        }
+
+        if self.black_can_castle_queenside {
+            castle = format!("{}{}", castle, "q");
+        }
+
+        castle
+    }
+
+    /// Get the FEN en passant square.
+    pub fn get_fen_en_passant(&self) -> String {
+        let (file, rank) = self.enpassant_target_square;
+
+        if file == '-' || rank == 9 {
+            "-".to_string()
+        }
+        else {
+            format!("{}{}", file, rank)
+        }
+    }
+
+    /// Get the X-FEN en passant square.
+    pub fn get_x_fen_en_passant(&self) -> String {
+        let (file, rank) = self.true_enpassant_target_square;
+
+        if file == '-' || rank == 9 {
+            "-".to_string()
+        }
+        else {
+            format!("{}{}", file, rank)
+        }
+    }
+
+    /// Get the FEN half-move clock.
+    pub fn get_fen_half_move_clock(&self) -> String {
+        self.half_move_clock.to_string()
+    }
+
+    /// Get the FEN full-move counter.
+    pub fn get_fen_full_move_counter(&self) -> String {
+        self.move_counter.to_string()
+    }
+
     /// Test function to display the board colors by a straight
     /// index from `0..64` range.
     /// 
@@ -276,6 +415,16 @@ impl Engine<'static> {
                 println!();
             }
         }
+    }
+
+    /// Display the FEN layout of the board.
+    pub fn get_fen(&self) -> String {
+        format!(
+            "FEN: {}\nX-FEN: {}\nShredder-FEN: {}",
+            Fen::get_fen(&self),
+            Fen::get_x_fen(&self),
+            Fen::get_shredder_fen(&self),
+        )
     }
 
     /// Return the display headers for white as a `String`.
@@ -303,20 +452,23 @@ impl Engine<'static> {
         };
 
         let row_vec: Vec<u8> = match color {
+            Color::White => (0..8).rev().collect(),
+            Color::Black => (0..8).collect(),
+        };
+
+        let col_vec: Vec<u8> = match color {
             Color::White => (0..8).collect(),
             Color::Black => (0..8).rev().collect(),
         };
-
-        let col_vec = row_vec.clone();
 
         let to_move = format!("{:?} to move.", self.to_move);
 
         let mut output = String::new();
 
-        for i in row_vec.iter().rev() {
+        for i in row_vec.iter() {
             output = format!("{}{} |", output, numeric_coords[*i as usize]);
             for j in col_vec.iter() {
-                output = match &self.board[*i as usize][*j as usize] {
+                output = match &self.board.get_piece(*j as usize, *i as usize) {
                     Some(piece) => format!("{} {} ", output, piece),
                     None => format!("{} · ", output),
                 };
@@ -363,72 +515,25 @@ impl Engine<'static> {
         }
     }
 
-    /// Produces a row (`[Option<Piece>; 8]`) of pieces according their color.
-    pub fn row_of_pieces(color: Color) -> [Option<Piece>; 8] {
-        [
-            Some(Piece::new(PieceKind::Rook, color)),
-            Some(Piece::new(PieceKind::Knight, color)),
-            Some(Piece::new(PieceKind::Bishop, color)),
-            Some(Piece::new(PieceKind::Queen, color)),
-            Some(Piece::new(PieceKind::King, color)),
-            Some(Piece::new(PieceKind::Bishop, color)),
-            Some(Piece::new(PieceKind::Knight, color)),
-            Some(Piece::new(PieceKind::Rook, color)),
-        ]
+    /// Apply the move.
+    pub fn apply_move(&mut self, move_obj: &Move) -> ChuiResult<()> {
+        let apply = self.board.apply_move(move_obj);
+
+        if apply.is_ok() {
+            self.toggle_to_move();
+        }
+
+        apply
     }
 
-    /// Return a new instance of `Ok<Engine>` given a white
-    /// `Player` and a black `Player`.
-    pub fn new(player_1: Player, player_2: Player, parser_engine: ParserEngine)
-    -> ChuiResult<Engine<'static>>
-    {
-        if player_1.color == player_2.color {
-            return Err(
-                ChuiError::IncompatibleSides(
-                    "both players cannot be the same color".to_string()
-                ),
-            );
-        }
-
-        let white;
-        let black;
-
-        if player_1.color == Color::White {
-            white = player_1;
-            black = player_2;
+    /// Switch `Player` to move.
+    pub fn toggle_to_move(&mut self) {
+        if let Color::White = self.to_move {
+            self.to_move = Color::Black;
         }
         else {
-            white = player_2;
-            black = player_1;
+            self.to_move = Color::White;
         }
-
-        Ok(
-            Engine {
-                white,
-                black,
-                to_move: Color::White,
-                white_can_castle_kingside: true,
-                white_can_castle_queenside: true,
-                black_can_castle_kingside: true,
-                black_can_castle_queenside: true,
-                pawn_move_or_piece_capture_half_move_counter: 0,
-                half_move_counter: 0,
-                move_counter: 0,
-                enpassant_target_square: ('-', 0),
-                move_generator: MoveGenerator::generate_move_list(),
-                parser: parser::new(parser_engine),
-                board: [
-                    Engine::row_of_pieces(Color::White),  // rank 1
-                    [Some(Piece::new(PieceKind::Pawn, Color::White)); 8], // rank 2
-                    [None; 8],                            // rank 3
-                    [None; 8],                            // rank 4
-                    [None; 8],                            // rank 5
-                    [None; 8],                            // rank 6
-                    [Some(Piece::new(PieceKind::Pawn, Color::Black)); 8], // rank 7
-                    Engine::row_of_pieces(Color::Black),  // rank 8
-                ],
-            }
-        )
     }
 }
 

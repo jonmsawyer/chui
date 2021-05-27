@@ -49,17 +49,9 @@ impl Player {
         age: Option<u8>,
         rating: Option<u32>,
     ) -> Player {
-        let name = match name {
-            Some(name) => Some(name.to_string()),
-            _ => None,
-        };
+        let name = name.map(|name| name.to_string());
 
-        Player {
-            color,
-            name,
-            age,
-            rating,
-        }
+        Player { color, name, age, rating }
     }
 }
 

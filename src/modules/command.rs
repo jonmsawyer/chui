@@ -15,6 +15,9 @@ pub enum CommandKind {
     /// Switch the current move parser.
     SwitchParser,
 
+    /// Display the board for the `Color` that is to move.
+    DisplayToMove,
+    
     /// Display the board for `White`.
     DisplayForWhite,
 
@@ -53,6 +56,9 @@ pub enum CommandKind {
 
     /// Switch to Smith Parser.
     SwitchToSmithParser,
+
+    /// Display the FEN layout of the board.
+    DisplayFEN,
 }
 
 /// The context of the command.
@@ -213,6 +219,13 @@ impl Command {
                 },
 
                 CommandPart {
+                    commands: vec!["dt".to_string()],
+                    description: "Display board for the color that \
+                                 is to move".to_string(),
+                    command_kind: CommandKind::DisplayToMove,
+                },
+
+                CommandPart {
                     commands: vec!["dw".to_string()],
                     description: "Display board for White".to_string(),
                     command_kind: CommandKind::DisplayForWhite,
@@ -222,6 +235,13 @@ impl Command {
                     commands: vec!["db".to_string()],
                     description: "Display board for Black".to_string(),
                     command_kind: CommandKind::DisplayForBlack,
+                },
+
+                CommandPart {
+                    commands: vec!["fen".to_string()],
+                    description: "Display the FEN layout of the board"
+                                 .to_string(),
+                    command_kind: CommandKind::DisplayFEN,
                 },
 
                 CommandPart {

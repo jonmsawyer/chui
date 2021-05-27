@@ -2,11 +2,12 @@ use std::fmt;
 
 mod modules;
 pub use modules::{
-    Engine, Player,
+    Engine, Player, Board, ChessVariant,
     Move, MoveType, MoveGenerator,
     piece::{Piece, PieceKind, Color},
     parser::{self, ParserEngine},
     Command, CommandContext, CommandKind,
+    Fen,
 };
 
 

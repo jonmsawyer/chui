@@ -3,7 +3,10 @@
 use std::fmt;
 use std::convert::TryFrom;
 
+use colored::Colorize;
+
 use crate::{ChuiResult, ChuiError};
+use super::Board;
 
 /// Piece color. Either `White` or `Black` variants.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -23,6 +26,7 @@ pub enum PieceKind {
     Knight,
     Pawn
 }
+
 /// Represents a piece on the chessboard. Each chess piece has
 /// a `PieceKind` and `Color`.
 ///
@@ -34,8 +38,8 @@ pub enum PieceKind {
 /// let white_pawn = Piece::new(PieceKind::Pawn, Color::White);
 /// let black_queen = Piece::new(PieceKind::Queen, Color::Black);
 /// 
-/// println!("White pawn: {:?}", white_pawn);
-/// println!("Black queen: {:?}", black_queen);
+/// println!("{}: {:?}", white_pawn.get_text(), white_pawn);
+/// println!("{}: {:?}", black_queen.get_text(), black_queen);
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Piece {
@@ -44,15 +48,27 @@ pub struct Piece {
 
     /// The color of the piece.
     color: Color,
+
+    /// The coordinates (by index) of the piece.
+    coords: (usize, usize),
 }
 
 impl Piece {
+    //
+    // Constructors.
+    //
+
     pub fn new(piece: PieceKind, color: Color) -> Piece {
         Piece {
             piece,
             color,
+            coords: (8, 8),
         }
     }
+
+    //
+    // Getters.
+    //
 
     /// Get the kind of the piece.
     pub fn get_piece(&self) -> PieceKind {
@@ -64,6 +80,15 @@ impl Piece {
         self.color
     }
 
+    /// Get the coordinates of the piece.
+    pub fn get_coords(&self) -> (usize, usize) {
+        self.coords
+    }
+
+    //
+    // Setters.
+    //
+
     /// Set the piece kind.
     pub fn set_piece(&mut self, piece: PieceKind) {
         self.piece = piece;
@@ -74,58 +99,118 @@ impl Piece {
         self.color = color;
     }
 
+    /// Set the piece coordinates.
+    pub fn set_coords(&mut self, file_idx: usize, rank_idx: usize) {
+        self.coords = (file_idx, rank_idx)
+    }
+
     /// Get the rendered `String` representation of the piece.
     /// E.g., `"White King".to_string()`.
     pub fn get_text(&self) -> String {
-        // let color = match self.color {
-        //     Color::White => "White",
-        //     Color::Black => "Black",
-        // };
-
-        // let piece = match self.piece {
-        //     PieceKind::King => "King",
-        //     PieceKind::Queen => "Queen",
-
-        // }
-        // let piece_text = match self {
-        //     Piece::King(Color::White) => "White King",
-        //     Piece::King(Color::Black) => "Black King",
-        //     Piece::Queen(Color::White) => "White Queen",
-        //     Piece::Queen(Color::Black) => "Black Queen",
-        //     Piece::Rook(Color::White) => "White Rook",
-        //     Piece::Rook(Color::Black) => "Black Rook",
-        //     Piece::Bishop(Color::White) => "White Bishop",
-        //     Piece::Bishop(Color::Black) => "Black Bishop",
-        //     Piece::Knight(Color::White) => "White Knight",
-        //     Piece::Knight(Color::Black) => "Black Knight",
-        //     Piece::Pawn(Color::White) => "White Pawn",
-        //     Piece::Pawn(Color::Black) => "Black Pawn",
-        // };
-
-        // piece_text.to_string()
         format!("{:?} {:?}", self.color, self.piece)
+    }
+
+    /// Get move coords for piece.
+    pub fn get_move_coords(&self, board: &Board) -> Vec<(usize, usize)> {
+        let (file_idx, rank_idx) = self.coords;
+        println!("Self.coords = {:?}", self.coords);
+
+        let move_coords;
+
+        match self.piece {
+            PieceKind::King => {
+                move_coords = board.get_king_move_coords(file_idx, rank_idx);
+            },
+
+            PieceKind::Queen => {
+                move_coords = board.get_queen_move_coords(file_idx, rank_idx);
+            },
+
+            PieceKind::Rook => {
+                move_coords = board.get_rook_move_coords(file_idx, rank_idx);
+            },
+
+            PieceKind::Bishop => {
+                move_coords = board.get_bishop_move_coords(file_idx, rank_idx);
+            },
+
+            PieceKind::Knight => {
+                move_coords = board.get_knight_move_coords(file_idx, rank_idx);
+            },
+
+            PieceKind::Pawn => {
+                move_coords = board.get_pawn_move_coords(
+                    file_idx,
+                    rank_idx,
+                    self.color
+                );
+            },
+        }
+
+        println!("Move coords: {:?}", move_coords);
+        move_coords
     }
 }
 
-/// Returns a string containing the string representation of the chess piece.
-/// (e.g., "P" for a White Pawn.)
+/// Returns a UTF-8, colored, string containing the string
+/// representation of the chess piece. (E.g., yellow "♙"
+/// for a White Pawn.)
+/// 
+/// TODO: Make representation configurable.
 impl fmt::Display for Piece {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let piece = match self.piece {
-            PieceKind::King => "k",
-            PieceKind::Queen => "q",
-            PieceKind::Rook => "r",
-            PieceKind::Bishop => "b",
-            PieceKind::Knight => "n",
-            PieceKind::Pawn => "p",
-       };
-
-       if let Color::White = self.color {
-           write!(f, "{}", piece.to_uppercase())
-       }
-       else {
-           write!(f, "{}", piece)
-       }
+        // ♔  U+2654  White Chess King
+        // ♕  U+2655  White Chess Queen
+        // ♖  U+2656  White Chess Rook
+        // ♗  U+2657  White Chess Bishop
+        // ♘  U+2658  White Chess Knight
+        // ♙  U+2659  White Chess Pawn
+        // ♚  U+265A  Black Chess King
+        // ♛  U+265B  Black Chess Queen
+        // ♜  U+265C  Black Chess Rook
+        // ♝  U+265D  Black Chess Bishop
+        // ♞  U+265E  Black Chess Knight
+        // ♟  U+265F  Black Chess Pawn
+        match self {
+            Piece { piece: PieceKind::King, color: Color::White, .. } => {
+                write!(f, "{}", "♔".yellow().bold())
+            },
+            Piece { piece: PieceKind::Queen, color: Color::White, .. } => {
+                write!(f, "{}", "♕".yellow().bold())
+            },
+            Piece { piece: PieceKind::Rook, color: Color::White, .. } => {
+                write!(f, "{}", "♖".yellow().bold())
+            },
+            Piece { piece: PieceKind::Bishop, color: Color::White, .. } => {
+                write!(f, "{}", "♗".yellow().bold())
+            },
+            Piece { piece: PieceKind::Knight, color: Color::White, .. } => {
+                write!(f, "{}", "♘".yellow().bold())
+            },
+            Piece { piece: PieceKind::Pawn, color: Color::White, .. } => {
+                write!(f, "{}", "♙".yellow().bold())
+                //write!(f, "{}", "▲".yellow().bold())
+            },
+            Piece { piece: PieceKind::King, color: Color::Black, .. } => {
+                write!(f, "{}", "♚".magenta().bold())
+            },
+            Piece { piece: PieceKind::Queen, color: Color::Black, .. } => {
+                write!(f, "{}", "♛".magenta().bold())
+            },
+            Piece { piece: PieceKind::Rook, color: Color::Black, .. } => {
+                write!(f, "{}", "♜".magenta().bold())
+            },
+            Piece { piece: PieceKind::Bishop, color: Color::Black, .. } => {
+                write!(f, "{}", "♝".magenta().bold())
+            },
+            Piece { piece: PieceKind::Knight, color: Color::Black, .. } => {
+                write!(f, "{}", "♞".magenta().bold())
+            },
+            Piece { piece: PieceKind::Pawn, color: Color::Black, .. } => {
+                write!(f, "{}", "♟".magenta().bold())
+                //write!(f, "{}", "▲".magenta().bold())
+            },
+        }
    }
 }
 
