@@ -1,4 +1,6 @@
-//use std::convert::TryFrom;
+// When Chui is run as a command line application:
+//  * On Windows, the `DejaVu Sans Mono` font should be used
+//    in your terminal. Size 18 font looks decent.
 
 use chui::{
     Engine, Player, Color,
@@ -25,8 +27,6 @@ fn main() {
         black,
         ParserEngine::Algebraic,
     ).unwrap();
-
-    println!("{}", engine.to_move_to_string());
 
     engine.run().expect("Failed to run engine.");
 }

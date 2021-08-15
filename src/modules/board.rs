@@ -11,7 +11,7 @@ pub enum ChessVariant {
     //Chess960,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Board {
     board: [[Option<Piece>; FILES]; RANKS],
 }
@@ -61,7 +61,11 @@ impl Board {
     // Conditionals.
     //
 
-    pub fn apply_move(&mut self, move_obj: &Move) -> ChuiResult<()> {
+    pub fn apply_move(&mut self, current_move: &Option<Move>)
+    -> ChuiResult<()>
+    {
+        let move_obj = current_move.as_ref().unwrap();
+
         if move_obj.get_piece().is_none() {
             return Err(
                 ChuiError::InvalidMove(
@@ -77,10 +81,14 @@ impl Board {
         let mut pieces_can_move = Vec::<Piece>::new();
 
         for piece in pieces.iter() {
-            if piece.get_move_coords(&self).iter().any(|&coord| {
-                coord.0 == move_obj.to_index.0 as usize &&
-                coord.1 == move_obj.to_index.1 as usize
-            })
+            if piece.get_move_coords(&self, current_move)
+                    .iter()
+                    .any(|&coord|
+                {
+                    coord.0 == move_obj.to_index.0 as usize &&
+                    coord.1 == move_obj.to_index.1 as usize
+                }
+            )
             {
                 pieces_can_move.push(*piece);
             }
@@ -103,7 +111,7 @@ impl Board {
             )
         }
         else if pieces_can_move.len() == 1 {
-            self.replace_piece(pieces_can_move[0], move_obj);
+            self.replace_piece(&mut pieces_can_move[0], &move_obj);
             Ok(())
         }
         else {
@@ -120,13 +128,15 @@ impl Board {
         }
     }
 
-    pub fn replace_piece(&mut self, piece_from: Piece, move_obj: &Move) {
+    pub fn replace_piece(&mut self, piece_from: &mut Piece, move_obj: &Move) {
         let (from_file_idx, from_rank_idx) = piece_from.get_coords();
         let (to_file_idx, to_rank_idx) = move_obj.to_index;
 
+        piece_from.set_coords(to_file_idx as usize, to_rank_idx as usize);
+
         self.board[from_rank_idx][from_file_idx] = None;
         self.board[to_rank_idx as usize][to_file_idx as usize] =
-            Some(piece_from);
+            Some(*piece_from);
     }
 
     //
@@ -194,68 +204,166 @@ impl Board {
     //
 
     /// Get a King's available move coordinates.
-    pub fn get_king_move_coords(&self, file_idx: usize, rank_idx: usize)
+    pub fn get_king_move_coords(
+        &self,
+        file_idx: usize,
+        rank_idx: usize,
+        current_move: &Option<Move>,
+    )
     -> Vec<(usize, usize)>
     {
         let mut coords = Vec::<(usize, usize)>::new();
 
-        coords.extend(self.get_top_left_coords(file_idx, rank_idx, 1));
+        coords.extend(
+            self.get_top_left_coords(file_idx, rank_idx, &mut 1, current_move)
+        );
         coords.extend(self.get_top_coords(file_idx, rank_idx, 1, false));
-        coords.extend(self.get_top_right_coords(file_idx, rank_idx, 1));
-        coords.extend(self.get_right_coords(file_idx, rank_idx, 1, false));
-        coords.extend(self.get_bottom_right_coords(file_idx, rank_idx, 1));
+        coords.extend(
+            self.get_top_right_coords(file_idx, rank_idx, &mut 1, current_move)
+        );
+        coords.extend(
+            self.get_right_coords(file_idx, rank_idx, &mut 1, false, current_move)
+        );
+        coords.extend(
+            self.get_bottom_right_coords(file_idx, rank_idx, &mut 1, current_move)
+        );
         coords.extend(self.get_bottom_coords(file_idx, rank_idx, 1, false));
-        coords.extend(self.get_bottom_left_coords(file_idx, rank_idx, 1));
-        coords.extend(self.get_left_coords(file_idx, rank_idx, 1, false));
+        coords.extend(
+            self.get_bottom_left_coords(file_idx, rank_idx, &mut 1, current_move)
+        );
+        coords.extend(
+            self.get_left_coords(
+                file_idx,
+                rank_idx,
+                &mut 1,
+                false,
+                current_move,
+            )
+        );
 
         coords
     }
 
     /// Get a Queen's available move coordinates.
-    pub fn get_queen_move_coords(&self, file_idx: usize, rank_idx: usize)
+    pub fn get_queen_move_coords(
+        &self,
+        file_idx: usize,
+        rank_idx: usize,
+        current_move: &Option<Move>,
+    )
     -> Vec<(usize, usize)>
     {
         let mut coords = Vec::<(usize, usize)>::new();
-        let max = if FILES <= RANKS { RANKS as usize } else { FILES as usize };
+        let mut max = if FILES <= RANKS { RANKS as usize }
+                      else { FILES as usize };
 
-        coords.extend(self.get_top_left_coords(file_idx, rank_idx, max));
-        coords.extend(self.get_top_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_top_right_coords(file_idx, rank_idx, max));
-        coords.extend(self.get_right_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_bottom_right_coords(file_idx, rank_idx, max));
-        coords.extend(self.get_bottom_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_bottom_left_coords(file_idx, rank_idx, max));
-        coords.extend(self.get_left_coords(file_idx, rank_idx, max, false));
+        coords.extend(
+            self.get_top_left_coords(
+                file_idx, rank_idx, &mut max, current_move
+            )
+        );
+        coords.extend(
+            self.get_top_coords(
+                file_idx, rank_idx, max, false
+            )
+        );
+        coords.extend(
+            self.get_top_right_coords(
+                file_idx, rank_idx, &mut max, current_move
+            )
+        );
+        coords.extend(
+            self.get_right_coords(
+                file_idx, rank_idx, &mut max, false, current_move
+            )
+        );
+        coords.extend(
+            self.get_bottom_right_coords(
+                file_idx, rank_idx, &mut max, current_move
+            )
+        );
+        coords.extend(
+            self.get_bottom_coords(
+                file_idx, rank_idx, max, false
+            )
+        );
+        coords.extend(
+            self.get_bottom_left_coords(
+                file_idx, rank_idx, &mut max, current_move
+            )
+        );
+        coords.extend(
+            self.get_left_coords(
+                file_idx, rank_idx, &mut max, false, current_move
+            )
+        );
 
         coords
     }
 
     /// Get a Rook's available move coordinates.
-    pub fn get_rook_move_coords(&self, file_idx: usize, rank_idx: usize)
+    pub fn get_rook_move_coords(
+        &self,
+        file_idx:
+        usize,
+        rank_idx: usize,
+        current_move: &Option<Move>,
+    )
     -> Vec<(usize, usize)>
     {
         let mut coords = Vec::<(usize, usize)>::new();
-        let max = if FILES <= RANKS { RANKS as usize } else { FILES as usize };
+        let mut max = if FILES <= RANKS { RANKS as usize }
+                      else { FILES as usize };
 
         coords.extend(self.get_top_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_right_coords(file_idx, rank_idx, max, false));
+        coords.extend(
+            self.get_right_coords(
+                file_idx,
+                rank_idx,
+                &mut max,
+                false,
+                current_move,
+            )
+        );
         coords.extend(self.get_bottom_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_left_coords(file_idx, rank_idx, max, false));
+        coords.extend(
+            self.get_left_coords(
+                file_idx,
+                rank_idx,
+                &mut max,
+                false,
+                current_move,
+            )
+        );
 
         coords
     }
 
     /// Get a Bishop's available move coordinates.
-    pub fn get_bishop_move_coords(&self, file_idx: usize, rank_idx: usize)
+    pub fn get_bishop_move_coords(
+        &self,
+        file_idx: usize,
+        rank_idx: usize,
+        current_move: &Option<Move>,
+    )
     -> Vec<(usize, usize)>
     {
         let mut coords = Vec::<(usize, usize)>::new();
-        let max = if FILES <= RANKS { RANKS as usize } else { FILES as usize };
+        let mut max = if FILES <= RANKS { RANKS as usize }
+                      else { FILES as usize };
 
-        coords.extend(self.get_top_left_coords(file_idx, rank_idx, max));
-        coords.extend(self.get_top_right_coords(file_idx, rank_idx, max));
-        coords.extend(self.get_bottom_right_coords(file_idx, rank_idx, max));
-        coords.extend(self.get_bottom_left_coords(file_idx, rank_idx, max));
+        coords.extend(
+            self.get_top_left_coords(file_idx, rank_idx, &mut max, current_move)
+        );
+        coords.extend(
+            self.get_top_right_coords(file_idx, rank_idx, &mut max, current_move)
+        );
+        coords.extend(
+            self.get_bottom_right_coords(file_idx, rank_idx, &mut max, current_move)
+        );
+        coords.extend(
+            self.get_bottom_left_coords(file_idx, rank_idx, &mut max, current_move)
+        );
 
         coords
     }
@@ -277,14 +385,14 @@ impl Board {
         }
 
         if file_idx + 1 < FILES as isize  &&
-           rank_idx - 2 > 0 &&
+           rank_idx - 2 >= 0 &&
            self.get_piece(file_idx as usize + 1, rank_idx as usize - 2)
                .is_none()
         {
             coords.push((file_idx as usize + 1, rank_idx as usize - 2));
         }
 
-        if file_idx - 1 > 0 &&
+        if file_idx > 0 &&
            rank_idx + 2 < RANKS as isize &&
            self.get_piece(file_idx as usize - 1, rank_idx as usize + 2)
                .is_none()
@@ -292,8 +400,8 @@ impl Board {
             coords.push((file_idx as usize - 1, rank_idx as usize + 2));
         }
 
-        if file_idx - 1 > 0  &&
-           rank_idx - 2 > 0 &&
+        if file_idx > 0  &&
+           rank_idx - 2 >= 0 &&
            self.get_piece(file_idx as usize - 1, rank_idx as usize - 2)
                .is_none()
         {
@@ -309,14 +417,14 @@ impl Board {
         }
 
         if file_idx + 2 < FILES as isize &&
-           rank_idx - 1 > 0 &&
+           rank_idx > 0 &&
            self.get_piece(file_idx as usize + 2, rank_idx as usize - 1)
                .is_none()
         {
             coords.push((file_idx as usize + 2, rank_idx as usize - 1));
         }
 
-        if file_idx - 2 > 0  &&
+        if file_idx - 2 >= 0  &&
            rank_idx + 1 < RANKS as isize &&
            self.get_piece(file_idx as usize - 2, rank_idx as usize + 1)
                .is_none()
@@ -324,8 +432,8 @@ impl Board {
             coords.push((file_idx as usize - 2, rank_idx as usize + 1));
         }
 
-        if file_idx - 2 > 0  &&
-           rank_idx - 1 > 0 &&
+        if file_idx - 2 >= 0  &&
+           rank_idx > 0 &&
            self.get_piece(file_idx as usize -2, rank_idx as usize - 1)
                .is_none()
         {
@@ -370,8 +478,8 @@ impl Board {
 
             // Pawn starting rank for Black.
             if rank_idx == 6 &&
-            self.get_piece(file_idx, rank_idx - 1).is_none() &&
-            self.get_piece(file_idx, rank_idx - 2).is_none()
+               self.get_piece(file_idx, rank_idx - 1).is_none() &&
+               self.get_piece(file_idx, rank_idx - 2).is_none()
             {
                 coords.push((file_idx, rank_idx - 2));
             }
@@ -405,6 +513,19 @@ impl Board {
                 coords.push((file_idx, rank_idx_counter));
             }
             else {
+                let move_coords = self.get_piece(
+                    file_idx,
+                    rank_idx_counter
+                )
+                .unwrap()
+                .get_file_rank_from_coords(
+                    &(file_idx, rank_idx_counter)
+                );
+                println!(
+                    "(Top) Breaking on {}{}",
+                    move_coords.0,
+                    move_coords.1
+                );
                 break;
             }
 
@@ -419,8 +540,9 @@ impl Board {
         &self,
         file_idx: usize,
         rank_idx: usize,
-        limit: usize,
-        ignore_pieces: bool
+        limit: &mut usize,
+        ignore_pieces: bool,
+        current_move: &Option<Move>,
     )
     -> Vec<(usize, usize)>
     {
@@ -429,13 +551,32 @@ impl Board {
         let mut limit_counter: usize = 0;
         let mut file_idx_counter = file_idx + 1;
 
-        while file_idx_counter < FILES && limit_counter < limit {
+        if let Some(move_obj) = current_move {
+            if let PieceKind::King = move_obj.piece.unwrap().get_piece() {
+                *limit = 2;
+            }
+        }
+
+        while file_idx_counter < FILES && limit_counter < *limit {
             if ignore_pieces ||
                self.get_piece(file_idx_counter, rank_idx).is_none()
             {
                 coords.push((file_idx_counter, rank_idx));
             }
             else {
+                let move_coords = self.get_piece(
+                    file_idx_counter,
+                    rank_idx
+                )
+                .unwrap()
+                .get_file_rank_from_coords(
+                    &(file_idx_counter, rank_idx)
+                );
+                println!(
+                    "(Right) Breaking on {}{}",
+                    move_coords.0,
+                    move_coords.1
+                );
                 break;
             }
 
@@ -467,6 +608,19 @@ impl Board {
                 coords.push((file_idx, rank_idx_counter as usize));
             }
             else {
+                let move_coords = self.get_piece(
+                    file_idx,
+                    rank_idx_counter as usize
+                )
+                .unwrap()
+                .get_file_rank_from_coords(
+                    &(file_idx, rank_idx_counter as usize)
+                );
+                println!(
+                    "(Bottom) Breaking on {}{}",
+                    move_coords.0,
+                    move_coords.1
+                );
                 break;
             }
 
@@ -481,8 +635,9 @@ impl Board {
         &self,
         file_idx: usize,
         rank_idx: usize,
-        limit: usize,
-        ignore_pieces: bool
+        limit: &mut usize,
+        ignore_pieces: bool,
+        current_move: &Option<Move>,
     )
     -> Vec<(usize, usize)>
     {
@@ -491,13 +646,33 @@ impl Board {
         let mut limit_counter: usize = 0;
         let mut file_idx_counter = file_idx as isize - 1;
 
-        while file_idx_counter >= 0 && limit_counter < limit {
+        if let Some(move_obj) = current_move {
+            if let PieceKind::King = move_obj.get_piece().unwrap().get_piece()
+            {
+                *limit = 2;
+            }
+        }
+
+        while file_idx_counter >= 0 && limit_counter < *limit {
             if ignore_pieces ||
                self.get_piece(file_idx_counter as usize, rank_idx).is_none()
             {
                 coords.push((file_idx_counter as usize, rank_idx));
             }
             else {
+                let move_coords = self.get_piece(
+                    file_idx_counter as usize,
+                    rank_idx
+                )
+                .unwrap()
+                .get_file_rank_from_coords(
+                    &(file_idx_counter as usize, rank_idx)
+                );
+                println!(
+                    "(Left) Breaking on {}{}",
+                    move_coords.0,
+                    move_coords.1
+                );
                 break;
             }
 
@@ -512,14 +687,15 @@ impl Board {
         &self,
         file_idx: usize,
         rank_idx: usize,
-        limit: usize
+        limit: &mut usize,
+        current_move: &Option<Move>,
     )
     -> Vec<(usize, usize)>
     {
         Board::zip_top_left_coords(
             self,
-            self.get_top_coords(file_idx, rank_idx, limit, true),
-            self.get_left_coords(file_idx, rank_idx, limit, true)
+            self.get_top_coords(file_idx, rank_idx, *limit, true),
+            self.get_left_coords(file_idx, rank_idx, limit, true, current_move)
         )
     }
 
@@ -527,14 +703,15 @@ impl Board {
         &self,
         file_idx: usize,
         rank_idx: usize,
-        limit: usize
+        limit: &mut usize,
+        current_move: &Option<Move>,
     )
     -> Vec<(usize, usize)>
     {
         Board::zip_top_right_coords(
             self,
-            self.get_top_coords(file_idx, rank_idx, limit, true),
-            self.get_right_coords(file_idx, rank_idx, limit, true)
+            self.get_top_coords(file_idx, rank_idx, *limit, true),
+            self.get_right_coords(file_idx, rank_idx, limit, true, current_move)
         )
     }
 
@@ -542,14 +719,15 @@ impl Board {
         &self,
         file_idx: usize,
         rank_idx: usize,
-        limit: usize
+        limit: &mut usize,
+        current_move: &Option<Move>,
     )
     -> Vec<(usize, usize)>
     {
         Board::zip_bottom_right_coords(
             self,
-            self.get_bottom_coords(file_idx, rank_idx, limit, true),
-            self.get_right_coords(file_idx, rank_idx, limit, true)
+            self.get_bottom_coords(file_idx, rank_idx, *limit, true),
+            self.get_right_coords(file_idx, rank_idx, limit, true, current_move)
         )
     }
 
@@ -557,14 +735,15 @@ impl Board {
         &self,
         file_idx: usize,
         rank_idx: usize,
-        limit: usize
+        limit: &mut usize,
+        current_move: &Option<Move>,
     )
     -> Vec<(usize, usize)>
     {
         Board::zip_bottom_left_coords(
             self,
-            self.get_bottom_coords(file_idx, rank_idx, limit, true),
-            self.get_left_coords(file_idx, rank_idx, limit, true)
+            self.get_bottom_coords(file_idx, rank_idx, *limit, true),
+            self.get_left_coords(file_idx, rank_idx, limit, true, current_move)
         )
     }
 
@@ -597,8 +776,11 @@ impl Board {
         let mut coords = Vec::<(usize, usize)>::new();
 
         for ((_, rank), (file, _)) in top_coords.iter().zip(left_coords) {
-            if self.get_piece(file, *rank).is_some() {
-                println!("Breaking on {}{}", file, rank);
+            if let Some(piece) = self.get_piece(file, *rank) {
+                let move_coords = piece.get_file_rank_from_coords(
+                    &(file, *rank)
+                );
+                println!("(Top Left) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
 
@@ -618,8 +800,11 @@ impl Board {
         let mut coords = Vec::<(usize, usize)>::new();
 
         for ((_, rank), (file, _)) in top_coords.iter().zip(right_coords) {
-            if self.get_piece(file, *rank).is_some() {
-                println!("Breaking on {}{}", file, rank);
+            if let Some(piece) = self.get_piece(file, *rank) {
+                let move_coords = piece.get_file_rank_from_coords(
+                    &(file, *rank)
+                );
+                println!("(Top Right) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
 
@@ -641,8 +826,11 @@ impl Board {
         for ((_, rank), (file, _)) in bottom_coords.iter()
                                                    .zip(right_coords)
         {
-            if self.get_piece(file, *rank).is_some() {
-                println!("Breaking on {}{}", file, rank);
+            if let Some(piece) = self.get_piece(file, *rank) {
+                let move_coords = piece.get_file_rank_from_coords(
+                    &(file, *rank)
+                );
+                println!("(Bottom Right) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
 
@@ -665,8 +853,15 @@ impl Board {
                                           .iter()
                                           .zip(left_coords)
         {
-            if self.get_piece(file, *rank).is_some() {
-                println!("Breaking on {}{}", file, rank);
+            if let Some(piece) = self.get_piece(file, *rank) {
+                let move_coords = piece.get_file_rank_from_coords(
+                    &(file, *rank)
+                );
+                println!(
+                    "(Bottom Left) Breaking on {}{}",
+                    move_coords.0,
+                    move_coords.1
+                );
                 break;
             }
 
@@ -674,5 +869,20 @@ impl Board {
         }
 
         coords
+    }
+    
+    /// Test function to display the board colors by a straight
+    /// index from `0..64` range.
+    /// 
+    /// Thanks to Kromey (https://github.com/Kromey).
+    pub fn display_board_colors_by_index() {
+        for idx in 0..64 {
+            let color_id = ((idx / 8) % 2 + idx % 2) % 2;
+            print!("{}  ", color_id);
+
+            if (idx + 1) % 8 == 0 {
+                println!();
+            }
+        }
     }
 }

@@ -117,6 +117,12 @@ impl Default for Move {
     }
 }
 
+impl fmt::Display for Move {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.input_move)
+    }
+}
+
 impl Move {
     /// Return a new default `Move`.
     pub fn new() -> Move {

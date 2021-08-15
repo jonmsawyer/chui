@@ -3,16 +3,29 @@
 use std::fmt;
 use std::convert::TryFrom;
 
-use colored::Colorize;
+use colored::{Colorize, ColoredString};
 
 use crate::{ChuiResult, ChuiError};
-use super::Board;
+use super::{Board, Move};
 
 /// Piece color. Either `White` or `Black` variants.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Color {
     White,
     Black,
+}
+
+impl fmt::Display for Color {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Color::White => {
+                write!(f, "{}", "♔".yellow().bold())
+            },
+            Color::Black => {
+                write!(f, "{}", "♚".magenta().bold())
+            }
+        }
+    }
 }
 
 /// Piece kind. One of `King`, `Queen`, `Rook`, `Knight`,
@@ -111,27 +124,47 @@ impl Piece {
     }
 
     /// Get move coords for piece.
-    pub fn get_move_coords(&self, board: &Board) -> Vec<(usize, usize)> {
+    pub fn get_move_coords(&self, board: &Board, current_move: &Option<Move>)
+    -> Vec<(usize, usize)>
+    {
         let (file_idx, rank_idx) = self.coords;
-        println!("Self.coords = {:?}", self.coords);
+        let move_coord = self.get_file_rank_from_coords(&self.coords);
+
+        println!("Found {} at {}{}", self, move_coord.0, move_coord.1);
 
         let move_coords;
 
         match self.piece {
             PieceKind::King => {
-                move_coords = board.get_king_move_coords(file_idx, rank_idx);
+                move_coords = board.get_king_move_coords(
+                    file_idx,
+                    rank_idx,
+                    current_move,
+                );
             },
 
             PieceKind::Queen => {
-                move_coords = board.get_queen_move_coords(file_idx, rank_idx);
+                move_coords = board.get_queen_move_coords(
+                    file_idx,
+                    rank_idx,
+                    current_move,
+                );
             },
 
             PieceKind::Rook => {
-                move_coords = board.get_rook_move_coords(file_idx, rank_idx);
+                move_coords = board.get_rook_move_coords(
+                    file_idx,
+                    rank_idx,
+                    current_move,
+                );
             },
 
             PieceKind::Bishop => {
-                move_coords = board.get_bishop_move_coords(file_idx, rank_idx);
+                move_coords = board.get_bishop_move_coords(
+                    file_idx,
+                    rank_idx,
+                    current_move,
+                );
             },
 
             PieceKind::Knight => {
@@ -147,8 +180,64 @@ impl Piece {
             },
         }
 
-        println!("Move coords: {:?}", move_coords);
+        print!(" > Move coords: ");
+        for move_coord in move_coords.iter() {
+            let move_coord = self.get_file_rank_from_coords(&move_coord);
+            print!("{}{}, ", move_coord.0, move_coord.1)
+        }
+        println!();
+
         move_coords
+    }
+
+    pub fn get_file_rank_from_coords(self, move_coord: &(usize, usize))
+    -> (char, usize)
+    {
+        let alpha_coords: Vec<char> = ('a'..='h').collect();
+        let (file_idx, rank_idx) = move_coord;
+
+        (alpha_coords[*file_idx], rank_idx + 1)
+    }
+
+    pub fn repr(&self) -> (ColoredString, ColoredString) {
+        match (self.piece, self.color) {
+            (PieceKind::King, Color::White) => {
+                ("K".yellow().bold(), "♔".yellow().bold())
+            },
+            (PieceKind::Queen, Color::White) => {
+                ("Q".yellow().bold(), "♕".yellow().bold())
+            },
+            (PieceKind::Rook, Color::White) => {
+                ("R".yellow().bold(), "♖".yellow().bold())
+            },
+            (PieceKind::Bishop, Color::White) => {
+                ("B".yellow().bold(), "♗".yellow().bold())
+            },
+            (PieceKind::Knight, Color::White) => {
+                ("N".yellow().bold(), "♘".yellow().bold())
+            },
+            (PieceKind::Pawn, Color::White) => {
+                ("P".yellow().bold(), "♙".yellow().bold())
+            },
+            (PieceKind::King, Color::Black) => {
+                ("k".magenta().bold(), "♚".magenta().bold())
+            },
+            (PieceKind::Queen, Color::Black) => {
+                ("q".magenta().bold(), "♛".magenta().bold())
+            },
+            (PieceKind::Rook, Color::Black) => {
+                ("r".magenta().bold(), "♜".magenta().bold())
+            },
+            (PieceKind::Bishop, Color::Black) => {
+                ("b".magenta().bold(), "♝".magenta().bold())
+            },
+            (PieceKind::Knight, Color::Black) => {
+                ("n".magenta().bold(), "♞".magenta().bold())
+            },
+            (PieceKind::Pawn, Color::Black) => {
+                ("p".magenta().bold(), "♟".magenta().bold())
+            },
+        }
     }
 }
 
@@ -159,59 +248,8 @@ impl Piece {
 /// TODO: Make representation configurable.
 impl fmt::Display for Piece {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // ♔  U+2654  White Chess King
-        // ♕  U+2655  White Chess Queen
-        // ♖  U+2656  White Chess Rook
-        // ♗  U+2657  White Chess Bishop
-        // ♘  U+2658  White Chess Knight
-        // ♙  U+2659  White Chess Pawn
-        // ♚  U+265A  Black Chess King
-        // ♛  U+265B  Black Chess Queen
-        // ♜  U+265C  Black Chess Rook
-        // ♝  U+265D  Black Chess Bishop
-        // ♞  U+265E  Black Chess Knight
-        // ♟  U+265F  Black Chess Pawn
-        match self {
-            Piece { piece: PieceKind::King, color: Color::White, .. } => {
-                write!(f, "{}", "♔".yellow().bold())
-            },
-            Piece { piece: PieceKind::Queen, color: Color::White, .. } => {
-                write!(f, "{}", "♕".yellow().bold())
-            },
-            Piece { piece: PieceKind::Rook, color: Color::White, .. } => {
-                write!(f, "{}", "♖".yellow().bold())
-            },
-            Piece { piece: PieceKind::Bishop, color: Color::White, .. } => {
-                write!(f, "{}", "♗".yellow().bold())
-            },
-            Piece { piece: PieceKind::Knight, color: Color::White, .. } => {
-                write!(f, "{}", "♘".yellow().bold())
-            },
-            Piece { piece: PieceKind::Pawn, color: Color::White, .. } => {
-                write!(f, "{}", "♙".yellow().bold())
-                //write!(f, "{}", "▲".yellow().bold())
-            },
-            Piece { piece: PieceKind::King, color: Color::Black, .. } => {
-                write!(f, "{}", "♚".magenta().bold())
-            },
-            Piece { piece: PieceKind::Queen, color: Color::Black, .. } => {
-                write!(f, "{}", "♛".magenta().bold())
-            },
-            Piece { piece: PieceKind::Rook, color: Color::Black, .. } => {
-                write!(f, "{}", "♜".magenta().bold())
-            },
-            Piece { piece: PieceKind::Bishop, color: Color::Black, .. } => {
-                write!(f, "{}", "♝".magenta().bold())
-            },
-            Piece { piece: PieceKind::Knight, color: Color::Black, .. } => {
-                write!(f, "{}", "♞".magenta().bold())
-            },
-            Piece { piece: PieceKind::Pawn, color: Color::Black, .. } => {
-                write!(f, "{}", "♟".magenta().bold())
-                //write!(f, "{}", "▲".magenta().bold())
-            },
-        }
-   }
+        write!(f, "{}", self.repr().1)
+    }
 }
 
 /// Returns a `Piece` given a `&str` if `&str` is one of \[PKQRBNpkqrbn\].
@@ -220,19 +258,18 @@ impl TryFrom<&str> for Piece {
 
     fn try_from(piece: &str) -> ChuiResult<Piece> {
         match piece {
-            "K" => Ok(Piece::new(PieceKind::King, Color::White)),
-            "Q" => Ok(Piece::new(PieceKind::Queen, Color::White)),
-            "R" => Ok(Piece::new(PieceKind::Rook, Color::White)),
-            "B" => Ok(Piece::new(PieceKind::Bishop, Color::White)),
-            "N" => Ok(Piece::new(PieceKind::Knight, Color::White)),
-            "P" => Ok(Piece::new(PieceKind::Pawn, Color::White)),
-
-            "k" => Ok(Piece::new(PieceKind::King, Color::Black)),
-            "q" => Ok(Piece::new(PieceKind::Queen, Color::Black)),
-            "r" => Ok(Piece::new(PieceKind::Rook, Color::Black)),
-            "b" => Ok(Piece::new(PieceKind::Bishop, Color::Black)),
-            "n" => Ok(Piece::new(PieceKind::Knight, Color::Black)),
-            "p" => Ok(Piece::new(PieceKind::Pawn, Color::Black)),
+            "K" | "♔" => Ok(Piece::new(PieceKind::King, Color::White)),
+            "Q" | "♕" => Ok(Piece::new(PieceKind::Queen, Color::White)),
+            "R" | "♖" => Ok(Piece::new(PieceKind::Rook, Color::White)),
+            "B" | "♗" => Ok(Piece::new(PieceKind::Bishop, Color::White)),
+            "N" | "♘" => Ok(Piece::new(PieceKind::Knight, Color::White)),
+            "P" | "♙" => Ok(Piece::new(PieceKind::Pawn, Color::White)),
+            "k" | "♚" => Ok(Piece::new(PieceKind::King, Color::Black)),
+            "q" | "♛" => Ok(Piece::new(PieceKind::Queen, Color::Black)),
+            "r" | "♜" => Ok(Piece::new(PieceKind::Rook, Color::Black)),
+            "b" | "♝" => Ok(Piece::new(PieceKind::Bishop, Color::Black)),
+            "n" | "♞" => Ok(Piece::new(PieceKind::Knight, Color::Black)),
+            "p" | "♟" => Ok(Piece::new(PieceKind::Pawn, Color::Black)),
 
             _ => Err(
                 ChuiError::InvalidPiece(

@@ -13,6 +13,39 @@ use super::parser::{self, Parser, ParserEngine};
 use super::{Command, CommandContext, CommandKind};
 use super::Fen;
 
+mod commands;
+mod fen;
+
+/// The win condition.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum WinCondition {
+    Checkmate,
+    WhiteResigns,
+    BlackResigns,
+}
+
+/// The draw condition.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum DrawCondition {
+    /// Both players agree to a draw.
+    AgreeToDraw,
+
+    /// The one to move cannot make any valid moves.
+    Stalemate,
+
+    /// The board's position has repeated itself three times.
+    ThriceRepitition,
+
+    /// 50 moves have been made with no piece capture or pawn move.
+    FiftyMoveRule,
+
+    /// Both players have insufficient material to check mate.
+    InsufficientMaterial,
+
+    /// Both players agree to that there will be perpetual check.
+    PerpetualCheck,
+}
+
 /// Represents the engine of the chess game. Moves will be input
 /// and output from this object. `Engine` captures and changes
 /// the state of the current initialized chess game.
@@ -70,6 +103,15 @@ pub struct Engine<'a> {
     /// Can black castle on the queen side?
     pub black_can_castle_queenside: bool,
 
+    /// Does White win?
+    pub white_wins: bool,
+
+    /// Does Black win?
+    pub black_wins: bool,
+
+    /// Is the game a draw?
+    pub is_draw: bool,
+
     /// The "ply", or number of half-moves, recorded in this game.
     pub half_move_counter: usize,
 
@@ -98,6 +140,16 @@ pub struct Engine<'a> {
     /// will do. Access the move list via
     /// `self.move_generator.move_list` (which is a `Vec<String>`).
     pub move_generator: MoveGenerator<'a>,
+
+    pub move_list: Vec<Move>,
+
+    pub current_move: Option<Move>,
+
+    pub win_condition: Option<WinCondition>,
+
+    pub draw_condition: Option<DrawCondition>,
+
+    pub display_for: Option<Color>,
 }
 
 /// Formats the position for white.
@@ -143,6 +195,9 @@ impl Engine<'static> {
                 white_can_castle_queenside: true,
                 black_can_castle_kingside: true,
                 black_can_castle_queenside: true,
+                white_wins: false,
+                black_wins: false,
+                is_draw: false,
                 half_move_counter: 0,
                 half_move_clock: 0,
                 move_counter: 1,
@@ -150,6 +205,11 @@ impl Engine<'static> {
                 true_enpassant_target_square: ('-', 9),
                 move_generator: MoveGenerator::generate_move_list(),
                 parser: parser::new(parser_engine),
+                move_list: Vec::<Move>::new(),
+                current_move: None,
+                win_condition: None,
+                draw_condition: None,
+                display_for: None,
             }
         )
     }
@@ -158,71 +218,196 @@ impl Engine<'static> {
     pub fn run(&mut self) -> ChuiResult<()> {
         let mut command = Command::new(&self);
         let context = CommandContext::Main;
+        let mut break_loop = false;
+        let mut display_board = true;
 
         loop {
+            if display_board {
+                println!("{}", self.to_move_to_string());
+            }
+            else {
+                display_board = true;
+            }
             println!();
-            println!("Please input move or command. (q to quit, h for help)");
+            println!(
+                "Please input move(s) or command. (q to quit, h for help)"
+            );
 
             let the_move = Engine::get_input();
-            
-            match command.process_command(context, &the_move) {
-                Some(CommandKind::Quit) => break,
 
-                Some(CommandKind::Help) => {
-                    command.display_help(context);
-                    continue;
-                },
+            for the_move in the_move.split_whitespace() {
+                match command.process_command(context, &the_move) {
+                    Some(CommandKind::Quit) => {
+                        break_loop = true;
+                    },
 
-                Some(CommandKind::SwitchParser) => {
-                    self.switch_parser(&command);
-                    command.set_commands(&self);
-                    continue;
-                },
+                    Some(CommandKind::Help) => {
+                        command.display_help(context);
+                        display_board = false;
+                        continue;
+                    },
 
-                Some(CommandKind::DisplayToMove) => {
-                    println!();
-                    println!("{}", self.to_move_to_string());
-                    continue;
-                },
+                    Some(CommandKind::SwitchParser) => {
+                        self.switch_parser(&command);
+                        command.rebuild_commands(&self);
+                        continue;
+                    },
 
-                Some(CommandKind::DisplayForWhite) => {
-                    println!();
-                    println!("{}", self.white_to_string());
-                    continue;
-                },
+                    Some(CommandKind::DisplayToMove) => {
+                        println!();
+                        println!("{}", self.to_move_to_string());
+                        display_board = false;
+                        continue;
+                    },
 
-                Some(CommandKind::DisplayForBlack) => {
-                    println!();
-                    println!("{}", self.black_to_string());
-                    continue;
-                },
+                    Some(CommandKind::DisplayForWhite) => {
+                        println!();
+                        println!("{}", self.white_to_string());
+                        display_board = false;
+                        continue;
+                    },
 
-                Some(CommandKind::DisplayFEN) => {
-                    println!();
-                    println!("{}", self.get_fen());
-                    continue;
-                }
+                    Some(CommandKind::DisplayForBlack) => {
+                        println!();
+                        println!("{}", self.black_to_string());
+                        display_board = false;
+                        continue;
+                    },
 
-                _ => {
-                    println!();
-                    println!("Input move: {}", the_move);
-            
-                    match self.parse(&the_move, self.to_move) {
-                        Ok(move_obj) => {
-                            println!("Ok! The move: {:?}", move_obj);
-                            if self.apply_move(&move_obj).is_ok() {
-                                println!("{}", move_obj.get_move_text());
-                                println!();
-                                println!("{}", self.to_move_to_string())
+                    Some(CommandKind::DisplayFEN) => {
+                        println!();
+                        println!("{}", self.get_fen());
+                        display_board = false;
+                        continue;
+                    },
+
+                    Some(CommandKind::WhiteResigns) => {
+                        println!();
+                        println!("White resigns.");
+                        self.win_condition = Some(
+                            WinCondition::WhiteResigns
+                        );
+                        self.draw_condition = None;
+                        continue;
+                    },
+
+                    Some(CommandKind::BlackResigns) => {
+                        println!();
+                        println!("Black resigns.");
+                        self.win_condition = Some(
+                            WinCondition::BlackResigns
+                        );
+                        self.draw_condition = None;
+                        continue;
+                    },
+
+                    Some(CommandKind::DisplayForWhiteEachMove) => {
+                        println!();
+                        println!("Display for White after each move.");
+                        self.display_for = Some(Color::White);
+                        continue;
+                    },
+
+                    Some(CommandKind::DisplayForBlackEachMove) => {
+                        println!();
+                        println!("Display for Black after each move.");
+                        self.display_for = Some(Color::Black);
+                        continue;
+                    },
+
+                    Some(CommandKind::DisplayMoveList) => {
+                        let mut output = String::new();
+
+                        println!();
+
+                        for (move_idx, move_str) in self.move_list.iter()
+                                                                  .enumerate()
+                        {
+                            let mut numeral = String::new();
+
+                            if move_idx % 2 == 0 {
+                                numeral = format!(
+                                    "\n{}. ",
+                                    (move_idx + 2) / 2
+                                );
                             }
-                            else {
-                                println!("Move not applied.")
-                            }
-                        },
 
-                        Err(error) => println!("{}", error),
+                            output = format!(
+                                "{}{}{} ",
+                                output,
+                                numeral,
+                                move_str
+                            );
+                        }
+
+                        if self.move_list.is_empty() {
+                            output = "No moves have been made.".to_string();
+                        }
+
+                        display_board = false;
+
+                        println!("Move List Notation:\n{}", output.trim());
                     }
-                },
+
+                    _ => {
+                        println!();
+                        println!("Input move or command: {}", the_move);
+
+                        // Ignore any moves or commands with a '.' in it.
+                        // Eg., "1."
+                        if the_move.contains('.') {
+                            continue;
+                        }
+
+                        if the_move.eq("1-0") {
+                            self.win_condition = Some(
+                                WinCondition::BlackResigns
+                            );
+                            self.draw_condition = None;
+                        } else if the_move.eq("0-1") {
+                            self.win_condition = Some(
+                                WinCondition::WhiteResigns
+                            );
+                            self.draw_condition = None;
+                        }
+                        else if the_move.eq("1/2-1/2") ||
+                                the_move.eq("½-½")
+                        {
+                            self.win_condition = None;
+                            self.draw_condition = None; // ?
+                        }
+
+                        match self.parse(&the_move, self.to_move).as_ref() {
+                            Ok(move_obj) => {
+                                println!("Ok! The move: {:?}", move_obj);
+                                self.current_move = Some(move_obj.clone());
+                                if self.apply_move()
+                                       .is_ok()
+                                {
+                                    println!("{}", move_obj.get_move_text());
+                                    println!();
+
+                                    self.move_list.push(move_obj.clone());
+
+                                    self.half_move_counter += 1;
+                                    if self.half_move_counter % 2 == 0 {
+                                        self.move_counter += 1;
+                                    }
+                                }
+                                else {
+                                    println!("Move not applied.");
+                                    break;
+                                }
+                            },
+
+                            Err(error) => println!("{}", error),
+                        }
+                    },
+                }
+            }
+
+            if break_loop {
+                break;
             }
         }
 
@@ -231,86 +416,7 @@ impl Engine<'static> {
 
     /// Switch the current move parser based on a `CommandKind`.
     pub fn switch_parser(&mut self, command: &Command) {
-        let context = CommandContext::SwitchParser;
-
-        loop {
-            println!();
-            println!("Current parser: {}", self.parser.name());
-            command.display_help(context);
-            println!();
-            println!("Select option. (1-8, b to go back, h for help)");
-    
-            let input = Engine::get_input();
-
-            match command.process_command(context, &input) {
-                Some(CommandKind::SwitchToAlgebraicParser) =>{
-                    let parser_engine = ParserEngine::Algebraic;
-                    println!("Switching parser to {:?}.", parser_engine);
-                    self.set_parser(parser_engine);
-                    break;
-                },
-
-                Some(CommandKind::SwitchToConciseReversibleParser) => {
-                    let parser_engine = ParserEngine::ConciseReversible;
-                    println!("Switching parser to {:?}.", parser_engine);
-                    self.set_parser(parser_engine);
-                    break;
-                },
-    
-                Some(CommandKind::SwitchToCoordinateParser) => {
-                    let parser_engine = ParserEngine::Coordinate;
-                    println!("Switching parser to {:?}.", parser_engine);
-                    self.set_parser(parser_engine);
-                    break;
-                },
-    
-                Some(CommandKind::SwitchToDescriptiveParser) => {
-                    let parser_engine = ParserEngine::Descriptive;
-                    println!("Switching parser to {:?}.", parser_engine);
-                    self.set_parser(parser_engine);
-                    break;
-                },
-    
-                Some(CommandKind::SwitchToICCFParser) => {
-                    let parser_engine = ParserEngine::ICCF;
-                    println!("Switching parser to {:?}.", parser_engine);
-                    self.set_parser(parser_engine);
-                    break;
-                },
-    
-                Some(CommandKind::SwitchToLongAlgebraicParser) => {
-                    let parser_engine = ParserEngine::LongAlgebraic;
-                    println!("Switching parser to {:?}.", parser_engine);
-                    self.set_parser(parser_engine);
-                    break;
-                },
-    
-                Some(CommandKind::SwitchToReversibleAlgebraicParser) => {
-                    let parser_engine = ParserEngine::ReversibleAlgebraic;
-                    println!("Switching parser to {:?}.", parser_engine);
-                    self.set_parser(parser_engine);
-                    break;
-                },
-    
-                Some(CommandKind::SwitchToSmithParser) => {
-                    let parser_engine = ParserEngine::Smith;
-                    println!("Switching parser to {:?}.", parser_engine);
-                    self.set_parser(parser_engine);
-                    break;
-                },
-
-                Some(CommandKind::Help) => {
-                    continue;
-                },
-
-                Some(CommandKind::Back) => {
-                    println!("Not switching parser.");
-                    break;
-                }
-    
-                _ => println!("Invalid option.")
-            }
-        }
+        commands::switch_parser(self, command)
     }
     
     /// Parse the move. Returns am Ok(Move) is the parsing of the
@@ -339,92 +445,37 @@ impl Engine<'static> {
 
     /// Get the FEN to move character.
     pub fn get_fen_to_move(&self) -> String {
-        match self.to_move {
-            Color::White => "w".to_string(),
-            Color::Black => "b".to_string(),
-        }
+        fen::get_fen_to_move(self)
     }
 
     /// Get the FEN for castle characters.
     pub fn get_fen_castle(&self) -> String {
-        let mut castle = String::new();
-
-        if self.white_can_castle_kingside {
-            castle = format!("{}{}", castle, "K");
-        }
-
-        if self.white_can_castle_queenside {
-            castle = format!("{}{}", castle, "Q");
-        }
-
-        if self.black_can_castle_kingside {
-            castle = format!("{}{}", castle, "k");
-        }
-
-        if self.black_can_castle_queenside {
-            castle = format!("{}{}", castle, "q");
-        }
-
-        castle
+        fen::get_fen_castle(self)
     }
 
     /// Get the FEN en passant square.
     pub fn get_fen_en_passant(&self) -> String {
-        let (file, rank) = self.enpassant_target_square;
-
-        if file == '-' || rank == 9 {
-            "-".to_string()
-        }
-        else {
-            format!("{}{}", file, rank)
-        }
+        fen::get_fen_en_passant(self)
     }
 
     /// Get the X-FEN en passant square.
     pub fn get_x_fen_en_passant(&self) -> String {
-        let (file, rank) = self.true_enpassant_target_square;
-
-        if file == '-' || rank == 9 {
-            "-".to_string()
-        }
-        else {
-            format!("{}{}", file, rank)
-        }
+        fen::get_x_fen_en_passant(self)
     }
 
     /// Get the FEN half-move clock.
     pub fn get_fen_half_move_clock(&self) -> String {
-        self.half_move_clock.to_string()
+        fen::get_fen_half_move_clock(self)
     }
 
     /// Get the FEN full-move counter.
     pub fn get_fen_full_move_counter(&self) -> String {
-        self.move_counter.to_string()
-    }
-
-    /// Test function to display the board colors by a straight
-    /// index from `0..64` range.
-    /// 
-    /// Thanks to Kromey (https://github.com/Kromey).
-    pub fn display_board_colors_by_index() {
-        for idx in 0..64 {
-            let color_id = ((idx / 8) % 2 + idx % 2) % 2;
-            print!("{}  ", color_id);
-
-            if (idx + 1) % 8 == 0 {
-                println!();
-            }
-        }
+        fen::get_fen_full_move_counter(self)
     }
 
     /// Display the FEN layout of the board.
     pub fn get_fen(&self) -> String {
-        format!(
-            "FEN: {}\nX-FEN: {}\nShredder-FEN: {}",
-            Fen::get_fen(&self),
-            Fen::get_x_fen(&self),
-            Fen::get_shredder_fen(&self),
-        )
+        fen::get_fen(self)
     }
 
     /// Return the display headers for white as a `String`.
@@ -463,24 +514,40 @@ impl Engine<'static> {
 
         let to_move = format!("{:?} to move.", self.to_move);
 
-        let mut output = String::new();
-
-        for i in row_vec.iter() {
-            output = format!("{}{} |", output, numeric_coords[*i as usize]);
-            for j in col_vec.iter() {
-                output = match &self.board.get_piece(*j as usize, *i as usize) {
-                    Some(piece) => format!("{} {} ", output, piece),
-                    None => format!("{} · ", output),
-                };
-            }
-            output = format!("{}\n", output.trim());
-        }
-
-        output = format!("{}  +-----------------------\n   ", output);
+        let mut output = "╔═════════════════════════╗\n║    ".to_string();
 
         for coord in alpha_coords.iter() {
-            output = format!("{} {} ", output, *coord);
+            output = format!("{} {}", output, *coord);
         }
+
+        output = format!("{}     ║\n║   ┌─────────────────┐   ║\n", output);
+
+        for i in row_vec.iter() {
+            output = format!("{}║ {} │", output, numeric_coords[*i as usize]);
+            for j in col_vec.iter() {
+                output = match &self.board.get_piece(*j as usize, *i as usize) {
+                    Some(piece) => format!("{} {}", output, piece),
+                    None => format!("{} ·", output),
+                };
+            }
+            output = format!(
+                "{} │ {} ║\n",
+                output.trim(),
+                numeric_coords[*i as usize]
+            );
+        }
+
+        output = format!("{}║   └─────────────────┘   ║\n║    ", output);
+
+        for coord in alpha_coords.iter() {
+            output = format!("{} {}", output, *coord);
+        }
+
+        output = format!(
+            "{} {}",
+            output,
+            format!("  {} ║\n╚═════════════════════════╝", self.to_move)
+        );
 
         let output = output.trim();
 
@@ -507,7 +574,10 @@ impl Engine<'static> {
 
     /// Display the chessboard for whomever's turn it is.
     pub fn to_move_to_string(&self) -> String {
-        if self.to_move == Color::White {
+        if let Some(display_for) = self.display_for {
+            self.to_string(display_for)
+        }
+        else if self.to_move == Color::White {
             self.to_string(Color::White)
         }
         else {
@@ -516,8 +586,8 @@ impl Engine<'static> {
     }
 
     /// Apply the move.
-    pub fn apply_move(&mut self, move_obj: &Move) -> ChuiResult<()> {
-        let apply = self.board.apply_move(move_obj);
+    pub fn apply_move(&mut self) -> ChuiResult<()> {
+        let apply = self.board.apply_move(&self.current_move);
 
         if apply.is_ok() {
             self.toggle_to_move();

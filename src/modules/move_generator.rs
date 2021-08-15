@@ -23,7 +23,7 @@ use std::collections::HashSet;
 /// 
 /// println!("{:?}", g.move_list);
 /// ```
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Clone)]
 pub struct MoveGenerator<'a> {
     /// The 8 files (e.g., `a`, `b`, `c`, `d`, `e`, `f`, `g`, `h`).
     pub files: [&'a str; 8],

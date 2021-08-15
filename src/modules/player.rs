@@ -23,7 +23,7 @@ use super::piece::Color;
 ///     None,
 /// );
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Player {
     /// The piece color of the player. One of `Color::White`
     /// or `Color::Black`.
