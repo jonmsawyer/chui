@@ -11,7 +11,7 @@ use super::chess_move::Move;
 use super::MoveGenerator;
 use super::parser::{self, Parser, ParserEngine};
 use super::{Command, CommandContext, CommandKind};
-use super::Fen;
+//use super::Fen;
 
 mod commands;
 mod fen;

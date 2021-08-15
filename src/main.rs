@@ -22,11 +22,8 @@ fn main() {
         Some(1500),
     );
     
-    let mut engine = Engine::new(
-        white,
-        black,
-        ParserEngine::Algebraic,
-    ).unwrap();
-
-    engine.run().expect("Failed to run engine.");
+    Engine::new(white, black, ParserEngine::Algebraic)
+        .expect("Failed to initialize engine")
+        .run()
+        .expect("Failed to run engine");
 }
