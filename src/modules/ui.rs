@@ -1,33 +1,19 @@
 //! The User Interface
 
 use bevy::{prelude::*, window::PresentMode};
-use bevy_asset_loader::prelude::*;
-use bevy_egui::{egui, EguiContext, EguiPlugin, EguiSettings};
+use bevy_egui::EguiPlugin;
 //use bevy_editor_pls::prelude::*; // Wait til this is in crates.io
 use bevy_inspector_egui::WorldInspectorPlugin;
 
-pub mod layout_jobs;
-
-pub mod top_menu;
-use top_menu::top_menu;
-
-pub mod assets;
+pub mod plugins;
 
 pub struct Ui;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-#[derive(Default)]
-struct UiState {
-    _label: String,
-    _value: f32,
-    _egui_texture_handle: Option<egui::TextureHandle>,
-    is_window_open: bool,
-    scale_factor: f64,
-}
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
-enum GameState {
+pub enum GameState {
     AssetLoading,
     Next,
 }
@@ -46,25 +32,12 @@ impl Ui {
                 ..default()
             })
 
-            // Add the GameState states to the the loading state.
-            .add_loading_state(
-                LoadingState::new(GameState::AssetLoading)
-                    .continue_to_state(GameState::Next)
-                    .with_collection::<assets::SpriteCollection>()
-            )
-
             //Start off with the default loading state (AssetLoading) and then
             // once the AssetLoading is finished, moved onto the Next state.
             .add_state(GameState::AssetLoading)
 
-            // Color used to clear the buffer between frames. It's a "background" for unrendered content
-            .insert_resource(ClearColor(Color::BLACK))
-
             // Set multi-sample anti-aliasing (WGPU only supports 1 or 4)
             .insert_resource(Msaa { samples: 4 })
-
-            // The UI state
-            .init_resource::<UiState>()
 
             // Default Bevy
             .add_plugins(DefaultPlugins)
@@ -78,192 +51,11 @@ impl Ui {
             // bevy-inspector-egui Plugin
             .add_plugin(WorldInspectorPlugin::new())
 
-            // Systems that create Egui widgets should be run during the `CoreStage::Update` stage,
-            // or after the `EguiSystem::BeginFrame` system (which belongs to the `CoreStage::PreUpdate` stage).
-            .add_startup_system(Self::configure_visuals)
-            .add_startup_system(Self::configure_ui_state)
-            .add_system(Self::update_ui_scale_factor)
-            .add_system(Self::main_ui)
-            .add_system_set(
-                SystemSet::on_enter(GameState::Next)
-                    .with_system(Self::use_my_assets)
-            )
+            // Chui's plugins
+            .add_plugin(plugins::UiStatePlugin)
+            .add_plugin(plugins::CameraControllerPlugin)
+            .add_plugin(plugins::AssetsPlugin)
+            .add_plugin(plugins::MainUiPlugin)
             .run();
-    }
-
-    fn use_my_assets(
-        my_assets: Res<assets::SpriteCollection>,
-        mut commands: Commands,
-        texture_atlases: Res<Assets<TextureAtlas>>,
-    ) {
-        // do something using the asset handles from the resource
-        println!("Use my assets!");
-        commands.spawn_bundle(Camera2dBundle::default());
-        //draw the original image (whole atlas)
-        let atlas = texture_atlases
-            .get(&my_assets.tiles)
-            .expect("Failed to find our atlas");
-        commands.spawn_bundle(SpriteBundle {
-            texture: atlas.texture.clone(),
-            transform: Transform::from_xyz(0., 0., 1.).with_scale(Vec3::new(0.5, 0.5, 1.0)),
-            ..Default::default()
-        });
-        // draw single texture from sprite sheet starting at index 0
-        commands
-            .spawn_bundle(SpriteSheetBundle {
-                transform: Transform {
-                    translation: Vec3::new(0., 0., 1.),
-                    ..Default::default()
-                }.with_scale(Vec3::new(0.5, 0.5, 1.)),
-                sprite: TextureAtlasSprite::new(0),
-                texture_atlas: my_assets.tiles.clone(),
-                ..Default::default()
-            });
-            //.insert(atlas);
-        }
-
-    fn configure_visuals(mut egui_ctx: ResMut<EguiContext>) {
-        // Default is Dark Mode
-        egui_ctx.ctx_mut().set_visuals(egui::Visuals {
-            window_rounding: (5.0).into(), // 5 points radius for window borders
-            ..Default::default()
-        });
-    }
-
-    fn configure_ui_state(mut ui_state: ResMut<UiState>) {
-        ui_state.is_window_open = false;
-    }
-
-    // fn load_assets(mut egui_ctx: ResMut<EguiContext>) {
-
-    // }
-
-    fn update_ui_scale_factor(
-        keyboard_input: Res<Input<KeyCode>>,
-        mut egui_settings: ResMut<EguiSettings>,
-        mut ui_state: ResMut<UiState>,
-        //toggle_scale_factor: Local<Option<bool>>,
-        //windows: Res<Windows>,
-    ) {
-        if keyboard_input.pressed(KeyCode::LControl) &&
-           keyboard_input.just_pressed(KeyCode::Equals)
-        {
-            // println!("LControl + Equals");
-            ui_state.scale_factor += 0.1;
-        }
-        if keyboard_input.pressed(KeyCode::LControl) &&
-           keyboard_input.just_pressed(KeyCode::Minus)
-        {
-            // println!("LControl + Minus");
-            ui_state.scale_factor -= 0.1;
-        }
-        if ui_state.scale_factor < 1.0 {
-            // println!("scale_factor < 1.0, setting to 1.0");
-            ui_state.scale_factor = 1.0;
-        }
-        if ui_state.scale_factor > 2.0 {
-            // println!("scale_factor > 2.0, setting to 2.0");
-            ui_state.scale_factor = 2.0;
-        }
-        // println!("scale_factor is currently {}", ui_state.scale_factor);
-        egui_settings.scale_factor = ui_state.scale_factor;
-        // if keyboard_input.just_pressed(KeyCode::Slash) || toggle_scale_factor.is_none() {
-        //     *toggle_scale_factor = Some(!toggle_scale_factor.unwrap_or(true));
-
-        //     if let Some(window) = windows.get_primary() {
-        //         let scale_factor = if toggle_scale_factor.unwrap() {
-        //             1.0
-        //         } else {
-        //             1.0 / window.scale_factor()
-        //         };
-        //         egui_settings.scale_factor = scale_factor;
-        //     }
-        // }
-    }
-
-    fn main_ui(
-        mut egui_ctx: ResMut<EguiContext>,
-        mut _ui_state: ResMut<UiState>,
-    ) {
-        top_menu(&mut egui_ctx);
-
-        egui::TopBottomPanel::bottom("status")
-            .show(egui_ctx.ctx_mut(), |ui| {
-                ui.label("Status panel");
-            });
-
-        egui::SidePanel::left("info")
-            .default_width(200.0)
-            .resizable(true)
-            .show(egui_ctx.ctx_mut(), |ui| {
-                ui.heading("Info Panel");
-
-                // ui.horizontal(|ui| {
-                //     ui.label("Write something: ");
-                //     ui.text_edit_singleline(&mut ui_state.label);
-                // });
-
-                // ui.add(egui::widgets::Image::new(
-                //     egui_texture_handle.id(),
-                //     egui_texture_handle.size_vec2(),
-                // ));
-
-                // ui.add(egui::Slider::new(&mut ui_state.value, 0.0..=10.0).text("value"));
-                // if ui.button("Increment").clicked() {
-                //     ui_state.value += 1.0;
-                // }
-
-                // ui.allocate_space(egui::Vec2::new(1.0, 100.0));
-                // ui.horizontal(|ui| {
-                //     load = ui.button("Load").clicked();
-                //     invert = ui.button("Invert").clicked();
-                //     remove = ui.button("Remove").clicked();
-                // });
-
-                // ui.allocate_space(egui::Vec2::new(1.0, 10.0));
-                // ui.checkbox(&mut ui_state.is_window_open, "Window Is Open");
-
-                // ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
-                //     ui.add(egui::Hyperlink::from_label_and_url(
-                //         "powered by egui",
-                //         "https://github.com/emilk/egui/",
-                //     ));
-                // });
-            });
-
-        egui::SidePanel::right("annotation")
-            .default_width(400.0)
-            .resizable(true)
-            .show(egui_ctx.ctx_mut(), |ui| {
-                ui.heading("Annotation");
-            });
-
-        // egui::CentralPanel::default().show(egui_ctx.ctx_mut(), |ui| {
-        //     ui.heading("Game Board");
-        //     // ui.hyperlink("https://github.com/emilk/egui_template");
-        //     // ui.add(egui::github_link_file_line!(
-        //     //     "https://github.com/mvlabat/bevy_egui/blob/main/",
-        //     //     "Direct link to source code."
-        //     // ));
-        //     // egui::warn_if_debug_build(ui);
-
-        //     // ui.separator();
-
-        //     // ui.heading("Central Panel");
-        //     // ui.label("The central panel the region left after adding TopPanel's and SidePanel's");
-        //     // ui.label("It is often a great place for big things, like drawings:");
-        //     ui.label("Add game board here from assets.");
-        //     //commands.spawn_bundle(Camera2dBundle::default());
-        // });
-
-        // egui::Window::new("Window")
-        //     .vscroll(true)
-        //     .open(&mut ui_state.is_window_open)
-        //     .show(egui_ctx.ctx_mut(), |ui| {
-        //         ui.label("Windows can be moved by dragging them.");
-        //         ui.label("They are automatically sized based on contents.");
-        //         ui.label("You can turn on resizing and scrolling if you like.");
-        //         ui.label("You would normally chose either panels OR windows.");
-        //     });
     }
 }
