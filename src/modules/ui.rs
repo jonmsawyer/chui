@@ -83,7 +83,7 @@ impl Ui {
             .add_startup_system(Self::configure_visuals)
             .add_startup_system(Self::configure_ui_state)
             .add_system(Self::update_ui_scale_factor)
-            .add_system(Self::main_ui)
+            //.add_system(Self::main_ui)
             .add_system_set(
                 SystemSet::on_enter(GameState::Next)
                     .with_system(Self::use_my_assets)
@@ -98,6 +98,7 @@ impl Ui {
     ) {
         // do something using the asset handles from the resource
         println!("Use my assets!");
+        commands.spawn_bundle(Camera2dBundle::default());
         //draw the original image (whole atlas)
         let atlas = texture_atlases
             .get(&my_assets.tiles)
