@@ -83,7 +83,7 @@ impl Ui {
             .add_startup_system(Self::configure_visuals)
             .add_startup_system(Self::configure_ui_state)
             .add_system(Self::update_ui_scale_factor)
-            //.add_system(Self::main_ui)
+            .add_system(Self::main_ui)
             .add_system_set(
                 SystemSet::on_enter(GameState::Next)
                     .with_system(Self::use_my_assets)
@@ -105,16 +105,16 @@ impl Ui {
             .expect("Failed to find our atlas");
         commands.spawn_bundle(SpriteBundle {
             texture: atlas.texture.clone(),
-            transform: Transform::from_xyz(0., 0., 1.),
+            transform: Transform::from_xyz(0., 0., 1.).with_scale(Vec3::new(0.5, 0.5, 1.0)),
             ..Default::default()
         });
         // draw single texture from sprite sheet starting at index 0
         commands
             .spawn_bundle(SpriteSheetBundle {
                 transform: Transform {
-                    translation: Vec3::new(0., 300., 1.),
+                    translation: Vec3::new(0., 0., 1.),
                     ..Default::default()
-                },
+                }.with_scale(Vec3::new(0.5, 0.5, 1.)),
                 sprite: TextureAtlasSprite::new(0),
                 texture_atlas: my_assets.tiles.clone(),
                 ..Default::default()
@@ -238,23 +238,23 @@ impl Ui {
                 ui.heading("Annotation");
             });
 
-        egui::CentralPanel::default().show(egui_ctx.ctx_mut(), |ui| {
-            ui.heading("Game Board");
-            // ui.hyperlink("https://github.com/emilk/egui_template");
-            // ui.add(egui::github_link_file_line!(
-            //     "https://github.com/mvlabat/bevy_egui/blob/main/",
-            //     "Direct link to source code."
-            // ));
-            // egui::warn_if_debug_build(ui);
+        // egui::CentralPanel::default().show(egui_ctx.ctx_mut(), |ui| {
+        //     ui.heading("Game Board");
+        //     // ui.hyperlink("https://github.com/emilk/egui_template");
+        //     // ui.add(egui::github_link_file_line!(
+        //     //     "https://github.com/mvlabat/bevy_egui/blob/main/",
+        //     //     "Direct link to source code."
+        //     // ));
+        //     // egui::warn_if_debug_build(ui);
 
-            // ui.separator();
+        //     // ui.separator();
 
-            // ui.heading("Central Panel");
-            // ui.label("The central panel the region left after adding TopPanel's and SidePanel's");
-            // ui.label("It is often a great place for big things, like drawings:");
-            ui.label("Add game board here from assets.");
-            //commands.spawn_bundle(Camera2dBundle::default());
-        });
+        //     // ui.heading("Central Panel");
+        //     // ui.label("The central panel the region left after adding TopPanel's and SidePanel's");
+        //     // ui.label("It is often a great place for big things, like drawings:");
+        //     ui.label("Add game board here from assets.");
+        //     //commands.spawn_bundle(Camera2dBundle::default());
+        // });
 
         // egui::Window::new("Window")
         //     .vscroll(true)
