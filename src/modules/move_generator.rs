@@ -1,7 +1,7 @@
 //! Provides the `MoveGenerator` struct. `MoveGenerator`
 //! generates all possible Algebraic and Coordinate Notation
 //! moves via `MoveGenerator::generate_move_list()`.
-//! 
+//!
 //! I realize there is a lot of duplicated code in this module,
 //! but I've separated it out for easier inspection of the output
 //! and for readabilty purposes.
@@ -11,16 +11,16 @@ use std::collections::HashSet;
 
 /// Contains all the needed information to generate all
 /// possible Algebraic and Coordinate Notation moves.
-/// 
+///
 /// Example:
-/// 
+///
 /// ```
 /// use chui::MoveGenerator;
-/// 
+///
 /// let g = MoveGenerator::generate_move_list();
 /// let (answer, _reason) = g.validate_moves();
 /// assert!(answer);
-/// 
+///
 /// println!("{:?}", g.move_list);
 /// ```
 #[derive(Debug, Default, PartialEq, Clone)]
@@ -66,7 +66,7 @@ pub struct MoveGenerator<'a> {
 }
 
 /// Writes the display of the generated chess moves by a certain prefix.
-/// 
+///
 /// TODO: Clean this up if possible.
 impl fmt::Display for MoveGenerator<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -175,14 +175,14 @@ impl fmt::Display for MoveGenerator<'_> {
 impl<'a> MoveGenerator<'a> {
     /// Returns a new `MoveGenerator<'a>` object. All the information
     /// needed to generate possible chess notation moves is contained.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let g = MoveGenerator::new();
-    /// 
+    ///
     /// assert_eq!(
     ///     g,
     ///     MoveGenerator {
@@ -230,15 +230,15 @@ impl<'a> MoveGenerator<'a> {
     /// `generate_square_to_square_captures()` isn't quite right
     /// yet as they provide some duplicates. Still, it's working
     /// as tested and expected.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::generate_move_list();
     /// let (answer, _reason) = g.validate_moves();
-    /// 
+    ///
     /// assert!(answer);
     /// ```
     pub fn validate_moves(&self) -> (bool, String) {
@@ -255,15 +255,15 @@ impl<'a> MoveGenerator<'a> {
     /// Checks to see if the move from the given
     /// `{file_a}{rank_b}{-,x}{file_b}{rank_b}` is valid.
     /// Return `true` on valid, `false` on invalid.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let file_a: usize = 0; let rank_a: usize = 6; // a7
     /// let file_b: usize = 0; let rank_b: usize = 7; // a8
-    /// 
+    ///
     /// assert!(
     ///     MoveGenerator::move_is_valid(
     ///         file_a, rank_a, file_b, rank_b
@@ -309,7 +309,7 @@ impl<'a> MoveGenerator<'a> {
            file_a_idx + 2 == file_b_idx && rank_a_idx - 1 == rank_b_idx ||
            file_a_idx - 2 == file_b_idx && rank_a_idx + 1 == rank_b_idx ||
            file_a_idx - 2 == file_b_idx && rank_a_idx - 1 == rank_b_idx
-        {   
+        {
             return true;
         }
 
@@ -319,15 +319,15 @@ impl<'a> MoveGenerator<'a> {
     /// Checks to see if the move from the given
     /// `{file_a}{rank_a}{-,x}{file_b}{rank_b}` is a valid
     /// pawn promotion move.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let file_a: usize = 0; let rank_a: usize = 6; // a7
     /// let file_b: usize = 0; let rank_b: usize = 7; // a8
-    /// 
+    ///
     /// assert!(
     ///     MoveGenerator::move_is_valid_promotion(
     ///         file_a, rank_a, file_b, rank_b
@@ -367,17 +367,17 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all pawn moves (e.g., a1, a2, ..., h7, h8).
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_pawn_moves();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_pawn_moves(&mut self) {
@@ -465,17 +465,17 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all pawn captures (e.g., axb8, cxd4+, fxg1Q#, etc.).
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_pawn_captures();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_pawn_captures(&mut self) {
@@ -682,19 +682,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all king moves (e.g., Ka6, Kg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_king_moves();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_king_moves(&mut self) {
@@ -744,19 +744,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all king captures (e.g., Kxa6, Kxg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_king_captures();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_king_captures(&mut self) {
@@ -810,19 +810,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all queen moves (e.g., Qa6, Qg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_queen_moves();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_queen_moves(&mut self) {
@@ -868,19 +868,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all queen captures (e.g., Qxa6, Qxg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_queen_captures();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_queen_captures(&mut self) {
@@ -929,19 +929,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all rook moves (e.g., Ra6, Rg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_rook_moves();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_rook_moves(&mut self) {
@@ -987,19 +987,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all rook captures (e.g., Rxa6, Rxg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_rook_captures();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_rook_captures(&mut self) {
@@ -1048,19 +1048,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all bishop moves (e.g., Ba6, Bg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_bishop_moves();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_bishop_moves(&mut self) {
@@ -1106,19 +1106,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all bishop captures (e.g., Bxa6, Bxg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_bishop_captures();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_bishop_captures(&mut self) {
@@ -1167,19 +1167,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all knight moves (e.g., Na6, Ng1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_knight_moves();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_knight_moves(&mut self) {
@@ -1225,19 +1225,19 @@ impl<'a> MoveGenerator<'a> {
     }
 
     /// Generate all knight captures (e.g., Nxa6, Nxg1, etc.).
-    /// 
+    ///
     /// Note: this method contains a hardcoded piece, so not dynamic.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_knight_captures();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_knight_captures(&mut self) {
@@ -1287,17 +1287,17 @@ impl<'a> MoveGenerator<'a> {
 
     /// Generate all castling moves (e.g., 0-0, 0-0-0,
     /// 0-0+, 0-0-0#, etc.).
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_castle_moves();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_castle_moves(&mut self) {
@@ -1331,21 +1331,21 @@ impl<'a> MoveGenerator<'a> {
 
     /// Generate all square to square moves
     /// (e.g., a1-a5, b4-a4, ..., h2-h4).
-    /// 
+    ///
     /// TODO: this method produces duplicates, fix at some point.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_square_to_square_moves();
     /// g.move_list.sort(); // dedup will not remove dupes unless sorted
     /// g.move_list.dedup(); // assert! will panic! unless deduped
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_square_to_square_moves(&mut self) {
@@ -1512,21 +1512,21 @@ impl<'a> MoveGenerator<'a> {
 
     /// Generate all square to square captures
     /// (e.g., a1xa5, b4xa4, ..., h2xh4).
-    /// 
+    ///
     /// TODO: this method produces duplicates, fix at some point.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_square_to_square_captures();
     /// g.move_list.sort(); // dedup will not remove dupes unless sorted
     /// g.move_list.dedup(); // assert! will panic! unless deduped
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_square_to_square_captures(&mut self) {
@@ -1693,16 +1693,16 @@ impl<'a> MoveGenerator<'a> {
     /// If you want to generate a specific set of move lists, use the other
     /// `generate_{pawn,king,queen,rook,knight,square_to_square}_{moves,captures}()`
     /// methods after initializing `let g = MoveGenerator::new();`.
-    /// 
+    ///
     /// Example:
-    /// 
+    ///
     /// ```
     /// use chui::MoveGenerator;
-    /// 
+    ///
     /// let g = MoveGenerator::generate_move_list();
     /// let (answer, _reason) = g.validate_moves();
     /// assert!(answer);
-    /// 
+    ///
     /// println!("{:?}", g.move_list);
     /// ```
     pub fn generate_move_list() -> MoveGenerator<'a> {
@@ -1724,11 +1724,11 @@ impl<'a> MoveGenerator<'a> {
         g.generate_square_to_square_moves();
         g.generate_square_to_square_captures();
         g.move_list.sort(); // sort for quicker lookups
-        g.move_list.dedup(); // have to dedup(licate) because of
+        g.move_list.dedup(); // have to dedup() because of
                              // .generate_square_to_square_move() and
                              // .generate_square_to_square_captures().
-                             // dedup() also requires sort(), so thre's
-                             // that.
+                             // dedup() also requires sort() to be
+                             // performed before dedup().
                              // TODO: fix.
 
         g
@@ -1769,7 +1769,7 @@ mod test {
             "e8/Q#".to_string(),
             "b7".to_string(),
             "e1B".to_string(),
-    
+
             // pawn captures
             "hxg8=N++".to_string(),
             "bxa1Q".to_string(),
@@ -1782,67 +1782,67 @@ mod test {
             "exd8/Q#".to_string(),
             "bxa7".to_string(),
             "dxe1B".to_string(),
-    
+
             // king moves
             "Ka6".to_string(),
             "Kg7#".to_string(),
             "Kd5+".to_string(),
             "Ka6++".to_string(),
-    
+
             // king captures
             "Kxc6#".to_string(),
             "Kxg7".to_string(),
             "Kxa2+".to_string(),
             "Kxe5++".to_string(),
-    
+
             // queen moves
             "Qa6".to_string(),
             "Qb2+".to_string(),
             "Qg7#".to_string(),
             "Qd5++".to_string(),
-    
+
             // queen captures
             "Qxc6".to_string(),
             "Qxd4+".to_string(),
             "Qxg7#".to_string(),
             "Qxe5++".to_string(),
-    
+
             // rook moves
             "Ra6".to_string(),
             "Rh3+".to_string(),
             "Rg7#".to_string(),
             "Rd5++".to_string(),
-    
+
             // rook captures
             "Rxc6".to_string(),
             "Rxb1+".to_string(),
             "Rxg7#".to_string(),
             "Rxe5++".to_string(),
-    
+
             // bishop moves
             "Ba6".to_string(),
             "Bg3+".to_string(),
             "Bg7#".to_string(),
             "Bd5++".to_string(),
-    
+
             // bishop captures
             "Bxc6".to_string(),
             "Bxe1+".to_string(),
             "Bxg7#".to_string(),
             "Bxe5++".to_string(),
-    
+
             // knight moves
             "Na6".to_string(),
             "Nc2+".to_string(),
             "Ng7#".to_string(),
             "Nd5++".to_string(),
-    
+
             // knight captures
             "Nxc6".to_string(),
             "Nxh8+".to_string(),
             "Nxg7#".to_string(),
             "Nxe5++".to_string(),
-    
+
             // castle moves
             "0-0".to_string(),
             "0-0-0".to_string(),
@@ -1852,7 +1852,7 @@ mod test {
             "0-0-0++".to_string(),
             "0-0#".to_string(),
             "0-0-0#".to_string(),
-    
+
             // square-to-square moves
             "a1-a2".to_string(),
             "a1-a2+".to_string(),
@@ -1873,7 +1873,7 @@ mod test {
             "f7-g8+".to_string(),
             "f7-g8++".to_string(),
             "f7-g8#".to_string(),
-    
+
             // square-to-square captures
             "a1xa2".to_string(),
             "a1xa2+".to_string(),
@@ -1918,10 +1918,10 @@ mod test {
         let file_b: usize = 2; let rank_b: usize = 1; // c2
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
-        
+
         let file_a: usize = 0; let rank_a: usize = 6; // a7
         let file_b: usize = 0; let rank_b: usize = 7; // a8
-        
+
         assert!(
             MoveGenerator::move_is_valid(
                 file_a, rank_a, file_b, rank_b

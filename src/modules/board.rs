@@ -98,7 +98,7 @@ impl Board {
 
         let (file, rank) = move_obj.to_coord;
 
-        if pieces_can_move.is_empty(){
+        if pieces_can_move.is_empty() {
             Err(
                 ChuiError::InvalidMove(
                     format!(
@@ -532,7 +532,7 @@ impl Board {
             rank_idx_counter += 1;
             limit_counter += 1;
         }
-        
+
         coords
     }
 
@@ -583,7 +583,7 @@ impl Board {
             file_idx_counter += 1;
             limit_counter += 1;
         }
-        
+
         coords
     }
 
@@ -627,7 +627,7 @@ impl Board {
             rank_idx_counter -= 1;
             limit_counter += 1;
         }
-        
+
         coords
     }
 
@@ -679,7 +679,7 @@ impl Board {
             file_idx_counter -= 1;
             limit_counter += 1;
         }
-        
+
         coords
     }
 
@@ -870,10 +870,10 @@ impl Board {
 
         coords
     }
-    
+
     /// Test function to display the board colors by a straight
     /// index from `0..64` range.
-    /// 
+    ///
     /// Thanks to Kromey (https://github.com/Kromey).
     pub fn display_board_colors_by_index() {
         for idx in 0..64 {

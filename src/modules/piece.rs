@@ -47,10 +47,10 @@ pub enum PieceKind {
 ///
 /// ```
 /// use chui::{Piece, PieceKind, Color};
-/// 
+///
 /// let white_pawn = Piece::new(PieceKind::Pawn, Color::White);
 /// let black_queen = Piece::new(PieceKind::Queen, Color::Black);
-/// 
+///
 /// println!("{}: {:?}", white_pawn.get_text(), white_pawn);
 /// println!("{}: {:?}", black_queen.get_text(), black_queen);
 /// ```
@@ -244,11 +244,11 @@ impl Piece {
 /// Returns a UTF-8, colored, string containing the string
 /// representation of the chess piece. (E.g., yellow "♙"
 /// for a White Pawn.)
-/// 
+///
 /// TODO: Make representation configurable.
 impl fmt::Display for Piece {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.repr().1)
+        write!(f, "{}", self.repr().0)
     }
 }
 

@@ -54,21 +54,21 @@ pub enum DrawCondition {
 ///
 /// ```
 /// use chui::{Player, Color, Engine, ParserEngine};
-/// 
+///
 /// let white = Player::new(
 ///     Color::White,
 ///     Some("Camina Drummer"),
 ///     Some(37),
 ///     None,
 /// );
-/// 
+///
 /// let black = Player::new(
 ///     Color::Black,
 ///     Some("Klaes Ashford"),
 ///     Some(72),
 ///     Some(1500),
 /// );
-/// 
+///
 /// if let Ok(engine) = Engine::new(white, black, ParserEngine::Algebraic) {
 ///     println!("{}", engine.white_to_string());
 /// };
@@ -320,8 +320,8 @@ impl Engine<'static> {
 
                         println!();
 
-                        for (move_idx, move_str) in self.move_list.iter()
-                                                                  .enumerate()
+                        for (move_idx, move_str) in
+                            self.move_list.iter().enumerate()
                         {
                             let mut numeral = String::new();
 
@@ -418,8 +418,8 @@ impl Engine<'static> {
     pub fn switch_parser(&mut self, command: &Command) {
         commands::switch_parser(self, command)
     }
-    
-    /// Parse the move. Returns am Ok(Move) is the parsing of the
+
+    /// Parse the move. Returns an Ok(Move) if the parsing of the
     /// move is successful, otherwise a `ChuiError` will result.
     pub fn parse(&mut self, the_move: &str, to_move: Color)
     -> ChuiResult<Move>
@@ -435,7 +435,7 @@ impl Engine<'static> {
     /// Get input string from `io::stdin()`.
     pub fn get_input() -> String {
         let mut input = String::new();
-            
+
         io::stdin()
             .read_line(&mut input)
             .expect("Failed to read input move or command.");
@@ -620,14 +620,14 @@ mod tests {
             Some(37),
             None,
         );
-    
+
         let white_2 = Player::new(
             Color::White,
             Some("Fred Johnson"),
             None,
             Some(2483),
         );
-    
+
         if let Err(error) = Engine::new(
             white,
             white_2,
@@ -646,14 +646,14 @@ mod tests {
             Some(37),
             None,
         );
-    
+
         let black = Player::new(
             Color::Black,
             Some("Fred Johnson"),
             None,
             Some(2483),
         );
-    
+
         if let Err(error) = Engine::new(
             black,
             white,

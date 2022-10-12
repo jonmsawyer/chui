@@ -8,8 +8,8 @@ pub use modules::{
     parser::{self, ParserEngine},
     Command, CommandContext, CommandKind,
     Fen,
+    Ui,
 };
-
 
 #[non_exhaustive]
 #[derive(Debug, PartialEq)]
@@ -20,7 +20,7 @@ pub enum ChuiError {
 
     /// An invalid move. This variant shows up when the user tries to
     /// make an invalid move on the chess board, usually in these ways:
-    /// 
+    ///
     /// 1. There's no piece in the "from" square
     /// 2. There's a friendly piece blocking the move
     /// 3. Player's king is in check

@@ -21,9 +21,9 @@ pub struct AlgebraicParser<'a>{
 impl<'a> Parser for AlgebraicParser<'a> {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    /// 
+    ///
     /// Examples:
-    /// 
+    ///
     /// * e4
     /// * e4+
     /// * e4#
@@ -64,7 +64,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
+    ///
     /// * Rae1
     /// * Raxe1
     /// * Rae1+
@@ -73,7 +73,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
     /// * Rae1++
     /// * Raxe1#
     /// * Raxe1++
-    /// 
+    ///
     /// * R1e1
     /// * R1xe1
     /// * R1e1+
@@ -82,7 +82,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
     /// * R1e1++
     /// * R1xe1#
     /// * R1xe1++
-    /// 
+    ///
     /// * Ra1e1
     /// * Ra1e1+
     /// * Ra1e1#
@@ -91,38 +91,38 @@ impl<'a> Parser for AlgebraicParser<'a> {
     /// * Ra1xe1#
     /// * Ra1e1++
     /// * Ra1xe1++
-    /// 
+    ///
     /// Token 1: e, B, 0 (
     ///     file, piece, castle king
     /// )
-    /// 
+    ///
     /// Token 2: f, 4, x, - (
     ///     file, rank, capture, castle king continuation
     /// )
-    /// 
+    ///
     /// Token 3: f, 4, +, #, Q, =, 0, x (
     ///     file, rank, check, mate, promotiom piece,
     ///     promotion notatiomn, castle king, capture
     /// )
-    /// 
+    ///
     /// Token 4: 4, +, #, Q, - (
     ///     rank, check, mate, promotion piece,
     ///     castle queen continuation
     /// )
-    /// 
+    ///
     /// Token 5: +, #, Q, =, 0 (
     ///     check, mate, promotion piece, promotion notation,
     ///     castle queen
     /// )
-    /// 
+    ///
     /// Token 6: +, #, Q (
     ///     check, mate, promotion piece
     /// )
-    /// 
+    ///
     /// Token 7: +, # (
     ///     check, mate
     /// )
-    /// 
+    ///
     /// Token 8: + (
     ///     check (mate)
     /// )
@@ -263,6 +263,8 @@ impl<'a> AlgebraicParser<'a> {
     /// move as a check mate.
     fn try_check(&mut self, token: char) -> ChuiResult<()> {
         if self.move_generator.check.starts_with(token) {
+            // A check has been recorded before (via `set_check()` if
+            // this is true.
             if self.move_obj.is_check() {
                 self.move_obj.set_check_mate();
             }
@@ -380,13 +382,13 @@ impl<'a> AlgebraicParser<'a> {
     }
 
     /// Parse the first token in the input move.
-    /// 
+    ///
     /// Token 1: e, B, 0 (
     ///     file, piece, castle king
     /// )
-    /// 
+    ///
     /// Valid move types for this token:
-    /// 
+    ///
     /// * e4
     /// * e4+
     /// * e4#
@@ -427,7 +429,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * 0-0-0+
     /// * 0-0-0#
     /// * 0-0-0++
-    /// 
+    ///
     /// * Rae1
     /// * Raxe1
     /// * Rae1+
@@ -436,7 +438,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * Rae1++
     /// * Raxe1#
     /// * Raxe1++
-    /// 
+    ///
     /// * R1e1
     /// * R1xe1
     /// * R1e1+
@@ -445,7 +447,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * R1e1++
     /// * R1xe1#
     /// * R1xe1++
-    /// 
+    ///
     /// * Ra1e1
     /// * Ra1e1+
     /// * Ra1e1#
@@ -472,13 +474,13 @@ impl<'a> AlgebraicParser<'a> {
     }
 
     /// Parse the second token in the input move.
-    /// 
+    ///
     /// Token 2: f, 4, x, - (
     ///     file, rank, capture, castle king
     /// )
-    /// 
+    ///
     /// Valid move types for this token:
-    /// 
+    ///
     /// * e4
     /// * e4+
     /// * e4#
@@ -519,7 +521,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
+    ///
     /// * Rae1
     /// * Raxe1
     /// * Rae1+
@@ -528,7 +530,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * Rae1++
     /// * Raxe1#
     /// * Raxe1++
-    /// 
+    ///
     /// * R1e1
     /// * R1xe1
     /// * R1e1+
@@ -537,7 +539,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * R1e1++
     /// * R1xe1#
     /// * R1xe1++
-    /// 
+    ///
     /// * Ra1e1
     /// * Ra1e1+
     /// * Ra1e1#
@@ -576,14 +578,14 @@ impl<'a> AlgebraicParser<'a> {
     }
 
     /// Parse the third token in the input move.
-    /// 
+    ///
     /// Token 3: f, 4, +, #, Q, =, 0 (
     ///     file, rank, check, mate, promotiom piece,
     ///     promotion notatiomn, castle king
     /// )
-    /// 
+    ///
     /// Valid move types for this token:
-    /// 
+    ///
     /// * e4+
     /// * e4#
     /// * e8Q
@@ -623,7 +625,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
+    ///
     /// * Rae1
     /// * Raxe1
     /// * Rae1+
@@ -632,7 +634,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * Rae1++
     /// * Raxe1#
     /// * Raxe1++
-    /// 
+    ///
     /// * R1e1
     /// * R1xe1
     /// * R1e1+
@@ -641,7 +643,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * R1e1++
     /// * R1xe1#
     /// * R1xe1++
-    /// 
+    ///
     /// * Ra1e1
     /// * Ra1e1+
     /// * Ra1e1#
@@ -691,13 +693,13 @@ impl<'a> AlgebraicParser<'a> {
     }
 
     /// Parse the fourth token in the input move.
-    /// 
+    ///
     /// Token 4: 4, +, #, Q, - (
     ///     rank, check, mate, promotion piece, castle queen
     /// )
-    /// 
+    ///
     /// Valid move types for this token:
-    /// 
+    ///
     /// * e4++
     /// * e8Q+
     /// * Bf4+
@@ -732,7 +734,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
+    ///
     /// * Rae1
     /// * Raxe1
     /// * Rae1+
@@ -741,7 +743,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * Rae1++
     /// * Raxe1#
     /// * Raxe1++
-    /// 
+    ///
     /// * R1e1
     /// * R1xe1
     /// * R1e1+
@@ -750,7 +752,7 @@ impl<'a> AlgebraicParser<'a> {
     /// * R1e1++
     /// * R1xe1#
     /// * R1xe1++
-    /// 
+    ///
     /// * Ra1e1
     /// * Ra1e1+
     /// * Ra1e1#
@@ -811,13 +813,13 @@ impl<'a> AlgebraicParser<'a> {
     }
 
     /// Parse the fifth token in the input move.
-    /// 
+    ///
     /// Token 5: +, #, Q, 0, = (
     ///     check, mate, promotion piece, castle queen
     /// )
-    /// 
+    ///
     /// Valid move types for this token:
-    /// 
+    ///
     /// * e8Q++
     /// * e8=Q+
     /// * e8=Q#
@@ -842,33 +844,33 @@ impl<'a> AlgebraicParser<'a> {
     /// * exf8Q++
     /// * 0-0-0++
     /// * exf8=Q++
-    /// 
+    ///
     /// * Rae1+
     /// * Rae1#
     /// * Rae1++
-    /// 
+    ///
     /// * Raxe1
     /// * Raxe1+
     /// * Raxe1#
     /// * Raxe1++
-    /// 
+    ///
     /// * R1e1+
     /// * R1e1#
     /// * R1e1++
-    /// 
+    ///
     /// * R1xe1
     /// * R1xe1+
     /// * R1xe1#
     /// * R1xe1++
-    /// 
+    ///
     /// * Ra1e1
     /// * Ra1e1+
     /// * Ra1e1#
     /// * Ra1e1++
-    /// 
+    ///
     /// * Ra1xe1
     /// * Ra1xe1+
-    /// 
+    ///
     /// * Ra1xe1#
     /// * Ra1xe1++
     fn parse_token_5(&mut self, token: char) -> ChuiResult<()> {
@@ -937,9 +939,9 @@ impl<'a> AlgebraicParser<'a> {
     /// Token 6: +, #, Q (
     ///     check, mate, promotion piece
     /// )
-    /// 
+    ///
     /// Valid move types for this token:
-    /// 
+    ///
     /// * exf4++
     /// * exf8Q+
     /// * exf8Q++
@@ -953,17 +955,17 @@ impl<'a> AlgebraicParser<'a> {
     /// * 0-0-0+
     /// * 0-0-0#
     /// * 0-0-0++
-    /// 
+    ///
     /// * Raxe1+
     /// * Rae1++
     /// * Raxe1#
     /// * Raxe1++
-    /// 
+    ///
     /// * R1xe1+
     /// * R1e1++
     /// * R1xe1#
     /// * R1xe1++
-    /// 
+    ///
     /// * Ra1e1+
     /// * Ra1e1#
     /// * Ra1xe1
@@ -1029,15 +1031,15 @@ impl<'a> AlgebraicParser<'a> {
     /// Token 7: +, # (
     ///     check, mate
     /// )
-    /// 
+    ///
     /// Valid move types for this token:
-    /// 
+    ///
     /// * exf8Q++
     /// * exf8=Q+
     /// * exf8=Q++
     /// * exf8=Q#
     /// * 0-0-0++
-    /// 
+    ///
     /// * Raxe1++
     /// * R1xe1++
     /// * Ra1xe1+
@@ -1076,9 +1078,9 @@ impl<'a> AlgebraicParser<'a> {
     /// Token 8: + (
     ///     check (mate)
     /// )
-    /// 
+    ///
     /// Valid move type for this token:
-    /// 
+    ///
     /// * exf8=Q++
     /// * Ra1xe1++
     fn parse_token_8(&mut self, token: char) -> ChuiResult<()> {

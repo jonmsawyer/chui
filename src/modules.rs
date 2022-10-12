@@ -10,6 +10,7 @@ pub use engine::Engine;
 pub mod board;
 pub use board::{ChessVariant, Board};
 
+// This module is named `chess_move` because `move` is already a reserved word.
 pub mod chess_move;
 pub use chess_move::{Move, MoveType};
 
@@ -23,3 +24,6 @@ pub mod fen;
 pub use fen::Fen;
 
 pub mod parser;
+
+pub mod ui;
+pub use ui::Ui;

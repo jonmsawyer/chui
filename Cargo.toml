@@ -2,9 +2,34 @@
 name = "chui"
 version = "0.1.0"
 authors = ["jonmsawyer <jonmsawyer@gmail.com>"]
-edition = "2018"
+edition = "2021"
+categories = ["command-line-utilities", "games", "parser-implementations", "parsing"]
+description = "A chess UI or command line application that allows you to play against a human, a computer, or online."
+readme = "README.md"
+homepage = "https://chui.io/"
+repository = "https://github.com/jonmsawyer/chui/"
+license = "MIT OR Apache-2.0"
+keywords = ["chess", "chess engine", "bevy", "chui", "chess ui", "chess user interface", "chess command line"]
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 colored = "2"
+bevy = "0.8"
+bevy_egui = "0.15"
+bevy-inspector-egui = "0.12"
+# Wait til bevy_editor_pls is in crates.io
+#bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls" }
+bevy_asset_loader = { version = "0.12", features = ["2d"] }
+
+[workspace]
+resolver = "2"
+
+# Enable first level optimizations in debug mode
+[profile.dev]
+opt-level = 1
+
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
