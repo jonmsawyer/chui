@@ -67,7 +67,7 @@ fn configure_ui_visuals(mut egui_ctx: ResMut<EguiContext>) {
     });
 }
 
-/// Our UI State controller plugin
+/// Our UI State plugin
 pub struct UiStatePlugin;
 
 impl Plugin for UiStatePlugin {

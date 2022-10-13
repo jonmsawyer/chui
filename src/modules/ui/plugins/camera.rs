@@ -4,7 +4,8 @@
 
 use bevy::prelude::*;
 
-use super::super::GameState;
+use super::GameState;
+
 
 /// Component to attach to the camera we're controlling
 ///

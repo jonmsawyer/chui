@@ -101,6 +101,8 @@ pub struct MainUiPlugin;
 
 impl Plugin for MainUiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(main_ui);
+        app.add_system(main_ui)
+            // Set multi-sample anti-aliasing (WGPU only supports 1 or 4)
+            .insert_resource(Msaa { samples: 4 });
     }
 }
