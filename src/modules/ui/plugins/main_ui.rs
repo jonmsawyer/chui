@@ -11,20 +11,24 @@ pub mod top_menu;
 use top_menu::top_menu;
 
 
+pub const INFO_PANEL_WIDTH: f32 = 300.0;
+pub const ANNOTATION_PANEL_WIDTH: f32 = 300.0;
+
 fn main_ui(
     mut egui_ctx: ResMut<EguiContext>,
-    mut _ui_state: ResMut<UiState>,
+    ui_state: ResMut<UiState>,
 ) {
     top_menu(&mut egui_ctx);
 
     egui::TopBottomPanel::bottom("status")
         .show(egui_ctx.ctx_mut(), |ui| {
-            ui.label("Status panel");
+            ui.label(ui_state.status.as_str());
         });
 
     egui::SidePanel::left("info")
-        .default_width(200.0)
-        .resizable(true)
+        .default_width(INFO_PANEL_WIDTH)
+        .min_width(INFO_PANEL_WIDTH)
+        .resizable(false)
         .show(egui_ctx.ctx_mut(), |ui| {
             ui.heading("Info Panel");
 
@@ -62,8 +66,9 @@ fn main_ui(
         });
 
     egui::SidePanel::right("annotation")
-        .default_width(400.0)
-        .resizable(true)
+        .min_width(ANNOTATION_PANEL_WIDTH)
+        .default_width(ANNOTATION_PANEL_WIDTH)
+        .resizable(false)
         .show(egui_ctx.ctx_mut(), |ui| {
             ui.heading("Annotation");
         });
