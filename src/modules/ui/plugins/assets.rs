@@ -94,7 +94,7 @@ impl Plugin for AssetsPlugin {
                     .with_collection::<SpriteCollection>()
             )
             .add_system_set(
-                SystemSet::on_enter(GameState::Next)
+                SystemSet::on_update(GameState::Next)
                     .with_system(draw_board)
             );
     }

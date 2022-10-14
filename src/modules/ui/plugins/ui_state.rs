@@ -6,7 +6,7 @@ use bevy_egui::{egui, EguiSettings, EguiContext};
 use super::SpriteCollection;
 use super::main_ui::INFO_PANEL_WIDTH;
 use super::main_ui::ANNOTATION_PANEL_WIDTH;
-
+use super::GameState;
 
 const START_X_COORD: f32 = -4.0; // The left four squares of the chessboard, in world coordinates
 const START_Y_COORD: f32 = 4.0; // The top four squares of the chessboard, in world coordinates
@@ -87,7 +87,7 @@ fn configure_ui_visuals(mut egui_ctx: ResMut<EguiContext>) {
     });
 }
 
-fn init_board(
+fn _init_board(
     my_assets: Res<SpriteCollection>,
     mut commands: Commands,
     ui_state: Res<UiState>
@@ -139,7 +139,10 @@ impl Plugin for UiStatePlugin {
             .insert_resource(ClearColor(Color::BLACK))
             .add_startup_system(configure_ui_state)
             .add_startup_system(configure_ui_visuals)
-            //.add_startup_system(init_board)
+            // .add_system_set(
+            //     SystemSet::on_enter(GameState::Next)
+            //         .with_system(init_board)
+            // )
             .add_system(update_ui_scale_factor);
     }
 }
