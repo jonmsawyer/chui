@@ -4,7 +4,7 @@ pub mod camera;
 pub use camera::CameraControllerPlugin;
 
 pub mod ui_state;
-pub use ui_state::{UiState, UiStatePlugin};
+pub use ui_state::{UiState, UiStatePlugin, Square, update_square_pixels};
 
 pub mod assets;
 pub use assets::{SpriteCollection, AssetsPlugin};

@@ -3,7 +3,8 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
-use super::{GameState, UiState};
+use super::{GameState, UiState, Square};
+use crate::modules::ui::events::ResizeBoardEvent;
 
 
 const START_X_COORD: f32 = -4.0; // The left four squares of the chessboard, in world coordinates
@@ -31,56 +32,36 @@ pub struct SpriteCollection {
     // pub background: Handle<Image>,
 }
 
-    // Thanks to Travis Veazey <https://github.com/Kromey>
-    // fn display_board_colors_by_index() {
-    //     for idx in 0..64 {
-    //         let color_id = ((idx / 8) % 2 + idx % 2) % 2;
-    //         print!("{}  ", color_id);
-
-    //         if (idx + 1) % 8 == 0 {
-    //             println!();
-    //         }
-    //     }
-    // }
-
-fn draw_board(
-    my_assets: Res<SpriteCollection>,
-    mut commands: Commands,
-    ui_state: Res<UiState>
+fn resize_board(
+    ui_state: Res<UiState>,
+    mut resize_event: EventReader<ResizeBoardEvent>,
+    mut query: Query<(&Square, &mut Transform)>,
 ) {
-    let offset = ui_state.square_pixels / 2.0_f32; // by half because textures are centered
-    let scale = ui_state.square_pixels / SPRITE_WIDTH; // 0.28125 by default
-    let start_x = START_X_COORD * SPRITE_WIDTH * scale; // -288.0 by default
-    let start_y = START_Y_COORD * SPRITE_WIDTH * scale; // 288.0 by default
-    let mut x = start_x;
-    let mut y = start_y;
-    let mut row: f32 = 0.;
-    println!(
-        "offset = {}, scale = {}, start_x = {}, start_y = {}, x = {}, y = {}",
-        offset, scale, start_x, start_y, x, y
-    );
+    for _ in resize_event.iter() {
+        let offset = ui_state.square_pixels / 2.0_f32; // by half because textures are centered
+        let scale = ui_state.square_pixels / SPRITE_WIDTH; // 0.28125 by default
+        let start_x = START_X_COORD * SPRITE_WIDTH * scale; // -288.0 by default
+        let start_y = START_Y_COORD * SPRITE_WIDTH * scale; // 288.0 by default
+        let mut x = start_x;
+        let mut y = start_y;
+        let mut row: f32 = 0.;
+        println!(
+            "ResizeBoardEvent: offset = {}, scale = {}, start_x = {}, start_y = {}, x = {}, y = {}",
+            offset, scale, start_x, start_y, x, y
+        );
 
-    for idx in 0..64 { // 64 squares in a chessboard
-        let color_id = ((idx / 8) % 2 + idx % 2) %2; // 8 squares per row
+        query.iter_mut().for_each(|(square, mut transform)| {
+            transform.translation = Vec3::new(x + offset, y - offset, 0.);
+            transform.scale = Vec3::new(scale, scale, 0.);
 
-        commands
-            .spawn_bundle(SpriteSheetBundle {
-                transform: Transform {
-                    translation: Vec3::new(x + offset, y - offset, 0.),
-                    ..Default::default()
-                }.with_scale(Vec3::new(scale, scale, 0.)),
-                sprite: TextureAtlasSprite::new(color_id),
-                texture_atlas: my_assets.tiles.clone(),
-                ..Default::default()
-            });
+            x += ui_state.square_pixels;
 
-        x += ui_state.square_pixels;
-
-        if (idx + 1) % 8 == 0 { // 8 squares per row
-            row += 1.0_f32;
-            x = start_x;
-            y = start_y - (row * ui_state.square_pixels);
-        }
+            if (square.index + 1) % 8 == 0 { // 8 squares per row
+                row += 1.0_f32;
+                x = start_x;
+                y = start_y - (row * ui_state.square_pixels);
+            }
+        });
     }
 }
 
@@ -95,7 +76,7 @@ impl Plugin for AssetsPlugin {
             )
             .add_system_set(
                 SystemSet::on_update(GameState::Next)
-                    .with_system(draw_board)
+                    .with_system(resize_board)
             );
     }
 }

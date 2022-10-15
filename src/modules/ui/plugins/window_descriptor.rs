@@ -3,28 +3,29 @@
 use bevy::{prelude::*, window::{PresentMode, MonitorSelection, WindowResized}};
 
 use super::UiState;
+use crate::modules::ui::events::ResizeBoardEvent;
+use super::update_square_pixels;
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub struct WindowDescriptorPlugin;
 
+
 fn resize_notificator(
-    resize_event: Res<Events<WindowResized>>,
-    mut ui_state: ResMut<UiState>
+    mut resize_event: EventReader<WindowResized>,
+    mut ui_state: ResMut<UiState>,
+    mut resize_board_event: EventWriter<ResizeBoardEvent>,
 ) {
-    let mut reader = resize_event.get_reader();
-    for window in reader.iter(&resize_event) {
+    for window in resize_event.iter() {
         println!("width = {} height = {}", window.width, window.height);
+        
         ui_state.window_width = window.width;
         ui_state.window_height = window.height;
-        ui_state.square_pixels = (
-            ui_state.window_width -
-            ui_state.board_margin -
-            ui_state.info_panel_width -
-            ui_state.annotation_panel_width
-        ) / 8.0_f32;
-        println!("square_pixels = {}", ui_state.square_pixels);
+        ui_state = update_square_pixels(ui_state);
+
+        // Notify that the board should be resized
+        resize_board_event.send_default();
     }
 }
 
