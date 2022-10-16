@@ -50,7 +50,6 @@ fn resize_board(
         let mut row: f32 = 0.;
 
         set.p0().iter_mut().for_each(|(square, mut transform)| {
-            println!("square.index = {}", square.index);
             transform.translation = Vec3::new(x + offset, y - offset, 0.);
             transform.scale = Vec3::new(scale, scale, 0.);
 
