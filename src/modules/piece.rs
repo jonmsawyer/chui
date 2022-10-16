@@ -5,6 +5,8 @@ use std::convert::TryFrom;
 
 use colored::{Colorize, ColoredString};
 
+use bevy::prelude::Component;
+
 use crate::{ChuiResult, ChuiError};
 use super::{Board, Move};
 
@@ -54,7 +56,7 @@ pub enum PieceKind {
 /// println!("{}: {:?}", white_pawn.get_text(), white_pawn);
 /// println!("{}: {:?}", black_queen.get_text(), black_queen);
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Component)]
 pub struct Piece {
     /// The kind of piece.
     piece: PieceKind,

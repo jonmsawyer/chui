@@ -3,6 +3,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
+use crate::Piece;
 use super::{GameState, UiState, Square};
 use crate::modules::ui::events::ResizeBoardEvent;
 
@@ -11,7 +12,7 @@ const START_X_COORD: f32 = -4.0; // The left four squares of the chessboard, in 
 const START_Y_COORD: f32 = 4.0; // The top four squares of the chessboard, in world coordinates
 const SPRITE_WIDTH: f32 = 256.0; // The size of the sprite in x*y dimentions (square)
 
-#[derive(AssetCollection)]
+#[derive(AssetCollection, Clone)]
 pub struct SpriteCollection {
     /// Light and dark squares, with chess pieces are defined in a texture atlas (aka sprite sheet).
     ///
@@ -35,18 +36,21 @@ pub struct SpriteCollection {
 fn resize_board(
     ui_state: Res<UiState>,
     mut resize_event: EventReader<ResizeBoardEvent>,
-    mut query: Query<(&Square, &mut Transform)>,
+    mut set: ParamSet<(Query<(&Square, &mut Transform)>, Query<(&Piece, &mut Transform)>)>
+    //engine: Res<Engine>
 ) {
     for _ in resize_event.iter() {
         let offset = ui_state.square_pixels / 2.0_f32; // by half because textures are centered
         let scale = ui_state.square_pixels / SPRITE_WIDTH; // 0.28125 by default
         let start_x = START_X_COORD * SPRITE_WIDTH * scale; // -288.0 by default
         let start_y = START_Y_COORD * SPRITE_WIDTH * scale; // 288.0 by default
+
         let mut x = start_x;
         let mut y = start_y;
         let mut row: f32 = 0.;
 
-        query.iter_mut().for_each(|(square, mut transform)| {
+        set.p0().iter_mut().for_each(|(square, mut transform)| {
+            println!("square.index = {}", square.index);
             transform.translation = Vec3::new(x + offset, y - offset, 0.);
             transform.scale = Vec3::new(scale, scale, 0.);
 
@@ -57,6 +61,28 @@ fn resize_board(
                 x = start_x;
                 y = start_y - (row * ui_state.square_pixels);
             }
+        });
+
+        // let mut x = start_x;
+        // let mut y = start_y;
+        // let mut row: f32 = 8.;
+
+        set.p1().iter_mut().for_each(|(piece, mut transform)| {
+            let (x, y) = piece.get_coords();
+            println!("piece.coords = ({}, {})", x, y);
+            let x: f32 = start_x - start_x * x as f32 / 4.0;
+            let y: f32 = -(start_y - start_y * y as f32 / 4.0) + (start_y / 4.0);
+            transform.translation = Vec3::new(x + offset, y - offset, 0.5);
+            transform.scale = Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.);
+
+            // y += ui_state.square_pixels;
+            // let idx = (piece.get_coords().1 * 8) + piece.get_coords().0;
+
+            // if (idx + 1) % 8 == 0 { // 8 squares per row
+            //     row += 1.0_f32;
+            //     x = start_x;
+            //     y = start_y - (row * ui_state.square_pixels);
+            // }
         });
     }
 }

@@ -5,7 +5,7 @@ pub struct Fen;
 
 impl Fen {
     /// Get the FEN layout of the board.
-    pub fn get_fen(engine: &Engine<'static>) -> String {
+    pub fn get_fen(engine: &Engine) -> String {
         let mut fen = Fen::get_board_fen(engine);
 
         // To move.
@@ -27,7 +27,7 @@ impl Fen {
     }
 
     /// Get the Shredder-FEN layout of the board.
-    pub fn get_shredder_fen(engine: &Engine<'static>) -> String {
+    pub fn get_shredder_fen(engine: &Engine) -> String {
         let mut fen = Fen::get_board_fen(engine);
 
         // To move.
@@ -44,12 +44,12 @@ impl Fen {
 
         // Full-move counter.
         fen = format!("{} {}", fen, engine.get_fen_full_move_counter());
-        
+
         fen
     }
 
     /// Get the X-FEN layout of the board.
-    pub fn get_x_fen(engine: &Engine<'static>) -> String {
+    pub fn get_x_fen(engine: &Engine) -> String {
         let mut fen = Fen::get_board_fen(engine);
 
         // To move.
@@ -66,13 +66,13 @@ impl Fen {
 
         // Full-move counter.
         fen = format!("{} {}", fen, engine.get_fen_full_move_counter());
-        
+
         fen
     }
 
     /// Get FEN layout of the board only without the other
     /// attributes.
-    pub fn get_board_fen(engine: &Engine<'static>) -> String {
+    pub fn get_board_fen(engine: &Engine) -> String {
         let mut fen = String::new();
         let mut empty_squares = 0;
 
@@ -108,7 +108,7 @@ impl Fen {
             fen = format!("{}/", fen);
             empty_squares = 0;
         }
-        
+
         // Remove trailing '/'.
         fen.pop();
 

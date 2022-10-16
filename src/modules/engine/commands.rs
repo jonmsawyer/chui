@@ -4,7 +4,7 @@ use super::super::{
 use super::parser::{ParserEngine};
 
 /// Switch the current move parser based on a `CommandKind`.
-pub fn switch_parser(engine: &mut Engine<'static>, command: &Command) {
+pub fn switch_parser(engine: &mut Engine, command: &Command) {
     let context = CommandContext::SwitchParser;
 
     loop {

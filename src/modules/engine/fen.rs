@@ -66,7 +66,7 @@ pub fn get_fen_full_move_counter(engine: &Engine) -> String {
 }
 
 /// Display the FEN layout of the board.
-pub fn get_fen(engine: &Engine<'static>) -> String {
+pub fn get_fen(engine: &Engine) -> String {
     format!(
         "FEN: {}\nX-FEN: {}\nShredder-FEN: {}",
         Fen::get_fen(&engine),

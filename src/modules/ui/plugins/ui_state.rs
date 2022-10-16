@@ -7,13 +7,14 @@ use super::SpriteCollection;
 use super::main_ui::INFO_PANEL_WIDTH;
 use super::main_ui::ANNOTATION_PANEL_WIDTH;
 use super::GameState;
+use crate::{Engine, PieceKind, Color as PieceColor};
 use crate::modules::ui::events::ResizeBoardEvent;
 
 const START_X_COORD: f32 = -4.0; // The left four squares of the chessboard, in world coordinates
 const START_Y_COORD: f32 = 4.0; // The top four squares of the chessboard, in world coordinates
 const SPRITE_WIDTH: f32 = 256.0; // The size of the sprite in x*y dimentions (square)
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct UiState {
     pub is_window_open: bool,
     pub ui_scale_factor: f32,
@@ -42,7 +43,7 @@ fn configure_ui_state(mut ui_state: ResMut<UiState>) {
     ui_state.annotation_panel_width = ANNOTATION_PANEL_WIDTH;
     ui_state.square_pixels = 72.0;
     ui_state.board_margin = 104.0;
-    ui_state.piece_scale_factor = 0.8;
+    ui_state.piece_scale_factor = 1.0;
 }
 
 pub fn update_square_pixels(mut ui_state: ResMut<UiState>) -> ResMut<UiState> {
@@ -113,15 +114,18 @@ fn configure_ui_visuals(mut egui_ctx: ResMut<EguiContext>) {
     });
 }
 
+
 fn init_board(
     my_assets: Res<SpriteCollection>,
     mut commands: Commands,
-    ui_state: Res<UiState>
+    ui_state: Res<UiState>,
+    engine: Res<Engine>
 ) {
     let offset = ui_state.square_pixels / 2.0_f32; // by half because textures are centered
     let scale = ui_state.square_pixels / SPRITE_WIDTH; // 0.28125 by default
     let start_x = START_X_COORD * SPRITE_WIDTH * scale; // -288.0 by default
     let start_y = START_Y_COORD * SPRITE_WIDTH * scale; // 288.0 by default
+
     let mut x = start_x;
     let mut y = start_y;
     let mut row: f32 = 0.;
@@ -148,6 +152,184 @@ fn init_board(
             y = start_y - (row * ui_state.square_pixels);
         }
     }
+
+    let mut x = start_x;
+    let mut y = start_y;
+    let mut row: f32 = 0.;
+
+    engine.board.get_board().iter().enumerate().for_each(|(x_idx, rank)| {
+        rank.iter().enumerate().for_each(|(y_idx, piece)| {
+            let idx = (x_idx * 8) + y_idx;
+            if let Some(piece) = piece {
+                match (piece.get_piece(), piece.get_color()) {
+                    (PieceKind::King, PieceColor::White) => {
+                        // ("K".yellow().bold(), "♔".yellow().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(7),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Queen, PieceColor::White) => {
+                        // ("Q".yellow().bold(), "♕".yellow().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(6),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Rook, PieceColor::White) => {
+                        // ("R".yellow().bold(), "♖".yellow().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(5),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Bishop, PieceColor::White) => {
+                        // ("B".yellow().bold(), "♗".yellow().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(4),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Knight, PieceColor::White) => {
+                        // ("N".yellow().bold(), "♘".yellow().bold())
+                        commands
+                        .spawn_bundle(SpriteSheetBundle {
+                            transform: Transform {
+                                translation: Vec3::new(x + offset, y - offset, 0.5),
+                                ..Default::default()
+                            }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                            sprite: TextureAtlasSprite::new(3),
+                            texture_atlas: my_assets.tiles.clone(),
+                            ..Default::default()
+                        }).insert(*piece);
+                     },
+                    (PieceKind::Pawn, PieceColor::White) => {
+                        // ("P".yellow().bold(), "♙".yellow().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(2),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::King, PieceColor::Black) => {
+                        // ("k".magenta().bold(), "♚".magenta().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(13),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Queen, PieceColor::Black) => {
+                        // ("q".magenta().bold(), "♛".magenta().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(12),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Rook, PieceColor::Black) => {
+                        // ("r".magenta().bold(), "♜".magenta().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(11),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Bishop, PieceColor::Black) => {
+                        // ("b".magenta().bold(), "♝".magenta().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(10),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Knight, PieceColor::Black) => {
+                        // ("n".magenta().bold(), "♞".magenta().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(9),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                    (PieceKind::Pawn, PieceColor::Black) => {
+                        // ("p".magenta().bold(), "♟".magenta().bold())
+                        commands
+                            .spawn_bundle(SpriteSheetBundle {
+                                transform: Transform {
+                                    translation: Vec3::new(x + offset, y - offset, 0.5),
+                                    ..Default::default()
+                                }.with_scale(Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.5)),
+                                sprite: TextureAtlasSprite::new(8),
+                                texture_atlas: my_assets.tiles.clone(),
+                                ..Default::default()
+                            }).insert(*piece);
+                    },
+                }
+            }
+
+            x += ui_state.square_pixels;
+
+            if (idx + 1) % 8 == 0 { // 8 squares per row
+                row += 1.0_f32;
+                x = start_x;
+                y = start_y - (row * ui_state.square_pixels);
+            }
+        });
+    });
 }
 
 /// Our UI State plugin

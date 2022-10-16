@@ -8,7 +8,7 @@ use super::piece::Color;
 use super::player::Player;
 use super::board::{ChessVariant, Board};
 use super::chess_move::Move;
-use super::MoveGenerator;
+//use super::MoveGenerator;
 use super::parser::{self, Parser, ParserEngine};
 use super::{Command, CommandContext, CommandKind};
 //use super::Fen;
@@ -74,7 +74,7 @@ pub enum DrawCondition {
 /// };
 /// ```
 #[derive(Debug)]
-pub struct Engine<'a> {
+pub struct Engine {
     /// Represents the `White` player.
     pub white: Player,
 
@@ -139,7 +139,9 @@ pub struct Engine<'a> {
     /// later in favor of an actual move parser. For now, this
     /// will do. Access the move list via
     /// `self.move_generator.move_list` (which is a `Vec<String>`).
+    /*
     pub move_generator: MoveGenerator<'a>,
+    */
 
     pub move_list: Vec<Move>,
 
@@ -152,7 +154,7 @@ pub struct Engine<'a> {
     pub display_for: Option<Color>,
 }
 
-impl Default for Engine<'static> {
+impl Default for Engine {
     fn default() -> Self {
         let white = Player::new(
             Color::White,
@@ -176,17 +178,17 @@ impl Default for Engine<'static> {
 }
 
 /// Formats the position for white.
-impl fmt::Display for Engine<'static> {
+impl fmt::Display for Engine {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.white_to_string())
     }
 }
 
-impl Engine<'static> {
+impl Engine {
     /// Return a new instance of `Ok<Engine>` given a white
     /// `Player` and a black `Player`.
     pub fn new(player_1: Player, player_2: Player, parser_engine: ParserEngine)
-    -> ChuiResult<Engine<'static>>
+    -> ChuiResult<Engine>
     {
         if player_1.color == player_2.color {
             return Err(
@@ -226,7 +228,7 @@ impl Engine<'static> {
                 move_counter: 1,
                 enpassant_target_square: ('-', 9),
                 true_enpassant_target_square: ('-', 9),
-                move_generator: MoveGenerator::generate_move_list(),
+                //move_generator: MoveGenerator::generate_move_list(),
                 parser: parser::new(parser_engine),
                 move_list: Vec::<Move>::new(),
                 current_move: None,
