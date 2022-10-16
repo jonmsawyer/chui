@@ -17,11 +17,7 @@ fn main() {
 // When Chui is run as a command line application:
 //  * On Windows, the `DejaVu Sans Mono` font should be used
 //    in your terminal. Size 18 font looks decent.
-
-// use chui::{
-//     Engine, Player, Color,
-//     parser::ParserEngine,
-// };
+//
 //
 // fn main() {
 //     let white = Player::new(
@@ -43,3 +39,10 @@ fn main() {
 //         .run()
 //         .expect("Failed to run engine");
 // }
+//
+// Or easy default:
+//
+//fn main() {
+//    engine = Engine::default();
+//    engine.run().expect("Failed to run engine");
+//}

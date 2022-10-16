@@ -16,7 +16,7 @@ pub fn switch_parser(engine: &mut Engine<'static>, command: &Command) {
 
         let input = Engine::get_input();
 
-        match command.process_command(context, &input) {
+        match command.process_command(context, input) {
             Some(CommandKind::SwitchToAlgebraicParser) =>{
                 let parser_engine = ParserEngine::Algebraic;
                 println!("Switching parser to {:?}.", parser_engine);

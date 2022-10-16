@@ -13,7 +13,7 @@ pub struct ICCFParser;
 impl Parser for ICCFParser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, _the_move: &str, _to_move: Color)
+    fn parse(&mut self, _the_move: String, _to_move: Color)
     -> ChuiResult<Move>
     {
         Err(
@@ -34,7 +34,7 @@ impl Parser for ICCFParser {
 
 impl ICCFParser {
     /// Return a new dynamic parser that implements the `Parser` trait.
-    pub fn new() -> Box<dyn Parser> {
+    pub fn new() -> Box<dyn Parser + Send + Sync> {
         Box::new(ICCFParser { })
     }
 }

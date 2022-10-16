@@ -45,10 +45,6 @@ fn resize_board(
         let mut x = start_x;
         let mut y = start_y;
         let mut row: f32 = 0.;
-        println!(
-            "ResizeBoardEvent: offset = {}, scale = {}, start_x = {}, start_y = {}, x = {}, y = {}",
-            offset, scale, start_x, start_y, x, y
-        );
 
         query.iter_mut().for_each(|(square, mut transform)| {
             transform.translation = Vec3::new(x + offset, y - offset, 0.);

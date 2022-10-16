@@ -16,7 +16,7 @@ const SPRITE_WIDTH: f32 = 256.0; // The size of the sprite in x*y dimentions (sq
 #[derive(Default)]
 pub struct UiState {
     pub is_window_open: bool,
-    pub scale_factor: f32,
+    pub ui_scale_factor: f32,
     pub status: String,
     pub window_width: f32,
     pub window_height: f32,
@@ -24,6 +24,7 @@ pub struct UiState {
     pub annotation_panel_width: f32,
     pub square_pixels: f32,
     pub board_margin: f32,
+    pub piece_scale_factor: f32,
 }
 
 #[derive(Component)]
@@ -33,6 +34,7 @@ pub struct Square {
 
 fn configure_ui_state(mut ui_state: ResMut<UiState>) {
     ui_state.is_window_open = false;
+    ui_state.ui_scale_factor = 1.0;
     ui_state.status = String::from("Chui Loaded");
     ui_state.window_width = 1280.0; // Bevy window default
     ui_state.window_height = 720.0; // Bevy window default
@@ -40,22 +42,22 @@ fn configure_ui_state(mut ui_state: ResMut<UiState>) {
     ui_state.annotation_panel_width = ANNOTATION_PANEL_WIDTH;
     ui_state.square_pixels = 72.0;
     ui_state.board_margin = 104.0;
-    ui_state.scale_factor = 1.0;
+    ui_state.piece_scale_factor = 0.8;
 }
 
 pub fn update_square_pixels(mut ui_state: ResMut<UiState>) -> ResMut<UiState> {
     let x_square_pixels = (
         ui_state.window_width -
         ui_state.board_margin -
-        (ui_state.info_panel_width * ui_state.scale_factor) -
-        (ui_state.annotation_panel_width * ui_state.scale_factor)
+        (ui_state.info_panel_width * ui_state.ui_scale_factor) -
+        (ui_state.annotation_panel_width * ui_state.ui_scale_factor)
     ) / 8.0; // 8 columns
 
     let y_square_pixels = (
         ui_state.window_height -
         ui_state.board_margin -
-        (25.0 * ui_state.scale_factor) - // 25.0 pixels for menu bar
-        (25.0 * ui_state.scale_factor)   // 25.0 pixels for status bar
+        (25.0 * ui_state.ui_scale_factor) - // 25.0 pixels for menu bar
+        (25.0 * ui_state.ui_scale_factor)   // 25.0 pixels for status bar
     ) / 8.0; // 8 columns
 
     if x_square_pixels <= y_square_pixels {
@@ -79,9 +81,9 @@ fn update_ui_scale_factor(
     if keyboard_input.pressed(KeyCode::LControl) &&
        keyboard_input.just_pressed(KeyCode::Equals)
     {
-        ui_state.scale_factor += 0.1;
-        if ui_state.scale_factor > 2.0 {
-            ui_state.scale_factor = 2.0;
+        ui_state.ui_scale_factor += 0.1;
+        if ui_state.ui_scale_factor > 2.0 {
+            ui_state.ui_scale_factor = 2.0;
         }
         ui_state = update_square_pixels(ui_state);
         // Notify that the board should be resized
@@ -91,16 +93,16 @@ fn update_ui_scale_factor(
     if keyboard_input.pressed(KeyCode::LControl) &&
        keyboard_input.just_pressed(KeyCode::Minus)
     {
-        ui_state.scale_factor -= 0.1;
-        if ui_state.scale_factor < 1.0 {
-            ui_state.scale_factor = 1.0;
+        ui_state.ui_scale_factor -= 0.1;
+        if ui_state.ui_scale_factor < 1.0 {
+            ui_state.ui_scale_factor = 1.0;
         }
         ui_state = update_square_pixels(ui_state);
         // Notify that the board should be resized
         resize_board_event.send_default();
     }
 
-    egui_settings.scale_factor = ui_state.scale_factor as f64;
+    egui_settings.scale_factor = ui_state.ui_scale_factor as f64;
 }
 
 fn configure_ui_visuals(mut egui_ctx: ResMut<EguiContext>) {
@@ -154,16 +156,10 @@ pub struct UiStatePlugin;
 impl Plugin for UiStatePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiState>()
-            // Color used to clear the buffer between frames.
-            // It's a "background" for unrendered content.
             .insert_resource(ClearColor(Color::BLACK))
             .add_startup_system(configure_ui_state)
             .add_startup_system(configure_ui_visuals)
             .add_system(update_ui_scale_factor)
-            //.add_system(update_square_pixels)
-            .add_system_set(
-                SystemSet::on_enter(GameState::Next)
-                    .with_system(init_board)
-            );
+            .add_system_set(SystemSet::on_enter(GameState::Next).with_system(init_board));
     }
 }

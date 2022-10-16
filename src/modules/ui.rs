@@ -7,6 +7,7 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 
 pub mod plugins;
 pub mod events;
+pub mod resources;
 
 
 pub struct Ui;
@@ -21,6 +22,9 @@ impl Ui {
             //.add_plugin(EditorPlugin) // Wait til this is in crates.io
             .add_plugin(WorldInspectorPlugin::new()) // bevy_inspector_egui plugin
 
+            // Chui's resources
+            .init_resource::<resources::Engine>()
+
             // Chui's custom events
             .add_event::<events::ResizeBoardEvent>()
 
@@ -30,6 +34,8 @@ impl Ui {
             .add_plugin(plugins::CameraControllerPlugin)
             .add_plugin(plugins::AssetsPlugin)
             .add_plugin(plugins::MainUiPlugin)
+
+            // Run it
             .run();
     }
 }

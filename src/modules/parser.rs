@@ -23,17 +23,17 @@ pub mod iccf;
 /// in an expected notation and return a `Move` object, representing
 /// the validty or invalidity of the requested move for the given
 /// chessboard.
-/// 
+///
 /// Example:
-/// 
+///
 /// ```
 /// use chui::{
 ///     Move, Color, Piece, parser::Parser,
 ///     ChuiResult, ChuiError, Engine
 /// };
-/// 
+///
 /// pub struct MyParser;
-/// 
+///
 /// impl Parser for MyParser {
 ///     fn parse(&mut self, _the_move: &str, _color: Color)
 ///     -> ChuiResult<Move>
@@ -44,20 +44,20 @@ pub mod iccf;
 ///             )
 ///         )
 ///     }
-/// 
+///
 ///     fn name(&self) -> String {
 ///         "My Parser".to_string()
 ///     }
-/// 
+///
 ///     fn eg(&self) -> String {
 ///         "My Parser example moves".to_string()
 ///     }
 /// }
 /// ```
-pub trait Parser {
+pub trait Parser: Send + Sync {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, the_move: &str, to_move: Color)
+    fn parse(&mut self, the_move: String, to_move: Color)
     -> ChuiResult<Move>;
 
     /// The name of the parser. Used in help messages and debug.
@@ -68,10 +68,10 @@ pub trait Parser {
 
     /// Trim the whitespace from `the_move` and check to see that
     /// the move doesn't contain any whitespace after the trim.
-    fn trim_and_check_whitespace<'a>(&self, the_move: &'a str)
-    -> ChuiResult<&'a str>
+    fn trim_and_check_whitespace(&self, the_move: String)
+    -> ChuiResult<String>
     {
-        let the_move = the_move.trim();
+        let the_move = the_move.trim().to_string();
 
         if the_move.eq("") {
             self.invalid_input("Input move cannot be empty")?;
@@ -117,9 +117,10 @@ pub trait Parser {
     fn invalid_input(&self, reason: &str) -> ChuiResult<()> {
         Err(ChuiError::InvalidInput(reason.to_string()))
     }
+
 }
 
-impl fmt::Debug for dyn Parser {
+impl fmt::Debug for dyn Parser + Send + Sync {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Parser")
             .finish()
@@ -173,33 +174,33 @@ pub enum ParserEngine {
 
 /// Given a variant of `ParserEngine`, this function returns a
 /// dynamic parser that implements the `Parse` trait.
-/// 
+///
 /// Example:
-/// 
+///
 /// ```
 /// use chui::{Engine, Player, Color, parser::{self, ParserEngine}};
-/// 
+///
 /// let white = Player::new(
 ///     Color::White,
 ///     Some("Camina Drummer"),
 ///     Some(37),
 ///     None,
 /// );
-/// 
+///
 /// let black = Player::new(
 ///     Color::Black,
 ///     Some("Klaes Ashford"),
 ///     Some(72),
 ///     Some(1500),
 /// );
-/// 
+///
 /// let mut parser_engine = parser::new(ParserEngine::Algebraic);
-/// 
+///
 /// if let Ok(engine) = Engine::new(white, black, ParserEngine::Algebraic) {
 ///     println!("the move: {:?}", parser_engine.parse("P-K4", Color::White));
 /// };
 /// ```
-pub fn new(parser: ParserEngine) -> Box<dyn Parser> {
+pub fn new(parser: ParserEngine) -> Box<dyn Parser + Send + Sync> {
     match parser {
         ParserEngine::Algebraic => {
             algebraic::AlgebraicParser::new()
@@ -228,7 +229,7 @@ pub fn new(parser: ParserEngine) -> Box<dyn Parser> {
         ParserEngine::ReversibleAlgebraic => {
             reversible_algebraic::ReversibleAlgebraicParser::new()
         },
-        
+
         ParserEngine::Smith => {
             smith::SmithParser::new()
         },

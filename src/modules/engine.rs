@@ -86,7 +86,7 @@ pub struct Engine<'a> {
     pub board: Board,
 
     /// Represents the current move parser.
-    pub parser: Box<dyn Parser>,
+    pub parser: Box<dyn Parser + Send + Sync>,
 
     /// The `Color` to move.
     pub to_move: Color,
@@ -150,6 +150,29 @@ pub struct Engine<'a> {
     pub draw_condition: Option<DrawCondition>,
 
     pub display_for: Option<Color>,
+}
+
+impl Default for Engine<'static> {
+    fn default() -> Self {
+        let white = Player::new(
+            Color::White,
+            Some("Camina Drummer"),
+            Some(37),
+            None,
+        );
+
+        let black = Player::new(
+            Color::Black,
+            Some("Klaes Ashford"),
+            Some(72),
+            Some(1500),
+        );
+
+        let engine = Engine::new(white, black, ParserEngine::Algebraic)
+            .expect("Failed to initialize engine");
+
+        engine
+    }
 }
 
 /// Formats the position for white.
@@ -236,7 +259,9 @@ impl Engine<'static> {
             let the_move = Engine::get_input();
 
             for the_move in the_move.split_whitespace() {
-                match command.process_command(context, &the_move) {
+                let the_move = String::from(the_move);
+                let command_move = the_move.clone();
+                match command.process_command(context, command_move) {
                     Some(CommandKind::Quit) => {
                         break_loop = true;
                     },
@@ -377,7 +402,7 @@ impl Engine<'static> {
                             self.draw_condition = None; // ?
                         }
 
-                        match self.parse(&the_move, self.to_move).as_ref() {
+                        match self.parse(the_move, self.to_move).as_ref() {
                             Ok(move_obj) => {
                                 println!("Ok! The move: {:?}", move_obj);
                                 self.current_move = Some(move_obj.clone());
@@ -421,7 +446,7 @@ impl Engine<'static> {
 
     /// Parse the move. Returns an Ok(Move) if the parsing of the
     /// move is successful, otherwise a `ChuiError` will result.
-    pub fn parse(&mut self, the_move: &str, to_move: Color)
+    pub fn parse(&mut self, the_move: String, to_move: Color)
     -> ChuiResult<Move>
     {
         self.parser.parse(the_move, to_move)

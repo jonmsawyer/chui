@@ -207,8 +207,8 @@ impl Move {
     //
 
     /// Set the input move.
-    pub fn set_input_move(&mut self, the_move: &str) {
-        self.input_move = the_move.to_string();
+    pub fn set_input_move(&mut self, the_move: String) {
+        self.input_move = the_move;
     }
 
     /// Set the moving piece.

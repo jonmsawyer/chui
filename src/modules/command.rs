@@ -17,7 +17,7 @@ pub enum CommandKind {
 
     /// Display the board for the `Color` that is to move.
     DisplayToMove,
-    
+
     /// Display the board for `White`.
     DisplayForWhite,
 
@@ -109,7 +109,7 @@ impl Command {
     }
 
     /// Process the input command based on the given context.
-    pub fn process_command(&self, context: CommandContext, command: &str)
+    pub fn process_command(&self, context: CommandContext, command: String)
     -> Option<CommandKind>
     {
         // Get the list of commands for the context.
@@ -119,7 +119,7 @@ impl Command {
             // return Some(CommandKind).
             for command_part in list.iter() {
                 for cmd in command_part.commands.iter() {
-                    if cmd.eq(command) {
+                    if cmd.eq(&command) {
                         return Some(command_part.command_kind)
                     }
                 }
@@ -140,9 +140,9 @@ impl Command {
     /// the command list and determins the length of each command
     /// list and description, then pretty prints the list of
     /// commands with their description.
-    /// 
+    ///
     /// Example output:
-    /// 
+    ///
     /// <pre>
     /// Input                   Description
     /// -------                 ------------------------------------------------
@@ -352,7 +352,7 @@ impl Command {
                     description: "Algebraic Parser".to_string(),
                     command_kind: CommandKind::SwitchToAlgebraicParser,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "2".to_string(),
@@ -362,7 +362,7 @@ impl Command {
                                  (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToConciseReversibleParser,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "3".to_string(),
@@ -372,7 +372,7 @@ impl Command {
                                  (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToCoordinateParser,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "4".to_string(),
@@ -382,7 +382,7 @@ impl Command {
                                  (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToDescriptiveParser,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "5".to_string(),
@@ -392,7 +392,7 @@ impl Command {
                                  (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToICCFParser,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "6".to_string(),
@@ -402,7 +402,7 @@ impl Command {
                                  (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToLongAlgebraicParser,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "7".to_string(),
@@ -412,7 +412,7 @@ impl Command {
                                  (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToReversibleAlgebraicParser,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "8".to_string(),
@@ -422,7 +422,7 @@ impl Command {
                                  (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToSmithParser,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "h".to_string(),
@@ -433,7 +433,7 @@ impl Command {
                     description: "Display this help message".to_string(),
                     command_kind: CommandKind::Help,
                 },
-                
+
                 CommandPart {
                     commands: vec![
                         "b".to_string(),
