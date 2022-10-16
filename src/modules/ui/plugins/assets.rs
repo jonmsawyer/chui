@@ -63,26 +63,15 @@ fn resize_board(
             }
         });
 
-        // let mut x = start_x;
-        // let mut y = start_y;
-        // let mut row: f32 = 8.;
-
         set.p1().iter_mut().for_each(|(piece, mut transform)| {
             let (x, y) = piece.get_coords();
-            println!("piece.coords = ({}, {})", x, y);
+
+            // I don't know why the next two lines work, but they do, after much deduction.
             let x: f32 = start_x - start_x * x as f32 / 4.0;
             let y: f32 = -(start_y - start_y * y as f32 / 4.0) + (start_y / 4.0);
+
             transform.translation = Vec3::new(x + offset, y - offset, 0.5);
             transform.scale = Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.);
-
-            // y += ui_state.square_pixels;
-            // let idx = (piece.get_coords().1 * 8) + piece.get_coords().0;
-
-            // if (idx + 1) % 8 == 0 { // 8 squares per row
-            //     row += 1.0_f32;
-            //     x = start_x;
-            //     y = start_y - (row * ui_state.square_pixels);
-            // }
         });
     }
 }
