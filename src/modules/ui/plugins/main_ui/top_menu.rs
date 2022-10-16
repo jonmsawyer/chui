@@ -1,6 +1,8 @@
 use bevy::prelude::ResMut;
 use bevy_egui::{egui, EguiContext};
 
+use crate::modules::ui::plugins::UiState;
+
 pub mod file;
 pub use file::file;
 
@@ -42,12 +44,12 @@ pub use help::help;
 
 pub use super::layout_jobs;
 
-pub fn top_menu(egui_ctx: &mut ResMut<EguiContext>) {
+pub fn top_menu(egui_ctx: &mut ResMut<EguiContext>, ui_state: &mut ResMut<UiState>) {
     egui::TopBottomPanel::top("menu")
         .show(egui_ctx.ctx_mut(), |ui| {
             egui::menu::bar(ui, |ui| {
                 file(ui);
-                commands(ui);
+                commands(ui, ui_state);
                 copy(ui);
                 levels(ui);
                 mode(ui);

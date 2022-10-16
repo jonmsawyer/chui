@@ -26,6 +26,7 @@ pub struct UiState {
     pub square_pixels: f32,
     pub board_margin: f32,
     pub piece_scale_factor: f32,
+    pub draw_for_white: bool,
 }
 
 #[derive(Component)]
@@ -44,6 +45,7 @@ fn configure_ui_state(mut ui_state: ResMut<UiState>) {
     ui_state.square_pixels = 72.0;
     ui_state.board_margin = 104.0;
     ui_state.piece_scale_factor = 1.0;
+    ui_state.draw_for_white = true;
 }
 
 pub fn update_square_pixels(mut ui_state: ResMut<UiState>) -> ResMut<UiState> {

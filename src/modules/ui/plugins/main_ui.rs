@@ -16,9 +16,9 @@ pub const ANNOTATION_PANEL_WIDTH: f32 = 300.0;
 
 fn main_ui(
     mut egui_ctx: ResMut<EguiContext>,
-    ui_state: ResMut<UiState>,
+    mut ui_state: ResMut<UiState>,
 ) {
-    top_menu(&mut egui_ctx);
+    top_menu(&mut egui_ctx, &mut ui_state);
 
     egui::TopBottomPanel::bottom("status")
         .show(egui_ctx.ctx_mut(), |ui| {

@@ -1,8 +1,11 @@
+use crate::modules::ui::plugins::UiState;
+
 use super::layout_jobs;
 
+use bevy::prelude::ResMut;
 use bevy_egui::egui::{self, Ui, InnerResponse};
 
-pub fn commands(ui: &mut Ui) -> InnerResponse<Option<()>> {
+pub fn commands(ui: &mut Ui, ui_state: &mut ResMut<UiState>) -> InnerResponse<Option<()>> {
     egui::menu::menu_button(ui, layout_jobs::top_menu_commands(), |ui| {
         // Commands > Compute / Switch Sides
         if ui.button(layout_jobs::top_menu_compute())
@@ -41,6 +44,14 @@ pub fn commands(ui: &mut Ui) -> InnerResponse<Option<()>> {
             .clicked()
         {
             println!("Resign was clicked");
+        }
+
+        // Commands > Flip Board
+        if ui.button(layout_jobs::top_menu_flip_board())
+            .clicked()
+        {
+            ui_state.draw_for_white = !ui_state.draw_for_white;
+            println!("Flip Board was clicked");
         }
 
         ui.separator();

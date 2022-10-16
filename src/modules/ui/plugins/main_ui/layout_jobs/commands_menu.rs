@@ -208,3 +208,14 @@ pub fn top_menu_game_details() -> LayoutJob {
 
     job
 }
+
+/// top_menu_flip_board()
+/// "Flip Board"
+pub fn top_menu_flip_board() -> LayoutJob {
+    let mut job = LayoutJob::default();
+
+    job.append("F", 0.0, top_menu_text_format_underline());
+    job.append("lip Board", 0.0, top_menu_text_format());
+
+    job
+}
