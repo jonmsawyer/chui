@@ -49,28 +49,28 @@ fn resize_board(
         let mut y = start_y;
         let mut row: f32 = 0.;
 
+        set.p0().iter_mut().for_each(|(square, mut transform)| {
+            println!("square.index = {}", square.index);
+            transform.translation = Vec3::new(x + offset, y - offset, 0.);
+            transform.scale = Vec3::new(scale, scale, 0.);
+
+            x += ui_state.square_pixels;
+
+            if (square.index + 1) % 8 == 0 { // 8 squares per row
+                row += 1.0_f32;
+                x = start_x;
+                y = start_y - (row * ui_state.square_pixels);
+            }
+        });
+
         match ui_state.draw_for_white {
             true => {
-                set.p0().iter_mut().for_each(|(square, mut transform)| {
-                    println!("square.index = {}", square.index);
-                    transform.translation = Vec3::new(x + offset, y - offset, 0.);
-                    transform.scale = Vec3::new(scale, scale, 0.);
-
-                    x += ui_state.square_pixels;
-
-                    if (square.index + 1) % 8 == 0 { // 8 squares per row
-                        row += 1.0_f32;
-                        x = start_x;
-                        y = start_y - (row * ui_state.square_pixels);
-                    }
-                });
-
                 set.p1().iter_mut().for_each(|(piece, mut transform)| {
                     let (x, y) = piece.get_coords();
 
                     // I don't know why the next two lines work, but they do, after much deduction.
                     let x: f32 = start_x - start_x * x as f32 / 4.0;
-                    let y: f32 = -(start_y - start_y * y as f32 / 4.0) + (start_y / 4.0);
+                    let y: f32 = -(start_y - start_y * y as f32 / 4.0) + start_y / 4.0;
 
                     transform.translation = Vec3::new(x + offset, y - offset, 0.5);
                     transform.scale = Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.);
@@ -78,26 +78,12 @@ fn resize_board(
             },
 
             false => {
-                set.p0().iter_mut().for_each(|(square, mut transform)| {
-                    println!("square.index = {}", square.index);
-                    transform.translation = Vec3::new(x - offset, y + offset, 0.);
-                    transform.scale = Vec3::new(scale, scale, 0.);
-
-                    x += ui_state.square_pixels;
-
-                    if (square.index + 1) % 8 == 0 { // 8 squares per row
-                        row += 1.0_f32;
-                        x = start_x;
-                        y = start_y - (row * ui_state.square_pixels);
-                    }
-                });
-
                 set.p1().iter_mut().for_each(|(piece, mut transform)| {
                     let (x, y) = piece.get_coords();
 
                     // I don't know why the next two lines work, but they do, after much deduction.
-                    let x: f32 = -(start_x - start_x * x as f32 / 4.0);
-                    let y: f32 = (start_y - start_y * y as f32 / 4.0) - (start_y / 4.0);
+                    let x: f32 = -(start_x - (start_x * x as f32 / 4.0)) + start_x / 4.0;
+                    let y: f32 = start_y - start_y * y as f32 / 4.0;
 
                     transform.translation = Vec3::new(x + offset, y - offset, 0.5);
                     transform.scale = Vec3::new(scale*ui_state.piece_scale_factor, scale*ui_state.piece_scale_factor, 0.);

@@ -1,11 +1,18 @@
+use bevy::prelude::EventWriter;
+
 use crate::modules::ui::plugins::UiState;
+use crate::modules::ui::events;
 
 use super::layout_jobs;
 
 use bevy::prelude::ResMut;
 use bevy_egui::egui::{self, Ui, InnerResponse};
 
-pub fn commands(ui: &mut Ui, ui_state: &mut ResMut<UiState>) -> InnerResponse<Option<()>> {
+pub fn commands(
+    ui: &mut Ui,
+    ui_state: &mut ResMut<UiState>,
+    resize_board_event: &mut EventWriter<events::ResizeBoardEvent>,
+) -> InnerResponse<Option<()>> {
     egui::menu::menu_button(ui, layout_jobs::top_menu_commands(), |ui| {
         // Commands > Compute / Switch Sides
         if ui.button(layout_jobs::top_menu_compute())
@@ -51,6 +58,7 @@ pub fn commands(ui: &mut Ui, ui_state: &mut ResMut<UiState>) -> InnerResponse<Op
             .clicked()
         {
             ui_state.draw_for_white = !ui_state.draw_for_white;
+            resize_board_event.send_default();
             println!("Flip Board was clicked");
         }
 

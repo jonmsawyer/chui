@@ -3,6 +3,8 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 
+use crate::modules::ui::events::ResizeBoardEvent;
+
 use super::ui_state::UiState;
 
 pub mod layout_jobs;
@@ -17,8 +19,9 @@ pub const ANNOTATION_PANEL_WIDTH: f32 = 300.0;
 fn main_ui(
     mut egui_ctx: ResMut<EguiContext>,
     mut ui_state: ResMut<UiState>,
+    mut resize_board_event: EventWriter<ResizeBoardEvent>
 ) {
-    top_menu(&mut egui_ctx, &mut ui_state);
+    top_menu(&mut egui_ctx, &mut ui_state, &mut resize_board_event);
 
     egui::TopBottomPanel::bottom("status")
         .show(egui_ctx.ctx_mut(), |ui| {
