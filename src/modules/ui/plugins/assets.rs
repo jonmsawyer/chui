@@ -81,7 +81,7 @@ fn resize_board(
                     let (x, y) = piece.get_coords();
 
                     // I don't know why the next two lines work, but they do, after much deduction.
-                    let x: f32 = -(start_x - (start_x * x as f32 / 4.0)) + start_x / 4.0;
+                    let x: f32 = -(start_x - start_x * x as f32 / 4.0) + start_x / 4.0;
                     let y: f32 = start_y - start_y * y as f32 / 4.0;
 
                     transform.translation = Vec3::new(x + offset, y - offset, 0.5);

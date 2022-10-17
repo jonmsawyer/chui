@@ -70,7 +70,7 @@ pub fn update_square_pixels(mut ui_state: ResMut<UiState>) -> ResMut<UiState> {
         ui_state.square_pixels = y_square_pixels;
     }
 
-    println!("square_pixels = {}", ui_state.square_pixels);
+    // println!("square_pixels = {}", ui_state.square_pixels);
 
     ui_state
 }

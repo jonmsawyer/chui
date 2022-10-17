@@ -18,8 +18,8 @@ fn resize_notificator(
     mut resize_board_event: EventWriter<ResizeBoardEvent>,
 ) {
     for window in resize_event.iter() {
-        println!("width = {} height = {}", window.width, window.height);
-        
+        // println!("width = {} height = {}", window.width, window.height);
+
         ui_state.window_width = window.width;
         ui_state.window_height = window.height;
         ui_state = update_square_pixels(ui_state);
