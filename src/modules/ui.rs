@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use bevy_egui::EguiPlugin;
 //use bevy_editor_pls::prelude::*; // Wait til this is in crates.io
-use bevy_inspector_egui::WorldInspectorPlugin;
+//use bevy_inspector_egui::WorldInspectorPlugin;
 
 pub mod plugins;
 pub mod events;
@@ -20,7 +20,7 @@ impl Ui {
             .add_plugins(DefaultPlugins) // Default Bevy plugins
             .add_plugin(EguiPlugin) // Default Egui plugins
             //.add_plugin(EditorPlugin) // Wait til this is in crates.io
-            .add_plugin(WorldInspectorPlugin::new()) // bevy_inspector_egui plugin
+            //.add_plugin(WorldInspectorPlugin::new()) // bevy_inspector_egui plugin
 
             // Chui's resources
             .init_resource::<resources::Engine>()

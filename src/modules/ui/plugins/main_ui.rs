@@ -5,7 +5,7 @@ use bevy_egui::{egui, EguiContext};
 
 use crate::modules::ui::events::ResizeBoardEvent;
 
-use super::ui_state::UiState;
+use super::{ui_state::UiState, MainCamera, Fps, get_mouse_coords, get_world_coords};
 
 pub mod layout_jobs;
 
@@ -19,7 +19,11 @@ pub const ANNOTATION_PANEL_WIDTH: f32 = 300.0;
 fn main_ui(
     mut egui_ctx: ResMut<EguiContext>,
     mut ui_state: ResMut<UiState>,
-    mut resize_board_event: EventWriter<ResizeBoardEvent>
+    mut resize_board_event: EventWriter<ResizeBoardEvent>,
+    windows: Res<Windows>,
+    mut fps: Local<Fps<25>>,
+    time: Res<Time>,
+    query: Query<(&Camera, &GlobalTransform), With<MainCamera>>
 ) {
     top_menu(&mut egui_ctx, &mut ui_state, &mut resize_board_event);
 
@@ -33,8 +37,6 @@ fn main_ui(
         .min_width(INFO_PANEL_WIDTH)
         .resizable(false)
         .show(egui_ctx.ctx_mut(), |ui| {
-            ui.heading("Info Panel");
-
             // ui.horizontal(|ui| {
             //     ui.label("Write something: ");
             //     ui.text_edit_singleline(&mut ui_state.label);
@@ -66,7 +68,32 @@ fn main_ui(
             //         "https://github.com/emilk/egui/",
             //     ));
             // });
-        });
+            if ui_state.debug_window {
+                let window = match windows.get_primary() {
+                    Some(win) => win,
+                    None => return
+                };
+                let cursor = get_mouse_coords(window);
+                let coords = get_world_coords(query, windows);
+
+                fps.add(time.delta_seconds());
+
+                if fps.average > f32::EPSILON {
+                    ui.heading("Debug");
+                    ui.label(format!("FPS: {:.2}", fps.average));
+                    ui.label(format!("Mouse Screen Coords: {}, {}", cursor[0] as i32, cursor[1] as i32));
+                    ui.label(format!("Mouse World Coords: {}, {}", coords[0] as i32, coords[1] as i32));
+                    ui.vertical_centered_justified(|options_ui| {
+                        options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Show Mouse Cursor");
+                    });
+                    ui.separator();
+                }
+            }
+
+            // ui.allocate_space(egui::Vec2::new(1.0, 100.0));
+            ui.heading("Info Panel");
+            ui.label("...");
+    });
 
     egui::SidePanel::right("annotation")
         .min_width(ANNOTATION_PANEL_WIDTH)

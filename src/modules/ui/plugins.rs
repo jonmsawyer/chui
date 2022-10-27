@@ -22,4 +22,4 @@ pub mod window_descriptor;
 pub use window_descriptor::WindowDescriptorPlugin;
 
 pub mod debug;
-pub use debug::{DebugPlugin, get_mouse_coords, get_world_coords};
+pub use debug::{DebugPlugin, Fps, get_mouse_coords, get_world_coords};

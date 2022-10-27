@@ -4,30 +4,29 @@ use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
 use bevy_egui::{egui, EguiContext};
 
-use super::{GameState, UiState, MainCamera};
+use super::{UiState, MainCamera};
 
 
 /// Container for calculating our FPS
 #[derive(Debug, Default, Clone, Copy)]
-struct Fps<const N: usize> {
+pub struct Fps<const N: usize> {
     /// Current average FPS
-    average: f32,
+    pub average: f32,
     /// Sum of per-frame time deltas
-    sum: f32,
+    pub sum: f32,
     /// Current measurements count since last recalculation
-    count: usize,
+    pub count: usize,
 }
 
 impl<const N: usize> Fps<N> {
     /// Add a new time delta measurement
-    fn add(&mut self, delta: f32) {
+    pub fn add(&mut self, delta: f32) {
         self.sum += delta;
         self.count = (self.count + 1) % N;
 
         if self.count == 0 {
             // Average delta would be sum/len, but we want average FPS which is the reciprocal
             self.average = N as f32 / self.sum;
-
             self.sum = 0.;
         }
     }
@@ -82,7 +81,7 @@ pub fn get_world_coords(
     }
 }
 
-fn debug_window(
+fn _debug_window(
     mut egui_context: ResMut<EguiContext>,
     windows: Res<Windows>,
     mut ui_state: ResMut<UiState>,
@@ -109,7 +108,7 @@ fn debug_window(
                     ui.vertical_centered_justified(|options_ui| {
                         options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Show Mouse Cursor");
                     });
-                });
+            });
         }
     }
 }
@@ -117,10 +116,10 @@ fn debug_window(
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_update(GameState::Next)
-                .with_system(debug_window)
-            );
+    fn build(&self, _app: &mut App) {
+        // app.add_system_set(
+        //     SystemSet::on_update(GameState::Next)
+        //         .with_system(debug_window)
+        //     );
     }
 }
