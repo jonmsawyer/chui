@@ -64,7 +64,7 @@ fn draw_cursor(
            coords[1] > y - offset_check &&
            coords[1] < y + offset_check - ui_state.square_pixels
         {
-            transform.translation = Vec3::new(x + offset, y - offset, 1.);
+            transform.translation = Vec3::new(x + offset, y - offset, 0.2);
             transform.scale = Vec3::new(scale, scale, 0.);
             visibility.is_visible = ui_state.show_mouse_cursor;
             return;
