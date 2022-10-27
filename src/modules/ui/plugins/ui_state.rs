@@ -27,6 +27,8 @@ pub struct UiState {
     pub board_margin: f32,
     pub piece_scale_factor: f32,
     pub draw_for_white: bool,
+    pub debug_window: bool,
+    pub show_mouse_cursor: bool,
 }
 
 #[derive(Component)]
@@ -46,6 +48,8 @@ fn configure_ui_state(mut ui_state: ResMut<UiState>) {
     ui_state.board_margin = 104.0;
     ui_state.piece_scale_factor = 1.0;
     ui_state.draw_for_white = true;
+    ui_state.debug_window = true;
+    ui_state.show_mouse_cursor = true;
 }
 
 pub fn update_square_pixels(mut ui_state: ResMut<UiState>) -> ResMut<UiState> {
@@ -61,7 +65,7 @@ pub fn update_square_pixels(mut ui_state: ResMut<UiState>) -> ResMut<UiState> {
         ui_state.board_margin -
         (25.0 * ui_state.ui_scale_factor) - // 25.0 pixels for menu bar
         (25.0 * ui_state.ui_scale_factor)   // 25.0 pixels for status bar
-    ) / 8.0; // 8 columns
+    ) / 8.0; // 8 rows
 
     if x_square_pixels <= y_square_pixels {
         ui_state.square_pixels = x_square_pixels;
@@ -115,7 +119,6 @@ fn configure_ui_visuals(mut egui_ctx: ResMut<EguiContext>) {
         ..Default::default()
     });
 }
-
 
 fn init_board(
     my_assets: Res<SpriteCollection>,
