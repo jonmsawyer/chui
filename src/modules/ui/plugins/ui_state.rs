@@ -120,22 +120,27 @@ fn configure_ui_visuals(mut egui_ctx: ResMut<EguiContext>) {
     });
 }
 
+pub fn compute_coords(square_pixels: f32) -> (f32, f32, f32, f32) {
+    let offset = square_pixels / 2.; // by half because textures are centered
+    let scale = square_pixels / SPRITE_WIDTH; // 0.28125 by default
+    let start_x = START_X_COORD * SPRITE_WIDTH * scale; // -288.0 by default
+    let start_y = START_Y_COORD * SPRITE_WIDTH * scale; // 288.0 by default
+
+    (offset, scale, start_x, start_y)
+}
+
 fn init_board(
     my_assets: Res<SpriteCollection>,
     mut commands: Commands,
     ui_state: Res<UiState>,
     engine: Res<Engine>
 ) {
-    let offset = ui_state.square_pixels / 2.0_f32; // by half because textures are centered
-    let scale = ui_state.square_pixels / SPRITE_WIDTH; // 0.28125 by default
-    let start_x = START_X_COORD * SPRITE_WIDTH * scale; // -288.0 by default
-    let start_y = START_Y_COORD * SPRITE_WIDTH * scale; // 288.0 by default
+    let (offset, scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
 
-    let mut x = start_x;
-    let mut y = start_y;
-    let mut row: f32 = 0.;
+    let (mut x, mut y, mut row) = (start_x, start_y, 0.);
 
     for idx in 0..64 { // 64 squares in a chessboard
+        // color_id will be 0 for a light square and 1 for a dark square.
         let color_id = ((idx / 8) % 2 + idx % 2) %2; // 8 squares per row
 
         commands
@@ -158,9 +163,7 @@ fn init_board(
         }
     }
 
-    let mut x = start_x;
-    let mut y = start_y;
-    let mut row: f32 = 0.;
+    let (mut x, mut y, mut row) = (start_x, start_y, 0.);
 
     engine.board.get_board().iter().enumerate().for_each(|(x_idx, rank)| {
         rank.iter().enumerate().for_each(|(y_idx, piece)| {

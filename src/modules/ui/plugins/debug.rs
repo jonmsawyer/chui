@@ -36,7 +36,7 @@ impl<const N: usize> Fps<N> {
 pub fn get_mouse_coords(window: &Window) -> Vec2 {
     match window.cursor_position() {
         Some(cursor) => cursor,
-        None => Vec2::new(-1., -1.),
+        None => Vec2::ZERO,
     }
 }
 
@@ -78,14 +78,14 @@ pub fn get_world_coords(
 
         world_pos
     } else {
-        Vec2::new(-1., -1.)
+        Vec2::ZERO
     }
 }
 
 fn debug_window(
     mut egui_context: ResMut<EguiContext>,
     windows: Res<Windows>,
-    ui_state: Res<UiState>,
+    mut ui_state: ResMut<UiState>,
     mut fps: Local<Fps<25>>,
     time: Res<Time>,
     query: Query<(&Camera, &GlobalTransform), With<MainCamera>>
@@ -106,9 +106,12 @@ fn debug_window(
                     ui.label(format!("FPS: {:.2}", fps.average));
                     ui.label(format!("Mouse Screen Coords: {}, {}", cursor[0] as i32, cursor[1] as i32));
                     ui.label(format!("Mouse World Coords: {}, {}", coords[0] as i32, coords[1] as i32));
+                    ui.vertical_centered_justified(|options_ui| {
+                        options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Show Mouse Cursor");
+                    });
                 });
         }
-        }
+    }
 }
 
 pub struct DebugPlugin;

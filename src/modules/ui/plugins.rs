@@ -7,7 +7,7 @@ pub mod mouse;
 pub use mouse::MousePlugin;
 
 pub mod ui_state;
-pub use ui_state::{UiState, UiStatePlugin, Square, update_square_pixels};
+pub use ui_state::{UiState, UiStatePlugin, Square, update_square_pixels, compute_coords};
 
 pub mod assets;
 pub use assets::{SpriteCollection, AssetsPlugin, SPRITE_WIDTH};
