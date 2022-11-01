@@ -9,9 +9,9 @@ use rand::{Rng, SeedableRng};
 
 use super::{
     GameState, UiState, MainCamera,
-    get_world_coords, compute_coords,
-    SPRITE_WIDTH, START_X_COORD, START_Y_COORD
+    get_world_coords, compute_coords
 };
+use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
 
 
 #[derive(Component)]

@@ -4,13 +4,10 @@ use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
 use crate::Piece;
-use super::{GameState, UiState, Square};
 use crate::modules::ui::events::ResizeBoardEvent;
+use super::{GameState, UiState, Square};
+use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
 
-
-const START_X_COORD: f32 = -4.0; // The left four squares of the chessboard, in world coordinates
-const START_Y_COORD: f32 = 4.0;  // The top four squares of the chessboard, in world coordinates
-pub const SPRITE_WIDTH: f32 = 256.0; // The width of the sprite (square)
 
 #[derive(AssetCollection, Clone)]
 pub struct SpriteCollection {

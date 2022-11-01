@@ -13,11 +13,10 @@ pub mod ui_state;
 pub use ui_state::{
     UiState, UiStatePlugin, Square,
     update_square_pixels, compute_coords,
-    START_X_COORD, START_Y_COORD
 };
 
 pub mod assets;
-pub use assets::{SpriteCollection, AssetsPlugin, SPRITE_WIDTH};
+pub use assets::{SpriteCollection, AssetsPlugin};
 
 pub mod egui_panels;
 pub use egui_panels::EguiPanelsPlugin;

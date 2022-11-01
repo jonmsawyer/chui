@@ -8,6 +8,7 @@ use bevy_egui::EguiPlugin;
 pub mod plugins;
 pub mod events;
 pub mod resources;
+pub mod constants;
 
 
 pub struct Ui;

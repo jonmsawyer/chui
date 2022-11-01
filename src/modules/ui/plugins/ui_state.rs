@@ -3,17 +3,13 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiSettings, EguiContext};
 
-use super::SpriteCollection;
-use super::egui_panels::INFO_PANEL_WIDTH;
-use super::egui_panels::ANNOTATION_PANEL_WIDTH;
-use super::GameState;
 use crate::Engine;
-use crate::modules::ui::events::ResizeBoardEvent;
+use super::{GameState, SpriteCollection};
+use super::super::events::ResizeBoardEvent;
+use super::super::constants::{
+    INFO_PANEL_WIDTH, ANNOTATION_PANEL_WIDTH, START_X_COORD, START_Y_COORD, SPRITE_WIDTH
+};
 
-
-pub const START_X_COORD: f32 = -4.0; // The left four squares of the chessboard, in world coordinates
-pub const START_Y_COORD: f32 = 4.0; // The top four squares of the chessboard, in world coordinates
-const SPRITE_WIDTH: f32 = 256.0; // The size of the sprite in x*y dimentions (square)
 
 #[derive(Default, Clone)]
 pub struct UiState {
