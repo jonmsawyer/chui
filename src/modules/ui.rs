@@ -35,6 +35,7 @@ impl Ui {
             .add_plugin(plugins::AssetsPlugin)
             .add_plugin(plugins::MousePlugin)
             .add_plugin(plugins::EguiPanelsPlugin)
+            .add_plugin(plugins::BoardPlugin)
 
             // Run it
             .run();

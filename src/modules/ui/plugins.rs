@@ -6,6 +6,9 @@ pub use camera::{CameraControllerPlugin, MainCamera};
 pub mod mouse;
 pub use mouse::MousePlugin;
 
+pub mod board;
+pub use board::BoardPlugin;
+
 pub mod ui_state;
 pub use ui_state::{
     UiState, UiStatePlugin, Square,

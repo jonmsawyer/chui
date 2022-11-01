@@ -10,6 +10,7 @@ use super::GameState;
 use crate::Engine;
 use crate::modules::ui::events::ResizeBoardEvent;
 
+
 pub const START_X_COORD: f32 = -4.0; // The left four squares of the chessboard, in world coordinates
 pub const START_Y_COORD: f32 = 4.0; // The top four squares of the chessboard, in world coordinates
 const SPRITE_WIDTH: f32 = 256.0; // The size of the sprite in x*y dimentions (square)

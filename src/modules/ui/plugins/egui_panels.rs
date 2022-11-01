@@ -4,14 +4,13 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 
 use crate::modules::ui::events::ResizeBoardEvent;
-
 use super::{ui_state::UiState, MainCamera, Fps, debug_panel};
+
 
 pub mod layout_jobs;
 
 pub mod top_menu;
 use top_menu::top_menu;
-
 
 pub const INFO_PANEL_WIDTH: f32 = 300.0;
 pub const ANNOTATION_PANEL_WIDTH: f32 = 300.0;
