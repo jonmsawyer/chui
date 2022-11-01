@@ -7,7 +7,11 @@ pub mod mouse;
 pub use mouse::MousePlugin;
 
 pub mod ui_state;
-pub use ui_state::{UiState, UiStatePlugin, Square, update_square_pixels, compute_coords};
+pub use ui_state::{
+    UiState, UiStatePlugin, Square,
+    update_square_pixels, compute_coords,
+    START_X_COORD, START_Y_COORD
+};
 
 pub mod assets;
 pub use assets::{SpriteCollection, AssetsPlugin, SPRITE_WIDTH};
@@ -22,4 +26,4 @@ pub mod window_descriptor;
 pub use window_descriptor::WindowDescriptorPlugin;
 
 pub mod debug;
-pub use debug::{DebugPlugin, Fps, get_mouse_coords, get_world_coords};
+pub use debug::{Fps, debug_panel, get_mouse_coords, get_world_coords};

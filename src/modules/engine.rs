@@ -3,8 +3,9 @@
 use std::fmt;
 use std::io;
 
+
 use crate::{ChuiResult, ChuiError};
-use super::piece::Color;
+use super::piece::{Piece, Color};
 use super::player::Player;
 use super::board::{ChessVariant, Board};
 use super::chess_move::Move;
@@ -84,6 +85,8 @@ pub struct Engine {
     /// Represents the board as an array of arrays each containing
     /// an `Option<Piece>`.
     pub board: Board,
+
+    pub captured_pieces: Vec<Piece>,
 
     /// Represents the current move parser.
     pub parser: Box<dyn Parser + Send + Sync>,
@@ -215,6 +218,7 @@ impl Engine {
                 white,
                 black,
                 board: Board::new(ChessVariant::StandardChess),
+                captured_pieces: Vec::<Piece>::new(),
                 to_move: Color::White,
                 white_can_castle_kingside: true,
                 white_can_castle_queenside: true,

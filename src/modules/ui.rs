@@ -33,7 +33,6 @@ impl Ui {
             .add_plugin(plugins::UiStatePlugin)
             .add_plugin(plugins::CameraControllerPlugin)
             .add_plugin(plugins::AssetsPlugin)
-            .add_plugin(plugins::DebugPlugin)
             .add_plugin(plugins::MousePlugin)
             .add_plugin(plugins::MainUiPlugin)
 

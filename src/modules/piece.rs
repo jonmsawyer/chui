@@ -66,6 +66,9 @@ pub struct Piece {
 
     /// The coordinates (by index) of the piece.
     coords: (usize, usize),
+
+    /// The index of the sprite in the sprite sheet.
+    sprite_index: usize,
 }
 
 impl Piece {
@@ -74,10 +77,26 @@ impl Piece {
     //
 
     pub fn new(piece: PieceKind, color: Color) -> Piece {
+        let sprite_index = match (piece, color) {
+            (PieceKind::King, Color::White) => 7,
+            (PieceKind::Queen, Color::White) => 6,
+            (PieceKind::Rook, Color::White) => 5,
+            (PieceKind::Bishop, Color::White) => 4,
+            (PieceKind::Knight, Color::White) => 3,
+            (PieceKind::Pawn, Color::White) => 2,
+            (PieceKind::King, Color::Black) => 13,
+            (PieceKind::Queen, Color::Black) => 12,
+            (PieceKind::Rook, Color::Black) => 11,
+            (PieceKind::Bishop, Color::Black) => 10,
+            (PieceKind::Knight, Color::Black) => 9,
+            (PieceKind::Pawn, Color::Black) => 8,
+        };
+
         Piece {
             piece,
             color,
             coords: (8, 8),
+            sprite_index,
         }
     }
 
@@ -98,6 +117,11 @@ impl Piece {
     /// Get the coordinates of the piece.
     pub fn get_coords(&self) -> (usize, usize) {
         self.coords
+    }
+
+    /// Get the sprite index of the piece.
+    pub fn get_sprite_index(&self) -> usize {
+        self.sprite_index
     }
 
     //

@@ -3,13 +3,14 @@
 use bevy::prelude::*;
 //use bevy::render::camera::RenderTarget;
 
+use bevy::sprite::Anchor;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
 use super::{
     GameState, UiState, MainCamera,
     get_world_coords, compute_coords,
-    SPRITE_WIDTH
+    SPRITE_WIDTH, START_X_COORD, START_Y_COORD
 };
 
 
@@ -28,6 +29,7 @@ fn init_cursor(
             sprite: Sprite {
                 custom_size: Some(Vec2::new(SPRITE_WIDTH, SPRITE_WIDTH)),
                 color,
+                anchor: Anchor::BottomLeft,
                 ..Default::default()
             },
             transform: Transform {
@@ -48,40 +50,20 @@ fn draw_cursor(
 ) {
     let coords = get_world_coords(camera_query, windows);
     let (mut visibility, mut transform) = mouse_query.single_mut();
+    let (_, scale, _, _) = compute_coords(ui_state.square_pixels);
+    let x = (coords[0] / ui_state.square_pixels).floor() * ui_state.square_pixels;
+    let y = (coords[1] / ui_state.square_pixels).floor() * ui_state.square_pixels;
+    let min = START_X_COORD * ui_state.square_pixels;
+    let max = START_Y_COORD * ui_state.square_pixels;
 
-    if coords[0] == 0.0 && coords[1] == 0.0 {
+    if x < min || x >= max || y < min || y >= max || (coords[0] == 0. && coords[1] == 0.) {
         visibility.is_visible = false;
         return;
     }
 
-    let (offset, scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
-    let (mut x, mut y, mut row) = (start_x, start_y, 0.);
-
-    for idx in 0..64 { // 64 squares in a chessboard
-        let offset_check = offset * 2.;
-        if coords[0] > x - offset_check + ui_state.square_pixels &&
-           coords[0] < x + offset_check &&
-           coords[1] > y - offset_check &&
-           coords[1] < y + offset_check - ui_state.square_pixels
-        {
-            transform.translation = Vec3::new(x + offset, y - offset, 0.2);
-            transform.scale = Vec3::new(scale, scale, 0.);
-            visibility.is_visible = ui_state.show_mouse_cursor;
-            return;
-        }
-        else {
-            visibility.is_visible = false;
-        }
-
-        x += ui_state.square_pixels;
-
-        if (idx + 1) % 8 == 0 { // 8 squares per row
-            row += 1.0_f32;
-            x = start_x;
-            y = start_y - (row * ui_state.square_pixels);
-        }
-    }
-
+    transform.translation = Vec3::new(x, y, 0.2);
+    transform.scale = Vec3::new(scale, scale, 0.);
+    visibility.is_visible = ui_state.show_mouse_cursor;
 }
 
 pub struct MousePlugin;
