@@ -4,8 +4,8 @@ use bevy::prelude::*;
 use bevy_egui::{egui, EguiSettings, EguiContext};
 
 use super::SpriteCollection;
-use super::main_ui::INFO_PANEL_WIDTH;
-use super::main_ui::ANNOTATION_PANEL_WIDTH;
+use super::egui_panels::INFO_PANEL_WIDTH;
+use super::egui_panels::ANNOTATION_PANEL_WIDTH;
 use super::GameState;
 use crate::Engine;
 use crate::modules::ui::events::ResizeBoardEvent;

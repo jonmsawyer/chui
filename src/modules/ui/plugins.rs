@@ -16,8 +16,8 @@ pub use ui_state::{
 pub mod assets;
 pub use assets::{SpriteCollection, AssetsPlugin, SPRITE_WIDTH};
 
-pub mod main_ui;
-pub use main_ui::MainUiPlugin;
+pub mod egui_panels;
+pub use egui_panels::EguiPanelsPlugin;
 
 pub mod game_state;
 pub use game_state::{GameState, GameStatePlugin};

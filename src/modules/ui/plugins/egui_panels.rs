@@ -16,7 +16,7 @@ use top_menu::top_menu;
 pub const INFO_PANEL_WIDTH: f32 = 300.0;
 pub const ANNOTATION_PANEL_WIDTH: f32 = 300.0;
 
-fn main_ui(
+fn egui_panels(
     mut egui_ctx: ResMut<EguiContext>,
     mut ui_state: ResMut<UiState>,
     mut resize_board_event: EventWriter<ResizeBoardEvent>,
@@ -112,11 +112,11 @@ fn main_ui(
     //     });
 }
 
-pub struct MainUiPlugin;
+pub struct EguiPanelsPlugin;
 
-impl Plugin for MainUiPlugin {
+impl Plugin for EguiPanelsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(main_ui)
+        app.add_system(egui_panels)
             // Set multi-sample anti-aliasing (WGPU only supports 1 or 4)
             .insert_resource(Msaa { samples: 4 });
     }
