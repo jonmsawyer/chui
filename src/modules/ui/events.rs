@@ -2,3 +2,6 @@
 
 #[derive(Default)]
 pub struct ResizeBoardEvent;
+
+#[derive(Default)]
+pub struct PieceMovedEvent;
