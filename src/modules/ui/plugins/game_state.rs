@@ -1,6 +1,6 @@
 //! Game State plugin
 
-use bevy::{prelude::*};
+use bevy::prelude::*;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub enum GameState {
