@@ -1,7 +1,9 @@
 use bevy::prelude::{ResMut, EventWriter};
 use bevy_egui::{egui, EguiContext};
 
-use crate::modules::ui::{plugins::UiState, events::ResizeBoardEvent};
+use crate::modules::ui::events::ResizeBoardEvent;
+use crate::modules::ui::resources::UiResource;
+
 
 pub mod file;
 pub use file::file;
@@ -46,7 +48,7 @@ pub use super::layout_jobs;
 
 pub fn top_menu(
     egui_ctx: &mut ResMut<EguiContext>,
-    ui_state: &mut ResMut<UiState>,
+    ui_state: &mut ResMut<UiResource>,
     resize_board_event: &mut EventWriter<ResizeBoardEvent>
 ) {
     egui::TopBottomPanel::top("menu")

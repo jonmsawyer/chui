@@ -9,6 +9,9 @@ pub mod plugins;
 pub mod events;
 pub mod resources;
 pub mod constants;
+pub mod components;
+pub mod states;
+pub mod utils;
 
 
 pub struct Ui;

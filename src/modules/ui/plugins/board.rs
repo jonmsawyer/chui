@@ -3,19 +3,18 @@
 use bevy::prelude::*;
 
 use crate::modules::ui::events::ResizeBoardEvent;
-use super::{GameState, SpriteCollection, UiState, compute_coords};
+use super::SpriteCollection;
 use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
+use super::super::components::Square;
+use super::super::resources::UiResource;
+use super::super::states::GameState;
+use super::super::utils::compute_coords;
 
-
-#[derive(Component)]
-pub struct Square {
-    pub index: usize
-}
 
 fn init_board(
     my_assets: Res<SpriteCollection>,
     mut commands: Commands,
-    ui_state: Res<UiState>
+    ui_state: Res<UiResource>
 ) {
     let (offset, scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
 
@@ -47,7 +46,7 @@ fn init_board(
 }
 
 fn resize_board(
-    ui_state: Res<UiState>,
+    ui_state: Res<UiResource>,
     mut resize_event: EventReader<ResizeBoardEvent>,
     mut query: Query<(&Square, &mut Transform)>
 ) {

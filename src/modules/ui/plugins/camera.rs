@@ -4,16 +4,9 @@
 
 use bevy::prelude::*;
 
-use super::GameState;
+use super::super::states::GameState;
+use super::super::components::MainCamera;
 
-
-/// Component to attach to the camera we're controlling
-///
-/// Doing this allows us to easily query for it, while also allowing for cameras to
-/// exist that we aren't controlling. This is also extensible, as we can add
-/// configurable options on a per-camera basis in the future.
-#[derive(Component, Default)]
-pub struct MainCamera;
 
 /// Event when we pan the camera, containing the delta of the move
 pub struct CameraPanned(Vec2);

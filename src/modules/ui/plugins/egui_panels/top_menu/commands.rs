@@ -1,16 +1,15 @@
 use bevy::prelude::EventWriter;
-
-use crate::modules::ui::plugins::UiState;
-use crate::modules::ui::events;
-
-use super::layout_jobs;
-
 use bevy::prelude::ResMut;
 use bevy_egui::egui::{self, Ui, InnerResponse};
 
+use crate::modules::ui::resources::UiResource;
+use crate::modules::ui::events;
+use super::layout_jobs;
+
+
 pub fn commands(
     ui: &mut Ui,
-    ui_state: &mut ResMut<UiState>,
+    ui_state: &mut ResMut<UiResource>,
     resize_board_event: &mut EventWriter<events::ResizeBoardEvent>,
 ) -> InnerResponse<Option<()>> {
     egui::menu::menu_button(ui, layout_jobs::top_menu_commands(), |ui| {

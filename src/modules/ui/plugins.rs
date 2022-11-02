@@ -1,7 +1,7 @@
 //! Plugins module
 
 pub mod camera;
-pub use camera::{CameraControllerPlugin, MainCamera};
+pub use camera::CameraControllerPlugin;
 
 pub mod mouse;
 pub use mouse::MousePlugin;
@@ -13,10 +13,7 @@ pub mod pieces;
 pub use pieces::PiecesPlugin;
 
 pub mod ui_state;
-pub use ui_state::{
-    UiState, UiStatePlugin, Square,
-    update_square_pixels, compute_coords,
-};
+pub use ui_state::UiStatePlugin;
 
 pub mod assets;
 pub use assets::{SpriteCollection, AssetsPlugin};
@@ -25,10 +22,10 @@ pub mod egui_panels;
 pub use egui_panels::EguiPanelsPlugin;
 
 pub mod game_state;
-pub use game_state::{GameState, GameStatePlugin};
+pub use game_state::GameStatePlugin;
 
 pub mod window_descriptor;
 pub use window_descriptor::WindowDescriptorPlugin;
 
 pub mod debug;
-pub use debug::{Fps, debug_panel, get_mouse_coords, get_world_coords};
+pub use debug::debug_panel;

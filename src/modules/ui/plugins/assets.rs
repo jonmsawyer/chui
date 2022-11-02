@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
-use super::GameState;
+use super::super::states::GameState;
 
 
 #[derive(AssetCollection, Clone)]

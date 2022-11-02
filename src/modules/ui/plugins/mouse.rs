@@ -7,15 +7,12 @@ use bevy::sprite::Anchor;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
-use super::{
-    GameState, UiState, MainCamera,
-    get_world_coords, compute_coords
-};
 use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
+use super::super::components::{MainCamera, MouseCursor};
+use super::super::resources::UiResource;
+use super::super::states::GameState;
+use super::super::utils::{compute_coords, get_world_coords};
 
-
-#[derive(Component)]
-struct MouseCursor;
 
 fn init_cursor(
     mut commands: Commands
@@ -42,11 +39,11 @@ fn init_cursor(
         .insert(MouseCursor);
 }
 
-fn draw_cursor(
+fn update_cursor(
     mut mouse_query: Query<(&mut Visibility, &mut Transform), With<MouseCursor>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     windows: Res<Windows>,
-    ui_state: Res<UiState>
+    ui_state: Res<UiResource>
 ) {
     let coords = get_world_coords(camera_query, windows);
     let (mut visibility, mut transform) = mouse_query.single_mut();
@@ -72,6 +69,6 @@ impl Plugin for MousePlugin {
     fn build(&self, app: &mut App) {
         app
             .add_system_set(SystemSet::on_enter(GameState::Next).with_system(init_cursor))
-            .add_system_set(SystemSet::on_update(GameState::Next).with_system(draw_cursor));
+            .add_system_set(SystemSet::on_update(GameState::Next).with_system(update_cursor));
     }
 }

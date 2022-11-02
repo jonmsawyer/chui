@@ -2,19 +2,16 @@
 
 use bevy::{prelude::*, window::{PresentMode, MonitorSelection, WindowResized}};
 
-use super::UiState;
-use crate::modules::ui::events::ResizeBoardEvent;
-use super::update_square_pixels;
+use super::super::resources::UiResource;
+use super::super::events::ResizeBoardEvent;
+use super::super::utils::update_square_pixels;
 
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-pub struct WindowDescriptorPlugin;
-
-
 fn resize_notificator(
     mut resize_event: EventReader<WindowResized>,
-    mut ui_state: ResMut<UiState>,
+    mut ui_state: ResMut<UiResource>,
     mut resize_board_event: EventWriter<ResizeBoardEvent>,
 ) {
     for window in resize_event.iter() {
@@ -28,6 +25,8 @@ fn resize_notificator(
         resize_board_event.send_default();
     }
 }
+
+pub struct WindowDescriptorPlugin;
 
 impl Plugin for WindowDescriptorPlugin {
     fn build(&self, app: &mut App) {

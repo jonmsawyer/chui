@@ -3,9 +3,11 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 
-use crate::modules::ui::events::ResizeBoardEvent;
-use super::{ui_state::UiState, MainCamera, Fps, debug_panel};
+use super::debug_panel;
 use super::super::constants::{INFO_PANEL_WIDTH, ANNOTATION_PANEL_WIDTH};
+use super::super::components::MainCamera;
+use super::super::resources::{UiResource, FpsResource};
+use super::super::events::ResizeBoardEvent;
 
 pub mod layout_jobs;
 
@@ -14,10 +16,10 @@ use top_menu::top_menu;
 
 fn egui_panels(
     mut egui_ctx: ResMut<EguiContext>,
-    mut ui_state: ResMut<UiState>,
+    mut ui_state: ResMut<UiResource>,
     mut resize_board_event: EventWriter<ResizeBoardEvent>,
     windows: Res<Windows>,
-    fps: Local<Fps<25>>,
+    fps: Local<FpsResource<25>>,
     time: Res<Time>,
     query: Query<(&Camera, &GlobalTransform), With<MainCamera>>
 ) {

@@ -1,91 +1,17 @@
-//! Assets plugin
+//! Debug plugin.
 
 use bevy::prelude::*;
-use bevy::render::camera::RenderTarget;
-use bevy_egui::{egui};
+use bevy_egui::egui::Ui;
 
-use crate::modules::ui::plugins::debug::egui::Ui;
-use super::{UiState, MainCamera};
+use super::super::components::MainCamera;
+use super::super::resources::{UiResource, FpsResource};
+use super::super::utils::{get_mouse_coords, get_world_coords};
 
-
-/// Container for calculating our FPS
-#[derive(Debug, Default, Clone, Copy)]
-pub struct Fps<const N: usize> {
-    /// Current average FPS
-    pub average: f32,
-    /// Sum of per-frame time deltas
-    pub sum: f32,
-    /// Current measurements count since last recalculation
-    pub count: usize,
-}
-
-impl<const N: usize> Fps<N> {
-    /// Add a new time delta measurement
-    pub fn add(&mut self, delta: f32) {
-        self.sum += delta;
-        self.count = (self.count + 1) % N;
-
-        if self.count == 0 {
-            // Average delta would be sum/len, but we want average FPS which is the reciprocal
-            self.average = N as f32 / self.sum;
-            self.sum = 0.;
-        }
-    }
-}
-
-pub fn get_mouse_coords(window: &Window) -> Vec2 {
-    match window.cursor_position() {
-        Some(cursor) => cursor,
-        None => Vec2::ZERO,
-    }
-}
-
-pub fn get_world_coords(
-    query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    windows: Res<Windows>,
-) -> Vec2 {
-    // get the camera info and transform
-    // assuming there is exactly one main camera entity, so query::single() is OK
-    let (camera, camera_transform) = query.single();
-
-    // get the window that the camera is displaying to (or the primary window)
-    let wnd = if let RenderTarget::Window(id) = camera.target {
-        match windows.get(id) {
-            Some(win) => win,
-            None => return Vec2::ZERO,
-        };
-        windows.get(id).unwrap()
-    } else {
-        windows.get_primary().unwrap()
-    };
-
-    // check if the cursor is inside the window and get its position
-    if let Some(screen_pos) = wnd.cursor_position() {
-        // get the size of the window
-        let window_size = Vec2::new(wnd.width() as f32, wnd.height() as f32);
-
-        // convert screen position [0..resolution] to ndc [-1..1] (gpu coordinates)
-        let ndc = (screen_pos / window_size) * 2.0 - Vec2::ONE;
-
-        // matrix for undoing the projection and camera transform
-        let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
-
-        // use it to convert ndc to world-space coordinates
-        let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0));
-
-        // reduce it to a 2D value
-        let world_pos: Vec2 = world_pos.truncate();
-
-        world_pos
-    } else {
-        Vec2::ZERO
-    }
-}
 
 pub fn debug_panel(
-    mut ui_state: ResMut<UiState>,
+    mut ui_state: ResMut<UiResource>,
     windows: Res<Windows>,
-    mut fps: Local<Fps<25>>,
+    mut fps: Local<FpsResource<25>>,
     time: Res<Time>,
     ui: &mut Ui,
     query: Query<(&Camera, &GlobalTransform), With<MainCamera>>
