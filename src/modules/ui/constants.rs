@@ -14,3 +14,9 @@ pub const INFO_PANEL_WIDTH: f32 = 300.0;
 
 /// The width of the Annotation egui panel.
 pub const ANNOTATION_PANEL_WIDTH: f32 = 300.0;
+
+/// Chessboard files
+pub const FILES: [char; 8] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+/// Chessboard ranks
+pub const RANKS: [usize; 8] = [1, 2, 3, 4, 5, 6, 7, 8];

@@ -4,7 +4,6 @@ use bevy::prelude::*;
 
 use crate::modules::ui::events::ResizeBoardEvent;
 use super::SpriteCollection;
-use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
 use super::super::components::Square;
 use super::super::resources::UiResource;
 use super::super::states::GameState;
@@ -17,7 +16,6 @@ fn init_board(
     ui_state: Res<UiResource>
 ) {
     let (offset, scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
-
     let (mut x, mut y, mut row) = (start_x, start_y, 0.);
 
     for idx in 0..64 { // 64 squares in a chessboard
@@ -51,10 +49,7 @@ fn resize_board(
     mut query: Query<(&Square, &mut Transform)>
 ) {
     for _ in resize_event.iter() {
-        let offset = ui_state.square_pixels / 2.0_f32; // by half because textures are centered
-        let scale = ui_state.square_pixels / SPRITE_WIDTH; // 0.28125 by default
-        let start_x = START_X_COORD * SPRITE_WIDTH * scale; // -288.0 by default
-        let start_y = START_Y_COORD * SPRITE_WIDTH * scale; // 288.0 by default
+        let (offset, scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
 
         let mut x = start_x;
         let mut y = start_y;

@@ -32,7 +32,8 @@ fn scale_factor(
     mut resize_board_event: EventWriter<ResizeBoardEvent>
 ) {
     if keyboard_input.pressed(KeyCode::LControl) &&
-       keyboard_input.just_pressed(KeyCode::Equals)
+       (keyboard_input.just_pressed(KeyCode::Equals) ||
+        keyboard_input.just_pressed(KeyCode::NumpadAdd))
     {
         ui_state.ui_scale_factor += 0.1;
         if ui_state.ui_scale_factor > 2.0 {
@@ -44,12 +45,23 @@ fn scale_factor(
     }
 
     if keyboard_input.pressed(KeyCode::LControl) &&
-       keyboard_input.just_pressed(KeyCode::Minus)
+       (keyboard_input.just_pressed(KeyCode::Minus) ||
+        keyboard_input.just_pressed(KeyCode::NumpadSubtract))
     {
         ui_state.ui_scale_factor -= 0.1;
-        if ui_state.ui_scale_factor < 1.0 {
-            ui_state.ui_scale_factor = 1.0;
+        if ui_state.ui_scale_factor < -0.2 {
+            ui_state.ui_scale_factor = -0.2;
         }
+        ui_state = update_square_pixels(ui_state);
+        // Notify that the board should be resized
+        resize_board_event.send_default();
+    }
+
+    if keyboard_input.pressed(KeyCode::LControl) &&
+       (keyboard_input.just_pressed(KeyCode::Key0) ||
+        keyboard_input.just_pressed(KeyCode::Numpad0))
+    {
+        ui_state.ui_scale_factor = 1.0;
         ui_state = update_square_pixels(ui_state);
         // Notify that the board should be resized
         resize_board_event.send_default();

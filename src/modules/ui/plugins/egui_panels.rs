@@ -21,6 +21,7 @@ fn egui_panels(
     windows: Res<Windows>,
     fps: Local<FpsResource<25>>,
     time: Res<Time>,
+    mouse_input: Res<Input<MouseButton>>,
     query: Query<(&Camera, &GlobalTransform), With<MainCamera>>
 ) {
     top_menu(&mut egui_ctx, &mut ui_state, &mut resize_board_event);
@@ -66,7 +67,7 @@ fn egui_panels(
             //         "https://github.com/emilk/egui/",
             //     ));
             // });
-            debug_panel(ui_state, windows, fps, time, ui, query);
+            debug_panel(ui_state, windows, fps, time, ui, mouse_input, query);
 
             // ui.allocate_space(egui::Vec2::new(1.0, 100.0));
             ui.heading("Info Panel");

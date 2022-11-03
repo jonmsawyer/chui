@@ -3,10 +3,30 @@
 use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
 
-use super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
+use super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD, FILES, RANKS};
 use super::resources::UiResource;
 use super::components::MainCamera;
 
+
+pub fn compute_board_coords(mut ui_state: ResMut<UiResource>)  -> ResMut<UiResource> {
+    let coords = (ui_state.mouse_click_coords / ui_state.square_pixels).floor() + 4. as f32;
+    let min = 0. as f32;
+    let max = 7. as f32;
+    if coords[0] < min || coords[0] > max || coords[1] < min || coords[1] > max {
+        return ui_state
+    }
+    if ui_state.draw_for_white {
+        ui_state.mouse_click_board_coords = (FILES[coords[0] as usize], RANKS[coords[1] as usize]);
+    }
+    else {
+        let mut files = FILES.clone();
+        files.reverse();
+        let mut ranks = RANKS.clone();
+        ranks.reverse();
+        ui_state.mouse_click_board_coords = (files[coords[0] as usize], ranks[coords[1] as usize]);
+    }
+    ui_state
+}
 
 pub fn compute_coords(square_pixels: f32) -> (f32, f32, f32, f32) {
     let offset = square_pixels / 2.; // by half because textures are centered

@@ -5,7 +5,7 @@ use bevy_egui::egui::Ui;
 
 use super::super::components::MainCamera;
 use super::super::resources::{UiResource, FpsResource};
-use super::super::utils::{get_mouse_coords, get_world_coords};
+use super::super::utils::{get_mouse_coords, get_world_coords, compute_board_coords};
 
 
 pub fn debug_panel(
@@ -14,6 +14,7 @@ pub fn debug_panel(
     mut fps: Local<FpsResource<25>>,
     time: Res<Time>,
     ui: &mut Ui,
+    mouse_input: Res<Input<MouseButton>>,
     query: Query<(&Camera, &GlobalTransform), With<MainCamera>>
 ) {
     if ui_state.debug_window {
@@ -23,6 +24,10 @@ pub fn debug_panel(
         };
         let cursor = get_mouse_coords(window);
         let coords = get_world_coords(query, windows);
+        if mouse_input.just_pressed(MouseButton::Left) {
+            ui_state.mouse_click_coords = coords.clone();
+            ui_state = compute_board_coords(ui_state);
+        }
 
         fps.add(time.delta_seconds());
 
@@ -31,6 +36,8 @@ pub fn debug_panel(
             ui.label(format!("FPS: {:.2}", fps.average));
             ui.label(format!("Mouse Screen Coords: {}, {}", cursor[0] as i32, cursor[1] as i32));
             ui.label(format!("Mouse World Coords: {}, {}", coords[0] as i32, coords[1] as i32));
+            ui.label(format!("Mouse Click Coords: {}, {}", ui_state.mouse_click_coords[0] as i32, ui_state.mouse_click_coords[1] as i32));
+            ui.label(format!("Mouse Click Board Coords: {}{}", ui_state.mouse_click_board_coords.0, ui_state.mouse_click_board_coords.1));
             ui.vertical_centered_justified(|options_ui| {
                 options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Show Mouse Cursor");
             });

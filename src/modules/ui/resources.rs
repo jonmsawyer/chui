@@ -1,5 +1,7 @@
 //! Main resources module
 
+use bevy::prelude::*;
+
 /// Chui game engine
 pub use crate::Engine;
 
@@ -19,6 +21,8 @@ pub struct UiResource {
     pub draw_for_white: bool,
     pub debug_window: bool,
     pub show_mouse_cursor: bool,
+    pub mouse_click_coords: Vec2,
+    pub mouse_click_board_coords: (char, usize),
 }
 
 /// Resource for calculating our Frames Per Second
