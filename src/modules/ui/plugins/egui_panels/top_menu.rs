@@ -1,9 +1,8 @@
-use bevy::prelude::{ResMut, EventWriter};
+use bevy::prelude::{EventWriter, ResMut};
 use bevy_egui::{egui, EguiContext};
 
 use crate::modules::ui::events::ResizeBoardEvent;
 use crate::modules::ui::resources::UiResource;
-
 
 pub mod file;
 pub use file::file;
@@ -49,24 +48,23 @@ pub use super::layout_jobs;
 pub fn top_menu(
     egui_ctx: &mut ResMut<EguiContext>,
     ui_state: &mut ResMut<UiResource>,
-    resize_board_event: &mut EventWriter<ResizeBoardEvent>
+    resize_board_event: &mut EventWriter<ResizeBoardEvent>,
 ) {
-    egui::TopBottomPanel::top("menu")
-        .show(egui_ctx.ctx_mut(), |ui| {
-            egui::menu::bar(ui, |ui| {
-                file(ui);
-                commands(ui, ui_state, resize_board_event);
-                copy(ui);
-                levels(ui);
-                mode(ui);
-                training(ui);
-                cpu_vs_cpu(ui);
-                engines(ui);
-                opening_book(ui);
-                extras(ui);
-                windows(ui);
-                design(ui);
-                help(ui);
-            });
+    egui::TopBottomPanel::top("menu").show(egui_ctx.ctx_mut(), |ui| {
+        egui::menu::bar(ui, |ui| {
+            file(ui);
+            commands(ui, ui_state, resize_board_event);
+            copy(ui);
+            levels(ui);
+            mode(ui);
+            training(ui);
+            cpu_vs_cpu(ui);
+            engines(ui);
+            opening_book(ui);
+            extras(ui);
+            windows(ui);
+            design(ui);
+            help(ui);
         });
+    });
 }

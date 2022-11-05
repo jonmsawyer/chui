@@ -1,4 +1,4 @@
-use super::super::{Engine, Color, Fen};
+use super::super::{Color, Engine, Fen};
 
 /// Get the FEN to move character.
 pub fn get_fen_to_move(engine: &Engine) -> String {
@@ -37,8 +37,7 @@ pub fn get_fen_en_passant(engine: &Engine) -> String {
 
     if file == '-' || rank == 9 {
         "-".to_string()
-    }
-    else {
+    } else {
         format!("{}{}", file, rank)
     }
 }
@@ -49,8 +48,7 @@ pub fn get_x_fen_en_passant(engine: &Engine) -> String {
 
     if file == '-' || rank == 9 {
         "-".to_string()
-    }
-    else {
+    } else {
         format!("{}{}", file, rank)
     }
 }

@@ -6,17 +6,17 @@
 
 use std::fmt;
 
-use crate::{ChuiResult, ChuiError};
-use super::{Move, Color};
+use super::{Color, Move};
+use crate::{ChuiError, ChuiResult};
 
 pub mod algebraic;
+pub mod concise_reversible;
+pub mod coordinate;
+pub mod descriptive;
+pub mod iccf;
 pub mod long_algebraic;
 pub mod reversible_algebraic;
-pub mod concise_reversible;
 pub mod smith;
-pub mod descriptive;
-pub mod coordinate;
-pub mod iccf;
 
 /// Implement this trait to define the `parse()` method on a parser.
 /// Any struct implementing this trait should parse a chess move
@@ -57,8 +57,7 @@ pub mod iccf;
 pub trait Parser: Send + Sync {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, the_move: String, to_move: Color)
-    -> ChuiResult<Move>;
+    fn parse(&mut self, the_move: String, to_move: Color) -> ChuiResult<Move>;
 
     /// The name of the parser. Used in help messages and debug.
     fn name(&self) -> String;
@@ -68,9 +67,7 @@ pub trait Parser: Send + Sync {
 
     /// Trim the whitespace from `the_move` and check to see that
     /// the move doesn't contain any whitespace after the trim.
-    fn trim_and_check_whitespace(&self, the_move: String)
-    -> ChuiResult<String>
-    {
+    fn trim_and_check_whitespace(&self, the_move: String) -> ChuiResult<String> {
         let the_move = the_move.trim().to_string();
 
         if the_move.eq("") {
@@ -117,13 +114,11 @@ pub trait Parser: Send + Sync {
     fn invalid_input(&self, reason: &str) -> ChuiResult<()> {
         Err(ChuiError::InvalidInput(reason.to_string()))
     }
-
 }
 
 impl fmt::Debug for dyn Parser + Send + Sync {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Parser")
-            .finish()
+        f.debug_struct("Parser").finish()
     }
 }
 
@@ -202,36 +197,20 @@ pub enum ParserEngine {
 /// ```
 pub fn new(parser: ParserEngine) -> Box<dyn Parser + Send + Sync> {
     match parser {
-        ParserEngine::Algebraic => {
-            algebraic::AlgebraicParser::new()
-        },
+        ParserEngine::Algebraic => algebraic::AlgebraicParser::new(),
 
-        ParserEngine::ConciseReversible => {
-            concise_reversible::ConciseReversibleParser::new()
-        },
+        ParserEngine::ConciseReversible => concise_reversible::ConciseReversibleParser::new(),
 
-        ParserEngine::Coordinate => {
-            coordinate::CoordinateParser::new()
-        },
+        ParserEngine::Coordinate => coordinate::CoordinateParser::new(),
 
-        ParserEngine::Descriptive => {
-            descriptive::DescriptiveParser::new()
-        },
+        ParserEngine::Descriptive => descriptive::DescriptiveParser::new(),
 
-        ParserEngine::ICCF => {
-            iccf::ICCFParser::new()
-        },
+        ParserEngine::ICCF => iccf::ICCFParser::new(),
 
-        ParserEngine::LongAlgebraic => {
-            long_algebraic::LongAlgebraicParser::new()
-        },
+        ParserEngine::LongAlgebraic => long_algebraic::LongAlgebraicParser::new(),
 
-        ParserEngine::ReversibleAlgebraic => {
-            reversible_algebraic::ReversibleAlgebraicParser::new()
-        },
+        ParserEngine::ReversibleAlgebraic => reversible_algebraic::ReversibleAlgebraicParser::new(),
 
-        ParserEngine::Smith => {
-            smith::SmithParser::new()
-        },
+        ParserEngine::Smith => smith::SmithParser::new(),
     }
 }

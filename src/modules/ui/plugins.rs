@@ -16,7 +16,7 @@ pub mod ui_state;
 pub use ui_state::UiStatePlugin;
 
 pub mod assets;
-pub use assets::{SpriteCollection, AssetsPlugin};
+pub use assets::{AssetsPlugin, SpriteCollection};
 
 pub mod egui_panels;
 pub use egui_panels::EguiPanelsPlugin;

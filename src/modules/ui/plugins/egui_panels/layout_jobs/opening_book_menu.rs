@@ -4,8 +4,8 @@ Layout jobs for the Opening Book menu
 A layout job is the custom way to format [`RichText`].
 */
 
-use bevy_egui::egui::text::LayoutJob;
 use super::{top_menu_text_format, top_menu_text_format_underline};
+use bevy_egui::egui::text::LayoutJob;
 
 /// top_menu_opening_book()
 /// "Opening Book"

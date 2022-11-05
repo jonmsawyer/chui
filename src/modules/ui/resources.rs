@@ -49,4 +49,3 @@ impl<const N: usize> FpsResource<N> {
         }
     }
 }
-

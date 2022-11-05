@@ -2,9 +2,9 @@
 
 //use std::fmt;
 
-use crate::{ChuiResult, ChuiError};
+use super::super::{Color, Move};
 use super::Parser;
-use super::super::{Move, Color};
+use crate::{ChuiError, ChuiResult};
 
 /// A parser that will parse ICCF chess notation.
 /// Example moves: `5254`, `5755`, `7163`, `2836`, `6125`, etc.
@@ -13,14 +13,10 @@ pub struct ICCFParser;
 impl Parser for ICCFParser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, _the_move: String, _to_move: Color)
-    -> ChuiResult<Move>
-    {
-        Err(
-            ChuiError::InvalidMove(
-                "ICCFParser not implemented".to_string()
-            )
-        )
+    fn parse(&mut self, _the_move: String, _to_move: Color) -> ChuiResult<Move> {
+        Err(ChuiError::InvalidMove(
+            "ICCFParser not implemented".to_string(),
+        ))
     }
 
     fn name(&self) -> String {
@@ -35,6 +31,6 @@ impl Parser for ICCFParser {
 impl ICCFParser {
     /// Return a new dynamic parser that implements the `Parser` trait.
     pub fn new() -> Box<dyn Parser + Send + Sync> {
-        Box::new(ICCFParser { })
+        Box::new(ICCFParser {})
     }
 }

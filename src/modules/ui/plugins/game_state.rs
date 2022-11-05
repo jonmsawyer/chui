@@ -1,8 +1,7 @@
 //! Game State plugin
 
-use bevy::prelude::*;
 use super::super::states::GameState;
-
+use bevy::prelude::*;
 
 pub struct GameStatePlugin;
 

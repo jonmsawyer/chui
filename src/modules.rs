@@ -1,5 +1,5 @@
 pub mod piece;
-pub use piece::{Piece, PieceKind, Color};
+pub use piece::{Color, Piece, PieceKind};
 
 pub mod player;
 pub use player::Player;
@@ -8,7 +8,7 @@ pub mod engine;
 pub use engine::Engine;
 
 pub mod board;
-pub use board::{ChessVariant, Board};
+pub use board::{Board, ChessVariant};
 
 // This module is named `chess_move` because `move` is already a reserved word.
 pub mod chess_move;

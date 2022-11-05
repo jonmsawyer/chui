@@ -4,13 +4,11 @@
 
 use bevy::prelude::*;
 
-use super::super::states::GameState;
 use super::super::components::MainCamera;
-
+use super::super::states::GameState;
 
 /// Event when we pan the camera, containing the delta of the move
 pub struct CameraPanned(Vec2);
-
 
 /// Set up our 2D orthographic camera
 fn setup_camera(mut commands: Commands) {
@@ -74,9 +72,6 @@ impl Plugin for CameraControllerPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CameraPanned>()
             .add_startup_system(setup_camera)
-            .add_system_set(
-                SystemSet::on_update(GameState::Next)
-                    .with_system(pan_camera)
-            );
+            .add_system_set(SystemSet::on_update(GameState::Next).with_system(pan_camera));
     }
 }

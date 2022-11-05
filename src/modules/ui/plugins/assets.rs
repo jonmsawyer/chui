@@ -5,7 +5,6 @@ use bevy_asset_loader::prelude::*;
 
 use super::super::states::GameState;
 
-
 #[derive(AssetCollection, Clone)]
 pub struct SpriteCollection {
     /// Light and dark squares, with chess pieces are defined in a texture atlas (aka sprite sheet).
@@ -32,9 +31,9 @@ pub struct AssetsPlugin;
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
         app.add_loading_state(
-                LoadingState::new(GameState::AssetLoading)
-                    .continue_to_state(GameState::Next)
-                    .with_collection::<SpriteCollection>()
-            );
+            LoadingState::new(GameState::AssetLoading)
+                .continue_to_state(GameState::Next)
+                .with_collection::<SpriteCollection>(),
+        );
     }
 }

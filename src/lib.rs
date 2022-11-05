@@ -2,13 +2,10 @@ use std::fmt;
 
 mod modules;
 pub use modules::{
-    Engine, Player, Board, ChessVariant,
-    Move, MoveType, MoveGenerator,
-    piece::{Piece, PieceKind, Color},
     parser::{self, ParserEngine},
-    Command, CommandContext, CommandKind,
-    Fen,
-    Ui,
+    piece::{Color, Piece, PieceKind},
+    Board, ChessVariant, Command, CommandContext, CommandKind, Engine, Fen, Move, MoveGenerator,
+    MoveType, Player, Ui,
 };
 
 #[non_exhaustive]
@@ -47,7 +44,6 @@ pub enum ChuiError {
     /// Something is not implemented completely. Raise this error when in
     /// development/testing.
     NotImplemented(String),
-
     // /// Unknown error. Used for testing.
     // Unknown(String),
 }
@@ -58,31 +54,29 @@ impl fmt::Display for ChuiError {
         match self {
             ChuiError::InvalidInput(reason) => {
                 write!(f, "Error (Invalid Input): {}.", reason)
-            },
+            }
 
             ChuiError::InvalidMove(reason) => {
                 write!(f, "Error (Invalid Move): {}.", reason)
-            },
+            }
 
             ChuiError::InvalidPiece(reason) => {
                 write!(f, "Error (Invalid Piece): {}.", reason)
-            },
+            }
 
             ChuiError::IncompatibleSides(reason) => {
                 write!(f, "Error (Incompatible Sides): {}.", reason)
-            },
+            }
 
             ChuiError::TokenNotSatisfied(reason) => {
                 write!(f, "Error (Token Not Satisfied): {}.", reason)
-            },
+            }
 
             ChuiError::NotImplemented(reason) => {
                 write!(f, "Error (Not Implemented): {}.", reason)
-            },
-
-            // ChuiError::Unknown(reason) => {
-            //     write!(f, "Error (Unknown): {}", reason)
-            // }
+            } // ChuiError::Unknown(reason) => {
+              //     write!(f, "Error (Unknown): {}", reason)
+              // }
         }
     }
 }

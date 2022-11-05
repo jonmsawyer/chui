@@ -7,9 +7,9 @@
 
 use std::fmt;
 
-use crate::{ChuiResult, ChuiError};
+use crate::{ChuiError, ChuiResult};
 
-use super::{Piece, PieceKind, Color};
+use super::{Color, Piece, PieceKind};
 
 /// Represents the type of move to be performed.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -75,7 +75,8 @@ pub struct Move {
 /// Displays the input move and move text.
 impl fmt::Debug for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let output = format!("{{
+        let output = format!(
+            "{{
     from_coord: {:?},
     to_coord: {:?},
     from_index: {:?},
@@ -275,15 +276,11 @@ impl Move {
             Some(MoveType::PawnMove) => Some(MoveType::PawnCapture),
             Some(MoveType::PieceMove) => Some(MoveType::PieceCapture),
             move_type => {
-                return Err(
-                    ChuiError::InvalidMove(
-                        format!(
-                            "`{:?}` move type is invalid for capture",
-                            move_type
-                        )
-                    )
-                );
-            },
+                return Err(ChuiError::InvalidMove(format!(
+                    "`{:?}` move type is invalid for capture",
+                    move_type
+                )));
+            }
         };
 
         Ok(())
@@ -353,10 +350,11 @@ impl Move {
 
         // Is moving, capturing, or castling?
         let move_verb = match self.move_type {
-            Some(MoveType::PawnMove) |
-            Some(MoveType::PieceMove) => "moves",
-            Some(MoveType::PawnCapture) |
-            Some(MoveType::PieceCapture) => { is_capture = true; "captures" },
+            Some(MoveType::PawnMove) | Some(MoveType::PieceMove) => "moves",
+            Some(MoveType::PawnCapture) | Some(MoveType::PieceCapture) => {
+                is_capture = true;
+                "captures"
+            }
             Some(MoveType::Castle) => "castles",
             _ => "", // should never match
         };
@@ -366,8 +364,7 @@ impl Move {
         // Is castling King or Queen side?
         if self.is_castling && self.is_castling_king {
             return format!("{} King side", move_text);
-        }
-        else if self.is_castling && self.is_castling_queen {
+        } else if self.is_castling && self.is_castling_queen {
             return format!("{} Queen side", move_text);
         }
 
@@ -392,8 +389,7 @@ impl Move {
         if to_file != '-' || from_rank <= 8 {
             if is_capture && !is_from {
                 move_text = format!("{} ", move_text);
-            }
-            else {
+            } else {
                 move_text = format!("{} to ", move_text);
             }
         }
@@ -408,18 +404,13 @@ impl Move {
 
         if self.promotion {
             if let Some(piece) = self.promotion_piece {
-                move_text = format!(
-                    "{} promotes to {}",
-                    move_text,
-                    piece.get_text()
-                );
+                move_text = format!("{} promotes to {}", move_text, piece.get_text());
             }
         }
 
         if self.check {
             move_text = format!("{} check", move_text);
-        }
-        else if self.check_mate {
+        } else if self.check_mate {
             move_text = format!("{} check mate", move_text);
         }
 

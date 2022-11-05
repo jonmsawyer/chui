@@ -81,19 +81,12 @@ impl Fen {
             for piece in rank.iter() {
                 if piece.is_some() {
                     if empty_squares > 0 {
-                        fen = format!(
-                            "{}{}{}",
-                            fen,
-                            empty_squares,
-                            piece.unwrap()
-                        );
+                        fen = format!("{}{}{}", fen, empty_squares, piece.unwrap());
                         empty_squares = 0;
-                    }
-                    else {
+                    } else {
                         fen = format!("{}{}", fen, piece.unwrap());
                     }
-                }
-                else {
+                } else {
                     empty_squares += 1;
                 }
             }

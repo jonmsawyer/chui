@@ -1,59 +1,48 @@
 use super::layout_jobs;
 
-use bevy_egui::egui::{self, Ui, InnerResponse};
+use bevy_egui::egui::{self, InnerResponse, Ui};
 
 pub fn design(ui: &mut Ui) -> InnerResponse<Option<()>> {
     egui::menu::menu_button(ui, layout_jobs::top_menu_design(), |ui| {
         // Design > Default
-        if ui.button(layout_jobs::top_menu_default())
-            .clicked()
-        {
+        if ui.button(layout_jobs::top_menu_default()).clicked() {
             println!("Default was clicked");
         }
 
         ui.separator();
 
         // Design > Change Design
-        if ui.button(layout_jobs::top_menu_change_design())
-            .clicked()
-        {
+        if ui.button(layout_jobs::top_menu_change_design()).clicked() {
             println!("Change Design was clicked");
         }
 
         ui.separator();
 
         // Design > Load Design
-        if ui.button(layout_jobs::top_menu_load_design())
-            .clicked()
-        {
+        if ui.button(layout_jobs::top_menu_load_design()).clicked() {
             println!("Load Design was clicked");
         }
 
         // Design > Save Design
-        if ui.button(layout_jobs::top_menu_save_design())
-            .clicked()
-        {
+        if ui.button(layout_jobs::top_menu_save_design()).clicked() {
             println!("Save Design was clicked");
         }
 
         ui.separator();
 
         // Design > Background...
-        if ui.button(layout_jobs::top_menu_background())
-            .clicked()
-        {
+        if ui.button(layout_jobs::top_menu_background()).clicked() {
             println!("Background was clicked");
         }
 
         // Design > Colors...
-        if ui.button(layout_jobs::top_menu_colors())
-            .clicked()
-        {
+        if ui.button(layout_jobs::top_menu_colors()).clicked() {
             println!("Colors was clicked");
         }
 
         // Design > Window Title Bars
-        if ui.button(layout_jobs::top_menu_window_title_bars())
+        if ui
+            .button(layout_jobs::top_menu_window_title_bars())
             .clicked()
         {
             println!("Window Title Bars was clicked");

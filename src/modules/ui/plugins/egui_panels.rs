@@ -3,11 +3,11 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 
-use super::debug_panel;
-use super::super::constants::{INFO_PANEL_WIDTH, ANNOTATION_PANEL_WIDTH};
 use super::super::components::MainCamera;
-use super::super::resources::{UiResource, FpsResource};
+use super::super::constants::{ANNOTATION_PANEL_WIDTH, INFO_PANEL_WIDTH};
 use super::super::events::ResizeBoardEvent;
+use super::super::resources::{FpsResource, UiResource};
+use super::debug_panel;
 
 pub mod layout_jobs;
 
@@ -22,14 +22,13 @@ fn egui_panels(
     fps: Local<FpsResource<25>>,
     time: Res<Time>,
     mouse_input: Res<Input<MouseButton>>,
-    query: Query<(&Camera, &GlobalTransform), With<MainCamera>>
+    query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     top_menu(&mut egui_ctx, &mut ui_state, &mut resize_board_event);
 
-    egui::TopBottomPanel::bottom("status")
-        .show(egui_ctx.ctx_mut(), |ui| {
-            ui.label(ui_state.status.as_str());
-        });
+    egui::TopBottomPanel::bottom("status").show(egui_ctx.ctx_mut(), |ui| {
+        ui.label(ui_state.status.as_str());
+    });
 
     egui::SidePanel::left("info")
         .default_width(INFO_PANEL_WIDTH)
@@ -72,7 +71,7 @@ fn egui_panels(
             // ui.allocate_space(egui::Vec2::new(1.0, 100.0));
             ui.heading("Info Panel");
             ui.label("...");
-    });
+        });
 
     egui::SidePanel::right("annotation")
         .min_width(ANNOTATION_PANEL_WIDTH)

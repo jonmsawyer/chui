@@ -1,13 +1,12 @@
 //! Maintain the state of the User Interface
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiSettings, EguiContext};
+use bevy_egui::{egui, EguiContext, EguiSettings};
 
+use super::super::constants::{ANNOTATION_PANEL_WIDTH, INFO_PANEL_WIDTH};
 use super::super::events::ResizeBoardEvent;
 use super::super::resources::UiResource;
 use super::super::utils::update_square_pixels;
-use super::super::constants::{INFO_PANEL_WIDTH, ANNOTATION_PANEL_WIDTH};
-
 
 fn configure_state(mut ui_state: ResMut<UiResource>) {
     ui_state.is_window_open = false;
@@ -29,11 +28,11 @@ fn scale_factor(
     keyboard_input: Res<Input<KeyCode>>,
     mut egui_settings: ResMut<EguiSettings>,
     mut ui_state: ResMut<UiResource>,
-    mut resize_board_event: EventWriter<ResizeBoardEvent>
+    mut resize_board_event: EventWriter<ResizeBoardEvent>,
 ) {
-    if keyboard_input.pressed(KeyCode::LControl) &&
-       (keyboard_input.just_pressed(KeyCode::Equals) ||
-        keyboard_input.just_pressed(KeyCode::NumpadAdd))
+    if keyboard_input.pressed(KeyCode::LControl)
+        && (keyboard_input.just_pressed(KeyCode::Equals)
+            || keyboard_input.just_pressed(KeyCode::NumpadAdd))
     {
         ui_state.ui_scale_factor += 0.1;
         if ui_state.ui_scale_factor > 2.0 {
@@ -44,9 +43,9 @@ fn scale_factor(
         resize_board_event.send_default();
     }
 
-    if keyboard_input.pressed(KeyCode::LControl) &&
-       (keyboard_input.just_pressed(KeyCode::Minus) ||
-        keyboard_input.just_pressed(KeyCode::NumpadSubtract))
+    if keyboard_input.pressed(KeyCode::LControl)
+        && (keyboard_input.just_pressed(KeyCode::Minus)
+            || keyboard_input.just_pressed(KeyCode::NumpadSubtract))
     {
         ui_state.ui_scale_factor -= 0.1;
         if ui_state.ui_scale_factor < -0.2 {
@@ -57,9 +56,9 @@ fn scale_factor(
         resize_board_event.send_default();
     }
 
-    if keyboard_input.pressed(KeyCode::LControl) &&
-       (keyboard_input.just_pressed(KeyCode::Key0) ||
-        keyboard_input.just_pressed(KeyCode::Numpad0))
+    if keyboard_input.pressed(KeyCode::LControl)
+        && (keyboard_input.just_pressed(KeyCode::Key0)
+            || keyboard_input.just_pressed(KeyCode::Numpad0))
     {
         ui_state.ui_scale_factor = 1.0;
         ui_state = update_square_pixels(ui_state);
@@ -83,8 +82,7 @@ pub struct UiStatePlugin;
 
 impl Plugin for UiStatePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .init_resource::<UiResource>()
+        app.init_resource::<UiResource>()
             .insert_resource(ClearColor(Color::BLACK))
             .add_startup_system(configure_state)
             .add_startup_system(configure_visuals)

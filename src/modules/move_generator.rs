@@ -6,8 +6,8 @@
 //! but I've separated it out for easier inspection of the output
 //! and for readabilty purposes.
 
-use std::fmt;
 use std::collections::HashSet;
+use std::fmt;
 
 /// Contains all the needed information to generate all
 /// possible Algebraic and Coordinate Notation moves.
@@ -71,19 +71,32 @@ pub struct MoveGenerator<'a> {
 impl fmt::Display for MoveGenerator<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut fmt_str = String::new();
-        let mut a_fmt_str = String::new(); let mut a_count =  0;
-        let mut b_fmt_str = String::new(); let mut b_count =  0;
-        let mut c_fmt_str = String::new(); let mut c_count =  0;
-        let mut d_fmt_str = String::new(); let mut d_count =  0;
-        let mut e_fmt_str = String::new(); let mut e_count =  0;
-        let mut f_fmt_str = String::new(); let mut f_count =  0;
-        let mut g_fmt_str = String::new(); let mut g_count =  0;
-        let mut h_fmt_str = String::new(); let mut h_count =  0;
-        let mut king_fmt_str = String::new(); let mut king_count = 0;
-        let mut queen_fmt_str = String::new(); let mut queen_count = 0;
-        let mut rook_fmt_str = String::new(); let mut rook_count = 0;
-        let mut bishop_fmt_str = String::new(); let mut bishop_count = 0;
-        let mut knight_fmt_str = String::new(); let mut knight_count = 0;
+        let mut a_fmt_str = String::new();
+        let mut a_count = 0;
+        let mut b_fmt_str = String::new();
+        let mut b_count = 0;
+        let mut c_fmt_str = String::new();
+        let mut c_count = 0;
+        let mut d_fmt_str = String::new();
+        let mut d_count = 0;
+        let mut e_fmt_str = String::new();
+        let mut e_count = 0;
+        let mut f_fmt_str = String::new();
+        let mut f_count = 0;
+        let mut g_fmt_str = String::new();
+        let mut g_count = 0;
+        let mut h_fmt_str = String::new();
+        let mut h_count = 0;
+        let mut king_fmt_str = String::new();
+        let mut king_count = 0;
+        let mut queen_fmt_str = String::new();
+        let mut queen_count = 0;
+        let mut rook_fmt_str = String::new();
+        let mut rook_count = 0;
+        let mut bishop_fmt_str = String::new();
+        let mut bishop_count = 0;
+        let mut knight_fmt_str = String::new();
+        let mut knight_count = 0;
         let mut castle_valid_fmt_str = String::new();
         let mut castle_valid_count = 0;
         let mut castle_invalid_fmt_str = String::new();
@@ -152,21 +165,66 @@ impl fmt::Display for MoveGenerator<'_> {
                 castle_invalid_count += 1;
             }
         }
-        fmt_str += &format!("\n{}({}) a: [\n{}{}{}\n{}],", tab, a_count, tab, tab, a_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) b: [\n{}{}{}\n{}],", tab, b_count, tab, tab, b_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) c: [\n{}{}{}\n{}],", tab, c_count, tab, tab, c_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) d: [\n{}{}{}\n{}],", tab, d_count, tab, tab, d_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) e: [\n{}{}{}\n{}],", tab, e_count, tab, tab, e_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) f: [\n{}{}{}\n{}],", tab, f_count, tab, tab, f_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) g: [\n{}{}{}\n{}],", tab, g_count, tab, tab, g_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) h: [\n{}{}{}\n{}],", tab, h_count, tab, tab, h_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) K: [\n{}{}{}\n{}],", tab, king_count, tab, tab, king_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) Q: [\n{}{}{}\n{}],", tab, queen_count, tab, tab, queen_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) R: [\n{}{}{}\n{}],", tab, rook_count, tab, tab, rook_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) B: [\n{}{}{}\n{}],", tab, bishop_count, tab, tab, bishop_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) N: [\n{}{}{}\n{}],", tab, knight_count, tab, tab, knight_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) O: [\n{}{}{}\n{}],", tab, castle_valid_count, tab, tab, castle_valid_fmt_str, tab);
-        fmt_str += &format!("\n{}({}) 0: [\n{}{}{}\n{}],", tab, castle_invalid_count, tab, tab, castle_invalid_fmt_str, tab);
+        fmt_str += &format!(
+            "\n{}({}) a: [\n{}{}{}\n{}],",
+            tab, a_count, tab, tab, a_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) b: [\n{}{}{}\n{}],",
+            tab, b_count, tab, tab, b_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) c: [\n{}{}{}\n{}],",
+            tab, c_count, tab, tab, c_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) d: [\n{}{}{}\n{}],",
+            tab, d_count, tab, tab, d_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) e: [\n{}{}{}\n{}],",
+            tab, e_count, tab, tab, e_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) f: [\n{}{}{}\n{}],",
+            tab, f_count, tab, tab, f_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) g: [\n{}{}{}\n{}],",
+            tab, g_count, tab, tab, g_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) h: [\n{}{}{}\n{}],",
+            tab, h_count, tab, tab, h_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) K: [\n{}{}{}\n{}],",
+            tab, king_count, tab, tab, king_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) Q: [\n{}{}{}\n{}],",
+            tab, queen_count, tab, tab, queen_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) R: [\n{}{}{}\n{}],",
+            tab, rook_count, tab, tab, rook_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) B: [\n{}{}{}\n{}],",
+            tab, bishop_count, tab, tab, bishop_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) N: [\n{}{}{}\n{}],",
+            tab, knight_count, tab, tab, knight_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) O: [\n{}{}{}\n{}],",
+            tab, castle_valid_count, tab, tab, castle_valid_fmt_str, tab
+        );
+        fmt_str += &format!(
+            "\n{}({}) 0: [\n{}{}{}\n{}],",
+            tab, castle_invalid_count, tab, tab, castle_invalid_fmt_str, tab
+        );
         fmt_str += "\n]";
         write!(f, "{}", fmt_str)
     }
@@ -275,8 +333,7 @@ impl<'a> MoveGenerator<'a> {
         rank_a_idx: usize,
         file_b_idx: usize,
         rank_b_idx: usize,
-    ) -> bool
-    {
+    ) -> bool {
         // We cast to `isize` for negative coordinate checking.
         let file_a_idx = file_a_idx as isize;
         let file_b_idx = file_b_idx as isize;
@@ -289,26 +346,26 @@ impl<'a> MoveGenerator<'a> {
         }
 
         // If on same file or on same rank, move is valid.
-        if file_a_idx == file_b_idx  || rank_a_idx == rank_b_idx {
+        if file_a_idx == file_b_idx || rank_a_idx == rank_b_idx {
             return true;
         }
 
         // If on same diagonal, move is valid.
-        if (file_b_idx - file_a_idx).abs() == (rank_a_idx - rank_b_idx).abs() &&
-           (file_b_idx - file_a_idx).abs() == (rank_b_idx - rank_a_idx).abs()
+        if (file_b_idx - file_a_idx).abs() == (rank_a_idx - rank_b_idx).abs()
+            && (file_b_idx - file_a_idx).abs() == (rank_b_idx - rank_a_idx).abs()
         {
             return true;
         }
 
         // If within knight move, move is valid.
-        if file_a_idx + 1 == file_b_idx && rank_a_idx + 2 == rank_b_idx ||
-           file_a_idx + 1 == file_b_idx && rank_a_idx - 2 == rank_b_idx ||
-           file_a_idx - 1 == file_b_idx && rank_a_idx + 2 == rank_b_idx ||
-           file_a_idx - 1 == file_b_idx && rank_a_idx - 2 == rank_b_idx ||
-           file_a_idx + 2 == file_b_idx && rank_a_idx + 1 == rank_b_idx ||
-           file_a_idx + 2 == file_b_idx && rank_a_idx - 1 == rank_b_idx ||
-           file_a_idx - 2 == file_b_idx && rank_a_idx + 1 == rank_b_idx ||
-           file_a_idx - 2 == file_b_idx && rank_a_idx - 1 == rank_b_idx
+        if file_a_idx + 1 == file_b_idx && rank_a_idx + 2 == rank_b_idx
+            || file_a_idx + 1 == file_b_idx && rank_a_idx - 2 == rank_b_idx
+            || file_a_idx - 1 == file_b_idx && rank_a_idx + 2 == rank_b_idx
+            || file_a_idx - 1 == file_b_idx && rank_a_idx - 2 == rank_b_idx
+            || file_a_idx + 2 == file_b_idx && rank_a_idx + 1 == rank_b_idx
+            || file_a_idx + 2 == file_b_idx && rank_a_idx - 1 == rank_b_idx
+            || file_a_idx - 2 == file_b_idx && rank_a_idx + 1 == rank_b_idx
+            || file_a_idx - 2 == file_b_idx && rank_a_idx - 1 == rank_b_idx
         {
             return true;
         }
@@ -339,8 +396,7 @@ impl<'a> MoveGenerator<'a> {
         rank_a_idx: usize,
         file_b_idx: usize,
         rank_b_idx: usize,
-    ) -> bool
-    {
+    ) -> bool {
         // Cast to `isize` due to negative bounds checks.
         let file_a_idx = file_a_idx as isize;
         let rank_a_idx = rank_a_idx as isize;
@@ -348,17 +404,15 @@ impl<'a> MoveGenerator<'a> {
         let rank_b_idx = rank_b_idx as isize;
 
         // Pawns must move forward and be on proper starting ranks.
-        if !(rank_a_idx == 6 && rank_b_idx == 7 ||
-             rank_a_idx == 1 && rank_b_idx == 0)
-        {
+        if !(rank_a_idx == 6 && rank_b_idx == 7 || rank_a_idx == 1 && rank_b_idx == 0) {
             return false;
         }
 
         // Ending file cannot be more than one apart from
         // starting file.
-        if !(file_a_idx + 1 == file_b_idx && file_a_idx < 7) &&
-           !(file_a_idx - 1 == file_b_idx && file_a_idx > 0) &&
-           file_a_idx != file_b_idx
+        if !(file_a_idx + 1 == file_b_idx && file_a_idx < 7)
+            && !(file_a_idx - 1 == file_b_idx && file_a_idx > 0)
+            && file_a_idx != file_b_idx
         {
             return false;
         }
@@ -389,40 +443,21 @@ impl<'a> MoveGenerator<'a> {
                     for piece in self.promotion_pieces.iter() {
                         for promotion in self.promotion_notation.iter() {
                             // a8Q, a8R, etc.
-                            self.move_list.push(
-                                format!(
-                                    "{}{}{}{}",
-                                    file,
-                                    rank,
-                                    promotion,
-                                    piece
-                                )
-                            );
+                            self.move_list
+                                .push(format!("{}{}{}{}", file, rank, promotion, piece));
 
                             // a8Q+, a8R+, etc.
-                            self.move_list.push(
-                                format!(
-                                    "{}{}{}{}{}",
-                                    file,
-                                    rank,
-                                    promotion,
-                                    piece,
-                                    self.check
-                                )
-                            );
+                            self.move_list.push(format!(
+                                "{}{}{}{}{}",
+                                file, rank, promotion, piece, self.check
+                            ));
 
                             for mate in self.check_mate.iter() {
                                 // a8Q++, a8/R++, a8=Q#, a8R#, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}",
-                                        file,
-                                        rank,
-                                        promotion,
-                                        piece,
-                                        mate,
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}",
+                                    file, rank, promotion, piece, mate,
+                                ));
                             }
                         }
                     }
@@ -430,34 +465,15 @@ impl<'a> MoveGenerator<'a> {
                 // Process all other moves.
                 else {
                     // a2, a3, ..., h6, h7
-                    self.move_list.push(
-                        format!(
-                            "{}{}",
-                            file,
-                            rank
-                        )
-                    );
+                    self.move_list.push(format!("{}{}", file, rank));
 
                     // a2+, a3+, ..., h6+, h7+
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}",
-                            file,
-                            rank,
-                            self.check
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}", file, rank, self.check));
 
                     for mate in self.check_mate.iter() {
                         // a2++, a2#, ..., g2++, g2#
-                        self.move_list.push(
-                            format!(
-                                "{}{}{}",
-                                file,
-                                rank,
-                                mate
-                            )
-                        );
+                        self.move_list.push(format!("{}{}{}", file, rank, mate));
                     }
                 }
             }
@@ -490,62 +506,54 @@ impl<'a> MoveGenerator<'a> {
                             // that are != "a".
                             if *file != "a" {
                                 // bxa8Q, bxa8=R, bxg7/R, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}{}",
-                                        file,
-                                        self.capture,
-                                        self.files[file_idx - 1],
-                                        rank,
-                                        promotion,
-                                        piece
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}{}",
+                                    file,
+                                    self.capture,
+                                    self.files[file_idx - 1],
+                                    rank,
+                                    promotion,
+                                    piece
+                                ));
 
                                 // bxa8Q+, bxa8=R+, bxa8/R+, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}{}{}",
-                                        file,
-                                        self.capture,
-                                        self.files[file_idx - 1],
-                                        rank,
-                                        promotion,
-                                        piece,
-                                        self.check
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}{}{}",
+                                    file,
+                                    self.capture,
+                                    self.files[file_idx - 1],
+                                    rank,
+                                    promotion,
+                                    piece,
+                                    self.check
+                                ));
                             }
 
                             // Process all pawn captures from all files
                             // that are != "h".
                             if *file != "h" {
                                 // bxc8Q, bxc8R, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}{}",
-                                        file,
-                                        self.capture,
-                                        self.files[file_idx + 1],
-                                        rank,
-                                        promotion,
-                                        piece
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}{}",
+                                    file,
+                                    self.capture,
+                                    self.files[file_idx + 1],
+                                    rank,
+                                    promotion,
+                                    piece
+                                ));
 
                                 // bxc8Q+, bxc8=R+, bxd1/R+, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}{}{}",
-                                        file,
-                                        self.capture,
-                                        self.files[file_idx + 1],
-                                        rank,
-                                        promotion,
-                                        piece,
-                                        self.check
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}{}{}",
+                                    file,
+                                    self.capture,
+                                    self.files[file_idx + 1],
+                                    rank,
+                                    promotion,
+                                    piece,
+                                    self.check
+                                ));
                             }
 
                             for mate in self.check_mate.iter() {
@@ -553,94 +561,81 @@ impl<'a> MoveGenerator<'a> {
                                 // that are != "a".
                                 if *file != "a" {
                                     // bxa8Q++, bxa8=R++, bxa8/Q#, etc.
-                                    self.move_list.push(
-                                        format!(
-                                            "{}{}{}{}{}{}{}",
-                                            file,
-                                            self.capture,
-                                            self.files[file_idx - 1],
-                                            rank,
-                                            promotion,
-                                            piece,
-                                            mate,
-                                        )
-                                    );
+                                    self.move_list.push(format!(
+                                        "{}{}{}{}{}{}{}",
+                                        file,
+                                        self.capture,
+                                        self.files[file_idx - 1],
+                                        rank,
+                                        promotion,
+                                        piece,
+                                        mate,
+                                    ));
                                 }
 
                                 // Process all pawn captures from all files
                                 // that are != "a".
                                 if *file != "h" {
                                     // bxc8Q++, bxc8=R++, bxc8/Q#, etc.
-                                    self.move_list.push(
-                                        format!(
-                                            "{}{}{}{}{}{}{}",
-                                            file,
-                                            self.capture,
-                                            self.files[file_idx + 1],
-                                            rank,
-                                            promotion,
-                                            piece,
-                                            mate,
-                                        )
-                                    );
+                                    self.move_list.push(format!(
+                                        "{}{}{}{}{}{}{}",
+                                        file,
+                                        self.capture,
+                                        self.files[file_idx + 1],
+                                        rank,
+                                        promotion,
+                                        piece,
+                                        mate,
+                                    ));
                                 }
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     // Process all pawn captures from all files
                     // that are != "a".
                     if *file != "a" {
                         // bxa2, bxa3, ..., hxg6, hxg7
-                        self.move_list.push(
-                            format!(
-                                "{}{}{}{}",
-                                file,
-                                self.capture,
-                                self.files[file_idx - 1],
-                                rank,
-                            )
-                        );
+                        self.move_list.push(format!(
+                            "{}{}{}{}",
+                            file,
+                            self.capture,
+                            self.files[file_idx - 1],
+                            rank,
+                        ));
 
                         // bxa2+, bxa3+, ..., hxg6+, hxg7+
-                        self.move_list.push(
-                            format!(
-                                "{}{}{}{}{}",
-                                file,
-                                self.capture,
-                                self.files[file_idx - 1],
-                                rank,
-                                self.check
-                            )
-                        );
+                        self.move_list.push(format!(
+                            "{}{}{}{}{}",
+                            file,
+                            self.capture,
+                            self.files[file_idx - 1],
+                            rank,
+                            self.check
+                        ));
                     }
 
                     // Process all pawn captures from all files
                     // that are != "a".
                     if *file != "h" {
                         // bxa2, bxa3, ..., hxg6, hxg7
-                        self.move_list.push(
-                            format!(
-                                "{}{}{}{}",
-                                file,
-                                self.capture,
-                                self.files[file_idx + 1],
-                                rank,
-                            )
-                        );
+                        self.move_list.push(format!(
+                            "{}{}{}{}",
+                            file,
+                            self.capture,
+                            self.files[file_idx + 1],
+                            rank,
+                        ));
 
                         // bxa2+, bxa3+, ..., hxg6+, hxg7+
-                        self.move_list.push(
-                            format!(
-                                "{}{}{}{}{}",
-                                file,
-                                self.capture,
-                                self.files[file_idx + 1],
-                                rank,
-                                self.check
-                            )
-                        );
+                        self.move_list.push(format!(
+                            "{}{}{}{}{}",
+                            file,
+                            self.capture,
+                            self.files[file_idx + 1],
+                            rank,
+                            self.check
+                        ));
                     }
 
                     for mate in self.check_mate.iter() {
@@ -648,32 +643,28 @@ impl<'a> MoveGenerator<'a> {
                         // that are != "a".
                         if *file != "a" {
                             // bxa2++, bxa2#, bxc2++, bxc2#, ... hxg7++, hxg7#
-                            self.move_list.push(
-                                format!(
-                                    "{}{}{}{}{}",
-                                    file,
-                                    self.capture,
-                                    self.files[file_idx - 1],
-                                    rank,
-                                    mate
-                                )
-                            );
+                            self.move_list.push(format!(
+                                "{}{}{}{}{}",
+                                file,
+                                self.capture,
+                                self.files[file_idx - 1],
+                                rank,
+                                mate
+                            ));
                         }
 
                         // Process all pawn captures from all files
                         // that are != "a".
                         if *file != "h" {
                             // axb2++, axb2#, axb2++, bxc2#, ... gxh7++, gxh7#
-                            self.move_list.push(
-                                format!(
-                                    "{}{}{}{}{}",
-                                    file,
-                                    self.capture,
-                                    self.files[file_idx + 1],
-                                    rank,
-                                    mate
-                                )
-                            );
+                            self.move_list.push(format!(
+                                "{}{}{}{}{}",
+                                file,
+                                self.capture,
+                                self.files[file_idx + 1],
+                                rank,
+                                mate
+                            ));
                         }
                     }
                 }
@@ -703,41 +694,20 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "K";
 
                 // Ka1, Kh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list.push(format!("{}{}{}", piece, file, rank,));
 
                 // Ka1+, Kh7+, etc.
                 // Note: The king itself cannot check, but there
                 //       can be a discovered check.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                        self.check,
-                   )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, file, rank, self.check,));
 
                 for mate in self.check_mate.iter() {
                     // Ka1++, Kh7#, etc.
                     // Note: The king itself cannot check mate, but
                     //       there can be a discovered check mate.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}",
-                            piece,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}", piece, file, rank, mate,));
                 }
             }
         }
@@ -765,45 +735,24 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "K";
 
                 // Kxa1, Kxh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, self.capture, file, rank,));
 
                 // Kxa1+, Kxh7+, etc.
                 // Note: The king itself cannot check, but there
                 //       can be a discovered check after capture.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list.push(format!(
+                    "{}{}{}{}{}",
+                    piece, self.capture, file, rank, self.check,
+                ));
 
                 for mate in self.check_mate.iter() {
                     // Kxa1++, Kxh7#, etc.
                     // Note: The king itself cannot check mate, but
                     //       there can be a discovered check mate
                     //       after capture.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}{}",
-                            piece,
-                            self.capture,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}{}", piece, self.capture, file, rank, mate,));
                 }
             }
         }
@@ -831,37 +780,16 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "Q";
 
                 // Qa1, Qh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list.push(format!("{}{}{}", piece, file, rank,));
 
                 // Qa1+, Qh7+, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, file, rank, self.check,));
 
                 for mate in self.check_mate.iter() {
                     // Qa1++, Qh7#, etc.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}",
-                            piece,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}", piece, file, rank, mate,));
                 }
             }
         }
@@ -889,40 +817,19 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "Q";
 
                 // Qxa1, Qxh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, self.capture, file, rank,));
 
                 // Qxa1+, Qxh7+, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list.push(format!(
+                    "{}{}{}{}{}",
+                    piece, self.capture, file, rank, self.check,
+                ));
 
                 for mate in self.check_mate.iter() {
                     // Qxa1++, Qxh7#, etc.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}{}",
-                            piece,
-                            self.capture,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}{}", piece, self.capture, file, rank, mate,));
                 }
             }
         }
@@ -950,37 +857,16 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "R";
 
                 // Ra1, Rh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list.push(format!("{}{}{}", piece, file, rank,));
 
                 // Ra1+, Rh7+, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, file, rank, self.check,));
 
                 for mate in self.check_mate.iter() {
                     // Ra1++, Rh7#, etc.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}",
-                            piece,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}", piece, file, rank, mate,));
                 }
             }
         }
@@ -1008,40 +894,19 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "R";
 
                 // Rxa1, Rxh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, self.capture, file, rank,));
 
                 // Rxa1+, Rxh7+, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list.push(format!(
+                    "{}{}{}{}{}",
+                    piece, self.capture, file, rank, self.check,
+                ));
 
                 for mate in self.check_mate.iter() {
                     // Rxa1++, Rxh7#, etc.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}{}",
-                            piece,
-                            self.capture,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}{}", piece, self.capture, file, rank, mate,));
                 }
             }
         }
@@ -1069,37 +934,16 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "B";
 
                 // Ba1, Bh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list.push(format!("{}{}{}", piece, file, rank,));
 
                 // Ba1+, Bh7+, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, file, rank, self.check,));
 
                 for mate in self.check_mate.iter() {
                     // Ba1++, Bh7#, etc.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}",
-                            piece,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}", piece, file, rank, mate,));
                 }
             }
         }
@@ -1127,40 +971,19 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "B";
 
                 // Bxa1, Bxh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, self.capture, file, rank,));
 
                 // Bxa1+, Bxh7+, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list.push(format!(
+                    "{}{}{}{}{}",
+                    piece, self.capture, file, rank, self.check,
+                ));
 
                 for mate in self.check_mate.iter() {
                     // Bxa1++, Bxh7#, etc.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}{}",
-                            piece,
-                            self.capture,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}{}", piece, self.capture, file, rank, mate,));
                 }
             }
         }
@@ -1188,37 +1011,16 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "N";
 
                 // Na1, Nh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list.push(format!("{}{}{}", piece, file, rank,));
 
                 // Na1+, Nh7+, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, file, rank, self.check,));
 
                 for mate in self.check_mate.iter() {
                     // Na1++, Nh7#, etc.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}",
-                            piece,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}", piece, file, rank, mate,));
                 }
             }
         }
@@ -1246,40 +1048,19 @@ impl<'a> MoveGenerator<'a> {
                 let piece = "N";
 
                 // Nxa1, Nxh7, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                    )
-                );
+                self.move_list
+                    .push(format!("{}{}{}{}", piece, self.capture, file, rank,));
 
                 // Nxa1+, Nxh7+, etc.
-                self.move_list.push(
-                    format!(
-                        "{}{}{}{}{}",
-                        piece,
-                        self.capture,
-                        file,
-                        rank,
-                        self.check,
-                    )
-                );
+                self.move_list.push(format!(
+                    "{}{}{}{}{}",
+                    piece, self.capture, file, rank, self.check,
+                ));
 
                 for mate in self.check_mate.iter() {
                     // Nxa1++, Nxh7#, etc.
-                    self.move_list.push(
-                        format!(
-                            "{}{}{}{}{}",
-                            piece,
-                            self.capture,
-                            file,
-                            rank,
-                            mate,
-                        )
-                    );
+                    self.move_list
+                        .push(format!("{}{}{}{}{}", piece, self.capture, file, rank, mate,));
                 }
             }
         }
@@ -1303,28 +1084,14 @@ impl<'a> MoveGenerator<'a> {
     pub fn generate_castle_moves(&mut self) {
         for castle in self.castle.iter() {
             // 0-0, 0-0-0
-            self.move_list.push(
-                castle.to_string()
-            );
+            self.move_list.push(castle.to_string());
 
             // 0-0+, 0-0-0+
-            self.move_list.push(
-                format!(
-                    "{}{}",
-                    castle,
-                    self.check,
-                )
-            );
+            self.move_list.push(format!("{}{}", castle, self.check,));
 
             for mate in self.check_mate.iter() {
                 // 0-0++, 0-0#, 0-0-0++, 0-0-0#
-                self.move_list.push(
-                    format!(
-                        "{}{}",
-                        castle,
-                        mate,
-                    )
-                );
+                self.move_list.push(format!("{}{}", castle, mate,));
             }
         }
     }
@@ -1356,67 +1123,71 @@ impl<'a> MoveGenerator<'a> {
                         // The square-to-square move must first be valid.
                         // E.g., not a1-g3.
                         if MoveGenerator::move_is_valid(
-                            file_a_idx,
-                            rank_a_idx,
-                            file_b_idx,
-                            rank_b_idx,
-                        )
-                        {
+                            file_a_idx, rank_a_idx, file_b_idx, rank_b_idx,
+                        ) {
                             // We check if the square-to-square move is
                             // a valid pawn promotion.
                             if MoveGenerator::move_is_valid_promotion(
-                                file_a_idx,
-                                rank_a_idx,
-                                file_b_idx,
-                                rank_b_idx,
-                            )
-                            {
+                                file_a_idx, rank_a_idx, file_b_idx, rank_b_idx,
+                            ) {
                                 for piece in self.promotion_pieces.iter() {
-                                    for promotion in self.promotion_notation
-                                                         .iter()
-                                    {
+                                    for promotion in self.promotion_notation.iter() {
                                         // a2-a1, a2-b1, a7-a8, a7-b8, etc.
-                                        self.move_list.push(
-                                            format!(
-                                                "{}{}{}{}{}",
-                                                file_a,
-                                                rank_a,
-                                                self.move_notation,
-                                                file_b,
-                                                rank_b,
-                                            )
-                                        );
+                                        self.move_list.push(format!(
+                                            "{}{}{}{}{}",
+                                            file_a, rank_a, self.move_notation, file_b, rank_b,
+                                        ));
 
                                         // a2-a1Q, a2-a1=R, etc.
-                                        self.move_list.push(
-                                            format!(
-                                                "{}{}{}{}{}{}{}",
-                                                file_a,
-                                                rank_a,
-                                                self.move_notation,
-                                                file_b,
-                                                rank_b,
-                                                promotion,
-                                                piece
-                                            )
-                                        );
+                                        self.move_list.push(format!(
+                                            "{}{}{}{}{}{}{}",
+                                            file_a,
+                                            rank_a,
+                                            self.move_notation,
+                                            file_b,
+                                            rank_b,
+                                            promotion,
+                                            piece
+                                        ));
 
                                         // a2-a1+, a2-a1+, etc.
-                                        self.move_list.push(
-                                            format!(
+                                        self.move_list.push(format!(
+                                            "{}{}{}{}{}{}",
+                                            file_a,
+                                            rank_a,
+                                            self.move_notation,
+                                            file_b,
+                                            rank_b,
+                                            self.check,
+                                        ));
+
+                                        // a2-a1Q+, a2-a1=R+, etc.
+                                        self.move_list.push(format!(
+                                            "{}{}{}{}{}{}{}{}",
+                                            file_a,
+                                            rank_a,
+                                            self.move_notation,
+                                            file_b,
+                                            rank_b,
+                                            promotion,
+                                            piece,
+                                            self.check,
+                                        ));
+
+                                        for mate in self.check_mate.iter() {
+                                            // a2-a1++, a2-b1#, etc.
+                                            self.move_list.push(format!(
                                                 "{}{}{}{}{}{}",
                                                 file_a,
                                                 rank_a,
                                                 self.move_notation,
                                                 file_b,
                                                 rank_b,
-                                                self.check,
-                                            )
-                                        );
+                                                mate,
+                                            ));
 
-                                        // a2-a1Q+, a2-a1=R+, etc.
-                                        self.move_list.push(
-                                            format!(
+                                            // a2-a1Q++, a2-a1=R#, etc.
+                                            self.move_list.push(format!(
                                                 "{}{}{}{}{}{}{}{}",
                                                 file_a,
                                                 rank_a,
@@ -1425,38 +1196,8 @@ impl<'a> MoveGenerator<'a> {
                                                 rank_b,
                                                 promotion,
                                                 piece,
-                                                self.check,
-                                            )
-                                        );
-
-                                        for mate in self.check_mate.iter() {
-                                            // a2-a1++, a2-b1#, etc.
-                                            self.move_list.push(
-                                                format!(
-                                                    "{}{}{}{}{}{}",
-                                                    file_a,
-                                                    rank_a,
-                                                    self.move_notation,
-                                                    file_b,
-                                                    rank_b,
-                                                    mate,
-                                                )
-                                            );
-
-                                            // a2-a1Q++, a2-a1=R#, etc.
-                                            self.move_list.push(
-                                                format!(
-                                                    "{}{}{}{}{}{}{}{}",
-                                                    file_a,
-                                                    rank_a,
-                                                    self.move_notation,
-                                                    file_b,
-                                                    rank_b,
-                                                    promotion,
-                                                    piece,
-                                                    mate,
-                                                )
-                                            );
+                                                mate,
+                                            ));
                                         }
                                     }
                                 }
@@ -1464,43 +1205,23 @@ impl<'a> MoveGenerator<'a> {
                             // Process all other moves.
                             else {
                                 // a1-b1, a1-c1, ..., g8-h8, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}",
-                                        file_a,
-                                        rank_a,
-                                        self.move_notation,
-                                        file_b,
-                                        rank_b,
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}",
+                                    file_a, rank_a, self.move_notation, file_b, rank_b,
+                                ));
 
                                 // a1-b1+, a1-c1+, ..., h7-h8+, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}{}",
-                                        file_a,
-                                        rank_a,
-                                        self.move_notation,
-                                        file_b,
-                                        rank_b,
-                                        self.check,
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}{}",
+                                    file_a, rank_a, self.move_notation, file_b, rank_b, self.check,
+                                ));
 
                                 for mate in self.check_mate.iter() {
                                     // a1-b1++, a1-c1#, ..., g7-h8++, g7-h8#
-                                    self.move_list.push(
-                                        format!(
-                                            "{}{}{}{}{}{}",
-                                            file_a,
-                                            rank_a,
-                                            self.move_notation,
-                                            file_b,
-                                            rank_b,
-                                            mate,
-                                        )
-                                    );
+                                    self.move_list.push(format!(
+                                        "{}{}{}{}{}{}",
+                                        file_a, rank_a, self.move_notation, file_b, rank_b, mate,
+                                    ));
                                 }
                             }
                         }
@@ -1537,52 +1258,60 @@ impl<'a> MoveGenerator<'a> {
                         // The square-to-square capture must first be valid.
                         // E.g., not a1xg3.
                         if MoveGenerator::move_is_valid(
-                            file_a_idx,
-                            rank_a_idx,
-                            file_b_idx,
-                            rank_b_idx,
+                            file_a_idx, rank_a_idx, file_b_idx, rank_b_idx,
                         ) {
                             // We check if the square-to-square capture is
                             // a valid pawn promotion.
                             if MoveGenerator::move_is_valid_promotion(
-                                file_a_idx,
-                                rank_a_idx,
-                                file_b_idx,
-                                rank_b_idx,
-                            )
-                            {
+                                file_a_idx, rank_a_idx, file_b_idx, rank_b_idx,
+                            ) {
                                 for piece in self.promotion_pieces.iter() {
-                                    for promotion in self.promotion_notation
-                                                         .iter() {
+                                    for promotion in self.promotion_notation.iter() {
                                         // a2xa1, a2xa1, etc.
-                                        self.move_list.push(
-                                            format!(
-                                                "{}{}{}{}{}",
-                                                file_a,
-                                                rank_a,
-                                                self.capture,
-                                                file_b,
-                                                rank_b,
-                                            )
-                                        );
+                                        self.move_list.push(format!(
+                                            "{}{}{}{}{}",
+                                            file_a, rank_a, self.capture, file_b, rank_b,
+                                        ));
 
                                         // a2xa1Q, a2xa1=R, etc.
-                                        self.move_list.push(
-                                            format!(
-                                                "{}{}{}{}{}{}{}",
-                                                file_a,
-                                                rank_a,
-                                                self.capture,
-                                                file_b,
-                                                rank_b,
-                                                promotion,
-                                                piece
-                                            )
-                                        );
+                                        self.move_list.push(format!(
+                                            "{}{}{}{}{}{}{}",
+                                            file_a,
+                                            rank_a,
+                                            self.capture,
+                                            file_b,
+                                            rank_b,
+                                            promotion,
+                                            piece
+                                        ));
 
                                         // a2xa1+, a2xa1+, etc.
-                                        self.move_list.push(
-                                            format!(
+                                        self.move_list.push(format!(
+                                            "{}{}{}{}{}{}{}{}",
+                                            file_a,
+                                            rank_a,
+                                            self.capture,
+                                            file_b,
+                                            rank_b,
+                                            promotion,
+                                            piece,
+                                            self.check,
+                                        ));
+
+                                        // a2xa1Q+, a2xa1=R+, etc.
+                                        self.move_list.push(format!(
+                                            "{}{}{}{}{}{}",
+                                            file_a,
+                                            rank_a,
+                                            self.capture,
+                                            file_b,
+                                            rank_b,
+                                            self.check,
+                                        ));
+
+                                        for mate in self.check_mate.iter() {
+                                            // a2xa1++, a2xa1#, etc.
+                                            self.move_list.push(format!(
                                                 "{}{}{}{}{}{}{}{}",
                                                 file_a,
                                                 rank_a,
@@ -1591,51 +1320,14 @@ impl<'a> MoveGenerator<'a> {
                                                 rank_b,
                                                 promotion,
                                                 piece,
-                                                self.check,
-                                            )
-                                        );
-
-                                        // a2xa1Q+, a2xa1=R+, etc.
-                                        self.move_list.push(
-                                            format!(
-                                                "{}{}{}{}{}{}",
-                                                file_a,
-                                                rank_a,
-                                                self.capture,
-                                                file_b,
-                                                rank_b,
-                                                self.check,
-                                            )
-                                        );
-
-                                        for mate in self.check_mate.iter() {
-                                            // a2xa1++, a2xa1#, etc.
-                                            self.move_list.push(
-                                                format!(
-                                                    "{}{}{}{}{}{}{}{}",
-                                                    file_a,
-                                                    rank_a,
-                                                    self.capture,
-                                                    file_b,
-                                                    rank_b,
-                                                    promotion,
-                                                    piece,
-                                                    mate,
-                                                )
-                                            );
+                                                mate,
+                                            ));
 
                                             // a2xa1Q++, a2xa1=R#, etc.
-                                            self.move_list.push(
-                                                format!(
-                                                    "{}{}{}{}{}{}",
-                                                    file_a,
-                                                    rank_a,
-                                                    self.capture,
-                                                    file_b,
-                                                    rank_b,
-                                                    mate,
-                                                )
-                                            );
+                                            self.move_list.push(format!(
+                                                "{}{}{}{}{}{}",
+                                                file_a, rank_a, self.capture, file_b, rank_b, mate,
+                                            ));
                                         }
                                     }
                                 }
@@ -1643,43 +1335,23 @@ impl<'a> MoveGenerator<'a> {
                             // Process all other moves.
                             else {
                                 // a1xb1, a1xc1, ..., g8xh8, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}",
-                                        file_a,
-                                        rank_a,
-                                        self.capture,
-                                        file_b,
-                                        rank_b,
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}",
+                                    file_a, rank_a, self.capture, file_b, rank_b,
+                                ));
 
                                 // a1xb1+, a1xc1+, ..., h7xh8+, etc.
-                                self.move_list.push(
-                                    format!(
-                                        "{}{}{}{}{}{}",
-                                        file_a,
-                                        rank_a,
-                                        self.capture,
-                                        file_b,
-                                        rank_b,
-                                        self.check,
-                                    )
-                                );
+                                self.move_list.push(format!(
+                                    "{}{}{}{}{}{}",
+                                    file_a, rank_a, self.capture, file_b, rank_b, self.check,
+                                ));
 
                                 for mate in self.check_mate.iter() {
                                     // a1xb1++, a1xc1#, ..., g7xh8++, g7xh8#
-                                    self.move_list.push(
-                                        format!(
-                                            "{}{}{}{}{}{}",
-                                            file_a,
-                                            rank_a,
-                                            self.capture,
-                                            file_b,
-                                            rank_b,
-                                            mate,
-                                        )
-                                    );
+                                    self.move_list.push(format!(
+                                        "{}{}{}{}{}{}",
+                                        file_a, rank_a, self.capture, file_b, rank_b, mate,
+                                    ));
                                 }
                             }
                         }
@@ -1769,7 +1441,6 @@ mod test {
             "e8/Q#".to_string(),
             "b7".to_string(),
             "e1B".to_string(),
-
             // pawn captures
             "hxg8=N++".to_string(),
             "bxa1Q".to_string(),
@@ -1782,67 +1453,56 @@ mod test {
             "exd8/Q#".to_string(),
             "bxa7".to_string(),
             "dxe1B".to_string(),
-
             // king moves
             "Ka6".to_string(),
             "Kg7#".to_string(),
             "Kd5+".to_string(),
             "Ka6++".to_string(),
-
             // king captures
             "Kxc6#".to_string(),
             "Kxg7".to_string(),
             "Kxa2+".to_string(),
             "Kxe5++".to_string(),
-
             // queen moves
             "Qa6".to_string(),
             "Qb2+".to_string(),
             "Qg7#".to_string(),
             "Qd5++".to_string(),
-
             // queen captures
             "Qxc6".to_string(),
             "Qxd4+".to_string(),
             "Qxg7#".to_string(),
             "Qxe5++".to_string(),
-
             // rook moves
             "Ra6".to_string(),
             "Rh3+".to_string(),
             "Rg7#".to_string(),
             "Rd5++".to_string(),
-
             // rook captures
             "Rxc6".to_string(),
             "Rxb1+".to_string(),
             "Rxg7#".to_string(),
             "Rxe5++".to_string(),
-
             // bishop moves
             "Ba6".to_string(),
             "Bg3+".to_string(),
             "Bg7#".to_string(),
             "Bd5++".to_string(),
-
             // bishop captures
             "Bxc6".to_string(),
             "Bxe1+".to_string(),
             "Bxg7#".to_string(),
             "Bxe5++".to_string(),
-
             // knight moves
             "Na6".to_string(),
             "Nc2+".to_string(),
             "Ng7#".to_string(),
             "Nd5++".to_string(),
-
             // knight captures
             "Nxc6".to_string(),
             "Nxh8+".to_string(),
             "Nxg7#".to_string(),
             "Nxe5++".to_string(),
-
             // castle moves
             "0-0".to_string(),
             "0-0-0".to_string(),
@@ -1852,7 +1512,6 @@ mod test {
             "0-0-0++".to_string(),
             "0-0#".to_string(),
             "0-0-0#".to_string(),
-
             // square-to-square moves
             "a1-a2".to_string(),
             "a1-a2+".to_string(),
@@ -1873,7 +1532,6 @@ mod test {
             "f7-g8+".to_string(),
             "f7-g8++".to_string(),
             "f7-g8#".to_string(),
-
             // square-to-square captures
             "a1xa2".to_string(),
             "a1xa2+".to_string(),
@@ -1906,94 +1564,126 @@ mod test {
 
     #[test]
     pub fn move_invalid_for_same_move() {
-        let file_a: usize = 0; let rank_a: usize = 0; // a1
-        let file_b: usize = 0; let rank_b: usize = 0; // a1
+        let file_a: usize = 0;
+        let rank_a: usize = 0; // a1
+        let file_b: usize = 0;
+        let rank_b: usize = 0; // a1
 
-        assert!(!MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        assert!(!MoveGenerator::move_is_valid(
+            file_a, rank_a, file_b, rank_b
+        ));
     }
 
     #[test]
     pub fn move_valid_for_same_file() {
-        let file_a: usize = 2; let rank_a: usize = 0; // c1
-        let file_b: usize = 2; let rank_b: usize = 1; // c2
+        let file_a: usize = 2;
+        let rank_a: usize = 0; // c1
+        let file_b: usize = 2;
+        let rank_b: usize = 1; // c2
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
 
-        let file_a: usize = 0; let rank_a: usize = 6; // a7
-        let file_b: usize = 0; let rank_b: usize = 7; // a8
+        let file_a: usize = 0;
+        let rank_a: usize = 6; // a7
+        let file_b: usize = 0;
+        let rank_b: usize = 7; // a8
 
-        assert!(
-            MoveGenerator::move_is_valid(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
     }
 
     #[test]
     pub fn move_valid_for_same_rank() {
-        let file_a: usize = 1; let rank_a: usize = 0; // b1
-        let file_b: usize = 2; let rank_b: usize = 0; // c1
+        let file_a: usize = 1;
+        let rank_a: usize = 0; // b1
+        let file_b: usize = 2;
+        let rank_b: usize = 0; // c1
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
 
-        let file_a: usize = 1; let rank_a: usize = 5; // b6
-        let file_b: usize = 2; let rank_b: usize = 5; // c6
+        let file_a: usize = 1;
+        let rank_a: usize = 5; // b6
+        let file_b: usize = 2;
+        let rank_b: usize = 5; // c6
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
     }
 
     #[test]
     pub fn move_valid_for_same_diagonal() {
-        let file_a: usize = 0; let rank_a: usize = 0; // a1
-        let file_b: usize = 7; let rank_b: usize = 7; // h8
+        let file_a: usize = 0;
+        let rank_a: usize = 0; // a1
+        let file_b: usize = 7;
+        let rank_b: usize = 7; // h8
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
 
-        let file_a: usize = 1; let rank_a: usize = 4; // b5
-        let file_b: usize = 0; let rank_b: usize = 5; // a6
+        let file_a: usize = 1;
+        let rank_a: usize = 4; // b5
+        let file_b: usize = 0;
+        let rank_b: usize = 5; // a6
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
 
-        let file_a: usize = 1; let rank_a: usize = 4; // b5
-        let file_b: usize = 2; let rank_b: usize = 6; // a6
+        let file_a: usize = 1;
+        let rank_a: usize = 4; // b5
+        let file_b: usize = 2;
+        let rank_b: usize = 6; // a6
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
     }
 
     #[test]
     pub fn move_valid_for_knight_move() {
-        let file_a: usize = 0; let rank_a: usize = 0; // a1
-        let file_b: usize = 1; let rank_b: usize = 2; // b3
+        let file_a: usize = 0;
+        let rank_a: usize = 0; // a1
+        let file_b: usize = 1;
+        let rank_b: usize = 2; // b3
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
 
-        let file_a: usize = 7; let rank_a: usize = 4; // h5
-        let file_b: usize = 5; let rank_b: usize = 5; // f6
+        let file_a: usize = 7;
+        let rank_a: usize = 4; // h5
+        let file_b: usize = 5;
+        let rank_b: usize = 5; // f6
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
 
-        let file_a: usize = 4; let rank_a: usize = 3; // e4
-        let file_b: usize = 3; let rank_b: usize = 1; // d2
+        let file_a: usize = 4;
+        let rank_a: usize = 3; // e4
+        let file_b: usize = 3;
+        let rank_b: usize = 1; // d2
 
         assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
     }
 
     #[test]
     pub fn move_is_invalid() {
-        let file_a: usize = 0; let rank_a: usize = 0; // a1
-        let file_b: usize = 3; let rank_b: usize = 6; // d7
+        let file_a: usize = 0;
+        let rank_a: usize = 0; // a1
+        let file_b: usize = 3;
+        let rank_b: usize = 6; // d7
 
-        assert!(!MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        assert!(!MoveGenerator::move_is_valid(
+            file_a, rank_a, file_b, rank_b
+        ));
 
-        let file_a: usize = 7; let rank_a: usize = 7; // h8
-        let file_b: usize = 0; let rank_b: usize = 3; // a4
+        let file_a: usize = 7;
+        let rank_a: usize = 7; // h8
+        let file_b: usize = 0;
+        let rank_b: usize = 3; // a4
 
-        assert!(!MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        assert!(!MoveGenerator::move_is_valid(
+            file_a, rank_a, file_b, rank_b
+        ));
 
-        let file_a: usize = 0; let rank_a: usize = 7; // a8
-        let file_b: usize = 7; let rank_b: usize = 3; // h4
+        let file_a: usize = 0;
+        let rank_a: usize = 7; // a8
+        let file_b: usize = 7;
+        let rank_b: usize = 3; // h4
 
-        assert!(!MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        assert!(!MoveGenerator::move_is_valid(
+            file_a, rank_a, file_b, rank_b
+        ));
     }
 
     //
@@ -2002,88 +1692,88 @@ mod test {
 
     #[test]
     pub fn move_is_valid_promotion() {
-        let file_a: usize = 0; let rank_a: usize = 6; // a7
-        let file_b: usize = 0; let rank_b: usize = 7; // a8
+        let file_a: usize = 0;
+        let rank_a: usize = 6; // a7
+        let file_b: usize = 0;
+        let rank_b: usize = 7; // a8
 
-        assert!(
-            MoveGenerator::move_is_valid_promotion(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(MoveGenerator::move_is_valid_promotion(
+            file_a, rank_a, file_b, rank_b
+        ));
 
-        let file_a: usize = 3; let rank_a: usize = 6; // d7
-        let file_b: usize = 2; let rank_b: usize = 7; // c8
+        let file_a: usize = 3;
+        let rank_a: usize = 6; // d7
+        let file_b: usize = 2;
+        let rank_b: usize = 7; // c8
 
-        assert!(
-            MoveGenerator::move_is_valid_promotion(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(MoveGenerator::move_is_valid_promotion(
+            file_a, rank_a, file_b, rank_b
+        ));
 
-        let file_a: usize = 0; let rank_a: usize = 1; // a2
-        let file_b: usize = 0; let rank_b: usize = 0; // a1
+        let file_a: usize = 0;
+        let rank_a: usize = 1; // a2
+        let file_b: usize = 0;
+        let rank_b: usize = 0; // a1
 
-        assert!(
-            MoveGenerator::move_is_valid_promotion(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(MoveGenerator::move_is_valid_promotion(
+            file_a, rank_a, file_b, rank_b
+        ));
 
-        let file_a: usize = 3; let rank_a: usize = 1; // d2
-        let file_b: usize = 2; let rank_b: usize = 0; // c1
+        let file_a: usize = 3;
+        let rank_a: usize = 1; // d2
+        let file_b: usize = 2;
+        let rank_b: usize = 0; // c1
 
-        assert!(
-            MoveGenerator::move_is_valid_promotion(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(MoveGenerator::move_is_valid_promotion(
+            file_a, rank_a, file_b, rank_b
+        ));
     }
 
     #[test]
     pub fn move_is_invalid_promotion_same_rank() {
-        let file_a: usize = 0; let rank_a: usize = 6; // a7
-        let file_b: usize = 1; let rank_b: usize = 6; // b7
+        let file_a: usize = 0;
+        let rank_a: usize = 6; // a7
+        let file_b: usize = 1;
+        let rank_b: usize = 6; // b7
 
-        assert!(
-            !MoveGenerator::move_is_valid_promotion(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(!MoveGenerator::move_is_valid_promotion(
+            file_a, rank_a, file_b, rank_b
+        ));
     }
 
     #[test]
     pub fn move_is_invalid_promotion_start_and_end_rank() {
-        let file_a: usize = 6; let rank_a: usize = 6; // g7
-        let file_b: usize = 6; let rank_b: usize = 5; // g5
+        let file_a: usize = 6;
+        let rank_a: usize = 6; // g7
+        let file_b: usize = 6;
+        let rank_b: usize = 5; // g5
 
-        assert!(
-            !MoveGenerator::move_is_valid_promotion(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(!MoveGenerator::move_is_valid_promotion(
+            file_a, rank_a, file_b, rank_b
+        ));
     }
 
     #[test]
     pub fn move_is_valid_promotion_start_and_end_file() {
-        let file_a: usize = 6; let rank_a: usize = 6; // g7
-        let file_b: usize = 5; let rank_b: usize = 7; // f8
+        let file_a: usize = 6;
+        let rank_a: usize = 6; // g7
+        let file_b: usize = 5;
+        let rank_b: usize = 7; // f8
 
-        assert!(
-            MoveGenerator::move_is_valid_promotion(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(MoveGenerator::move_is_valid_promotion(
+            file_a, rank_a, file_b, rank_b
+        ));
     }
 
     #[test]
     pub fn move_is_invalid_promotion_start_and_end_file() {
-        let file_a: usize = 6; let rank_a: usize = 6; // g7
-        let file_b: usize = 2; let rank_b: usize = 7; // b8
+        let file_a: usize = 6;
+        let rank_a: usize = 6; // g7
+        let file_b: usize = 2;
+        let rank_b: usize = 7; // b8
 
-        assert!(
-            !MoveGenerator::move_is_valid_promotion(
-                file_a, rank_a, file_b, rank_b
-            )
-        );
+        assert!(!MoveGenerator::move_is_valid_promotion(
+            file_a, rank_a, file_b, rank_b
+        ));
     }
 }

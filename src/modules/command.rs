@@ -109,9 +109,7 @@ impl Command {
     }
 
     /// Process the input command based on the given context.
-    pub fn process_command(&self, context: CommandContext, command: String)
-    -> Option<CommandKind>
-    {
+    pub fn process_command(&self, context: CommandContext, command: String) -> Option<CommandKind> {
         // Get the list of commands for the context.
         if let Some(list) = self.commands.get(&context) {
             // For each command part, compare the input command
@@ -120,7 +118,7 @@ impl Command {
             for command_part in list.iter() {
                 for cmd in command_part.commands.iter() {
                     if cmd.eq(&command) {
-                        return Some(command_part.command_kind)
+                        return Some(command_part.command_kind);
                     }
                 }
             }
@@ -212,9 +210,7 @@ impl Command {
 
     /// Build (or rebuild) the commands list based on the
     /// (changed) context of `Engine`.
-    pub fn build_commands(engine: &Engine)
-    -> HashMap<CommandContext, Vec<CommandPart>>
-    {
+    pub fn build_commands(engine: &Engine) -> HashMap<CommandContext, Vec<CommandPart>> {
         let mut map = HashMap::new();
 
         // Insert commands for context `Main`.
@@ -226,98 +222,62 @@ impl Command {
                     description: format!("E.g., {}", engine.parser.eg()),
                     command_kind: CommandKind::Move,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "wr".to_string(),
-                        "white resigns".to_string(),
-                    ],
+                    commands: vec!["wr".to_string(), "white resigns".to_string()],
                     description: "White resigns".to_string(),
                     command_kind: CommandKind::WhiteResigns,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "br".to_string(),
-                        "black resigns".to_string()
-                    ],
+                    commands: vec!["br".to_string(), "black resigns".to_string()],
                     description: "Black resigns".to_string(),
                     command_kind: CommandKind::BlackResigns,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "sw".to_string(),
-                        "switch parser".to_string(),
-                    ],
+                    commands: vec!["sw".to_string(), "switch parser".to_string()],
                     description: "Switch the current parser engine".to_string(),
                     command_kind: CommandKind::SwitchParser,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "dt".to_string(),
-                        "display to move".to_string(),
-                    ],
+                    commands: vec!["dt".to_string(), "display to move".to_string()],
                     description: "Display board for the color that \
-                                 is to move".to_string(),
+                                 is to move"
+                        .to_string(),
                     command_kind: CommandKind::DisplayToMove,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "dw".to_string(),
-                        "display white".to_string(),
-                    ],
+                    commands: vec!["dw".to_string(), "display white".to_string()],
                     description: "Display board for White".to_string(),
                     command_kind: CommandKind::DisplayForWhite,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "db".to_string(),
-                        "display black".to_string(),
-                    ],
+                    commands: vec!["db".to_string(), "display black".to_string()],
                     description: "Display board for Black".to_string(),
                     command_kind: CommandKind::DisplayForBlack,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "dfw".to_string(),
-                        "display for white".to_string(),
-                    ],
+                    commands: vec!["dfw".to_string(), "display for white".to_string()],
                     description: "Display board for White after \
-                                 each move".to_string(),
+                                 each move"
+                        .to_string(),
                     command_kind: CommandKind::DisplayForWhiteEachMove,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "dfb".to_string(),
-                        "display for black".to_string(),
-                    ],
+                    commands: vec!["dfb".to_string(), "display for black".to_string()],
                     description: "Display board for Black after \
-                                 each move".to_string(),
+                                 each move"
+                        .to_string(),
                     command_kind: CommandKind::DisplayForBlackEachMove,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "ml".to_string(),
-                        "move list".to_string(),
-                    ],
+                    commands: vec!["ml".to_string(), "move list".to_string()],
                     description: "Display the move list notation".to_string(),
                     command_kind: CommandKind::DisplayMoveList,
                 },
-
                 CommandPart {
                     commands: vec!["fen".to_string()],
-                    description: "Display the FEN layout of the board"
-                                 .to_string(),
+                    description: "Display the FEN layout of the board".to_string(),
                     command_kind: CommandKind::DisplayFEN,
                 },
-
                 CommandPart {
                     commands: vec![
                         "h".to_string(),
@@ -328,15 +288,11 @@ impl Command {
                     description: "Display this help message".to_string(),
                     command_kind: CommandKind::Help,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "q".to_string(),
-                        "quit".to_string(),
-                    ],
+                    commands: vec!["q".to_string(), "quit".to_string()],
                     description: "Quit the application".to_string(),
                     command_kind: CommandKind::Quit,
-                }
+                },
             ],
         );
 
@@ -345,84 +301,59 @@ impl Command {
             CommandContext::SwitchParser,
             vec![
                 CommandPart {
-                    commands: vec![
-                        "1".to_string(),
-                        "algebraic".to_string(),
-                    ],
+                    commands: vec!["1".to_string(), "algebraic".to_string()],
                     description: "Algebraic Parser".to_string(),
                     command_kind: CommandKind::SwitchToAlgebraicParser,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "2".to_string(),
-                        "concise reversible".to_string(),
-                    ],
+                    commands: vec!["2".to_string(), "concise reversible".to_string()],
                     description: "Concise Reversible Parser \
-                                 (Not Implemented)".to_string(),
+                                 (Not Implemented)"
+                        .to_string(),
                     command_kind: CommandKind::SwitchToConciseReversibleParser,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "3".to_string(),
-                        "coordinate".to_string(),
-                    ],
+                    commands: vec!["3".to_string(), "coordinate".to_string()],
                     description: "Coordinate Parser \
-                                 (Not Implemented)".to_string(),
+                                 (Not Implemented)"
+                        .to_string(),
                     command_kind: CommandKind::SwitchToCoordinateParser,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "4".to_string(),
-                        "descriptive".to_string(),
-                    ],
+                    commands: vec!["4".to_string(), "descriptive".to_string()],
                     description: "Descriptive Parser \
-                                 (Not Implemented)".to_string(),
+                                 (Not Implemented)"
+                        .to_string(),
                     command_kind: CommandKind::SwitchToDescriptiveParser,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "5".to_string(),
-                        "iccf".to_string(),
-                    ],
+                    commands: vec!["5".to_string(), "iccf".to_string()],
                     description: "ICCF Parser \
-                                 (Not Implemented)".to_string(),
+                                 (Not Implemented)"
+                        .to_string(),
                     command_kind: CommandKind::SwitchToICCFParser,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "6".to_string(),
-                        "long algebraic".to_string(),
-                    ],
+                    commands: vec!["6".to_string(), "long algebraic".to_string()],
                     description: "Long Algebraic Parser \
-                                 (Not Implemented)".to_string(),
+                                 (Not Implemented)"
+                        .to_string(),
                     command_kind: CommandKind::SwitchToLongAlgebraicParser,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "7".to_string(),
-                        "reversible algebraic".to_string(),
-                    ],
+                    commands: vec!["7".to_string(), "reversible algebraic".to_string()],
                     description: "Reversible Algebraic Parser \
-                                 (Not Implemented)".to_string(),
+                                 (Not Implemented)"
+                        .to_string(),
                     command_kind: CommandKind::SwitchToReversibleAlgebraicParser,
                 },
-
                 CommandPart {
-                    commands: vec![
-                        "8".to_string(),
-                        "smith".to_string(),
-                    ],
+                    commands: vec!["8".to_string(), "smith".to_string()],
                     description: "Smith Parser \
-                                 (Not Implemented)".to_string(),
+                                 (Not Implemented)"
+                        .to_string(),
                     command_kind: CommandKind::SwitchToSmithParser,
                 },
-
                 CommandPart {
                     commands: vec![
                         "h".to_string(),
@@ -433,7 +364,6 @@ impl Command {
                     description: "Display this help message".to_string(),
                     command_kind: CommandKind::Help,
                 },
-
                 CommandPart {
                     commands: vec![
                         "b".to_string(),
@@ -444,7 +374,7 @@ impl Command {
                     description: "Go back".to_string(),
                     command_kind: CommandKind::Back,
                 },
-            ]
+            ],
         );
 
         map

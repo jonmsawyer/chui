@@ -3,59 +3,51 @@
 use bevy::prelude::*;
 use bevy::render::camera::RenderTarget;
 
-use super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD, FILES, RANKS};
-use super::resources::UiResource;
 use super::components::MainCamera;
+use super::constants::{FILES, RANKS, SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
+use super::resources::UiResource;
 
-
-pub fn compute_board_coords(mut ui_state: ResMut<UiResource>)  -> ResMut<UiResource> {
+pub fn compute_board_coords(mut ui_state: &mut UiResource) {
     let coords = (ui_state.mouse_click_coords / ui_state.square_pixels).floor() + 4. as f32;
     let min = 0. as f32;
     let max = 7. as f32;
     if coords[0] < min || coords[0] > max || coords[1] < min || coords[1] > max {
-        return ui_state
+        return;
     }
     if ui_state.draw_for_white {
         ui_state.mouse_click_board_coords = (FILES[coords[0] as usize], RANKS[coords[1] as usize]);
+    } else {
+        ui_state.mouse_click_board_coords =
+            (FILES[7 - coords[0] as usize], RANKS[7 - coords[1] as usize]);
     }
-    else {
-        let mut files = FILES.clone();
-        files.reverse();
-        let mut ranks = RANKS.clone();
-        ranks.reverse();
-        ui_state.mouse_click_board_coords = (files[coords[0] as usize], ranks[coords[1] as usize]);
-    }
-    ui_state
 }
 
-pub fn compute_coords(square_pixels: f32) -> (f32, f32, f32, f32) {
-    let offset = square_pixels / 2.; // by half because textures are centered
+pub fn compute_coords(square_pixels: f32) -> (f32, f32, f32) {
     let scale = square_pixels / SPRITE_WIDTH; // 0.28125 by default
-    let start_x = START_X_COORD * SPRITE_WIDTH * scale; // -288.0 by default
-    let start_y = START_Y_COORD * SPRITE_WIDTH * scale; // 288.0 by default
+    let start_x = START_X_COORD * square_pixels; // -288.0 by default
+    let start_y = START_Y_COORD * square_pixels - square_pixels; // 216.0 by default
 
-    (offset, scale, start_x, start_y)
+    (scale, start_x, start_y)
 }
 
 pub fn update_square_pixels(mut ui_state: ResMut<UiResource>) -> ResMut<UiResource> {
-    let x_square_pixels = (
-        ui_state.window_width -
-        ui_state.board_margin -
-        (ui_state.info_panel_width * ui_state.ui_scale_factor) -
-        (ui_state.annotation_panel_width * ui_state.ui_scale_factor)
-    ) / 8.0; // 8 columns
+    let x_square_pixels = (ui_state.window_width
+        - ui_state.board_margin
+        - (ui_state.info_panel_width * ui_state.ui_scale_factor)
+        - (ui_state.annotation_panel_width * ui_state.ui_scale_factor))
+        / 8.0; // 8 columns
 
     let y_square_pixels = (
         ui_state.window_height -
         ui_state.board_margin -
         (25.0 * ui_state.ui_scale_factor) - // 25.0 pixels for menu bar
-        (25.0 * ui_state.ui_scale_factor)   // 25.0 pixels for status bar
+        (25.0 * ui_state.ui_scale_factor)
+        // 25.0 pixels for status bar
     ) / 8.0; // 8 rows
 
     if x_square_pixels <= y_square_pixels {
         ui_state.square_pixels = x_square_pixels;
-    }
-    else {
+    } else {
         ui_state.square_pixels = y_square_pixels;
     }
 

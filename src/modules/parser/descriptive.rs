@@ -2,9 +2,9 @@
 
 //use std::fmt;
 
-use crate::{ChuiResult, ChuiError};
+use super::super::{Color, Move};
 use super::Parser;
-use super::super::{Move, Color};
+use crate::{ChuiError, ChuiResult};
 
 /// A parser that will parse English descriptive chess notation.
 /// Example moves: `P-K4`, `NxN`, `QxRch`, `Q-KR4 mate`, `O-O`, etc.
@@ -13,14 +13,10 @@ pub struct DescriptiveParser;
 impl Parser for DescriptiveParser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, _the_move: String, _to_move: Color)
-    -> ChuiResult<Move>
-    {
-        Err(
-            ChuiError::InvalidMove(
-                "DescriptiveParser not implemented".to_string()
-            )
-        )
+    fn parse(&mut self, _the_move: String, _to_move: Color) -> ChuiResult<Move> {
+        Err(ChuiError::InvalidMove(
+            "DescriptiveParser not implemented".to_string(),
+        ))
     }
 
     fn name(&self) -> String {
@@ -35,6 +31,6 @@ impl Parser for DescriptiveParser {
 impl DescriptiveParser {
     /// Return a new dynamic parser that implements the `Parser` trait.
     pub fn new() -> Box<dyn Parser + Send + Sync> {
-        Box::new(DescriptiveParser { })
+        Box::new(DescriptiveParser {})
     }
 }

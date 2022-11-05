@@ -1,11 +1,13 @@
 //! Window Descriptor plugin
 
-use bevy::{prelude::*, window::{PresentMode, MonitorSelection, WindowResized}};
+use bevy::{
+    prelude::*,
+    window::{MonitorSelection, PresentMode, WindowResized},
+};
 
-use super::super::resources::UiResource;
 use super::super::events::ResizeBoardEvent;
+use super::super::resources::UiResource;
 use super::super::utils::update_square_pixels;
-
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -38,11 +40,11 @@ impl Plugin for WindowDescriptorPlugin {
         // on the Window object.
         // -Travis Veazey <https://github.com/Kromey>
         app.insert_resource(WindowDescriptor {
-                title: format!(r#"Chui: Chess UI v{}"#, VERSION),
-                position: WindowPosition::Centered(MonitorSelection::Current),
-                present_mode: PresentMode::AutoVsync,
-                ..default()
-            })
-            .add_system(resize_notificator);
+            title: format!(r#"Chui: Chess UI v{}"#, VERSION),
+            position: WindowPosition::Centered(MonitorSelection::Current),
+            present_mode: PresentMode::AutoVsync,
+            ..default()
+        })
+        .add_system(resize_notificator);
     }
 }

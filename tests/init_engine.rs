@@ -1,13 +1,8 @@
-use chui::{Engine, Player, Color, ParserEngine};
+use chui::{Color, Engine, ParserEngine, Player};
 
 #[test]
 fn init_engine() {
-    let white = Player::new(
-        Color::White,
-        Some("Nathan Vander Martin"),
-        Some(36),
-        None,
-    );
+    let white = Player::new(Color::White, Some("Nathan Vander Martin"), Some(36), None);
 
     let black = Player::new(
         Color::Black,
@@ -17,7 +12,6 @@ fn init_engine() {
     );
 
     if let Ok(engine) = Engine::new(white, black, ParserEngine::Algebraic) {
-
         assert_eq!(
             &format!("{}", engine),
             "White: Nathan Vander Martin (Age 36) (no Elo rating)

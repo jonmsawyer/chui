@@ -4,7 +4,7 @@ Layout jobs for the UI
 A layout job is the custom way to format [`RichText`].
 */
 
-use bevy_egui::egui::{Color32, Stroke, FontFamily, FontId, text::TextFormat};
+use bevy_egui::egui::{text::TextFormat, Color32, FontFamily, FontId, Stroke};
 
 mod file_menu;
 pub use file_menu::*;
@@ -64,4 +64,3 @@ fn top_menu_text_format_underline() -> TextFormat {
         ..Default::default()
     }
 }
-

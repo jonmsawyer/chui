@@ -15,7 +15,7 @@ use super::piece::Color;
 ///
 /// ```
 /// use chui::{Color, Player};
-/// 
+///
 /// let player = Player::new(
 ///     Color::White,
 ///     Some("Fred Johnson"),
@@ -43,15 +43,15 @@ pub struct Player {
 impl Player {
     /// Creates a new `Player` instance when provided with `color`.
     /// Most fields are `Option`al.
-    pub fn new(
-        color: Color,
-        name: Option<&str>,
-        age: Option<u8>,
-        rating: Option<u32>,
-    ) -> Player {
+    pub fn new(color: Color, name: Option<&str>, age: Option<u8>, rating: Option<u32>) -> Player {
         let name = name.map(|name| name.to_string());
 
-        Player { color, name, age, rating }
+        Player {
+            color,
+            name,
+            age,
+            rating,
+        }
     }
 }
 
@@ -89,7 +89,7 @@ mod test {
             Color::White,
             Some("Dr. John Smith III"),
             Some(47),
-            Some(1500)
+            Some(1500),
         );
 
         assert_eq!(
@@ -100,12 +100,7 @@ mod test {
 
     #[test]
     fn full_name_is_computed_name_age_no_rating() {
-        let player = Player::new(
-            Color::Black,
-            Some("John Smith IV"),
-            Some(12),
-            None,
-        );
+        let player = Player::new(Color::Black, Some("John Smith IV"), Some(12), None);
 
         assert_eq!(
             format!("{}", player),
@@ -130,12 +125,7 @@ mod test {
 
     #[test]
     fn full_name_is_computed_name_no_age_no_rating() {
-        let player = Player::new(
-            Color::Black,
-            Some("Smith"),
-            None,
-            None,
-        );
+        let player = Player::new(Color::Black, Some("Smith"), None, None);
 
         assert_eq!(
             format!("{}", player),
@@ -145,12 +135,7 @@ mod test {
 
     #[test]
     fn full_name_is_computed_no_name_age_rating() {
-        let player = Player::new(
-            Color::White,
-            None,
-            Some(47),
-            Some(1500)
-        );
+        let player = Player::new(Color::White, None, Some(47), Some(1500));
 
         assert_eq!(
             format!("{}", player),
@@ -160,12 +145,7 @@ mod test {
 
     #[test]
     fn full_name_is_computed_no_name_age_no_rating() {
-        let player = Player::new(
-            Color::Black,
-            None,
-            Some(12),
-            None,
-        );
+        let player = Player::new(Color::Black, None, Some(12), None);
 
         assert_eq!(
             format!("{}", player),
@@ -175,12 +155,7 @@ mod test {
 
     #[test]
     fn full_name_is_computed_no_name_no_age_rating() {
-        let player = Player::new(
-            Color::Black,
-            None,
-            None,
-            Some(2639),
-        );
+        let player = Player::new(Color::Black, None, None, Some(2639));
 
         assert_eq!(
             format!("{}", player),
@@ -190,12 +165,7 @@ mod test {
 
     #[test]
     fn full_name_is_computed_no_name_no_age_no_rating() {
-        let player = Player::new(
-            Color::Black,
-            None,
-            None,
-            None,
-        );
+        let player = Player::new(Color::Black, None, None, None);
 
         assert_eq!(
             format!("{}", player),

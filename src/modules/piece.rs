@@ -1,14 +1,14 @@
 //! Provides the enums for each chess `Piece` and `Color`.
 
-use std::fmt;
 use std::convert::TryFrom;
+use std::fmt;
 
-use colored::{Colorize, ColoredString};
+use colored::{ColoredString, Colorize};
 
 use bevy::prelude::Component;
 
-use crate::{ChuiResult, ChuiError};
 use super::{Board, Move};
+use crate::{ChuiError, ChuiResult};
 
 /// Piece color. Either `White` or `Black` variants.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -22,7 +22,7 @@ impl fmt::Display for Color {
         match self {
             Color::White => {
                 write!(f, "{}", "♔".yellow().bold())
-            },
+            }
             Color::Black => {
                 write!(f, "{}", "♚".magenta().bold())
             }
@@ -39,7 +39,7 @@ pub enum PieceKind {
     Rook,
     Bishop,
     Knight,
-    Pawn
+    Pawn,
 }
 
 /// Represents a piece on the chessboard. Each chess piece has
@@ -150,9 +150,11 @@ impl Piece {
     }
 
     /// Get move coords for piece.
-    pub fn get_move_coords(&self, board: &Board, current_move: &Option<Move>)
-    -> Vec<(usize, usize)>
-    {
+    pub fn get_move_coords(
+        &self,
+        board: &Board,
+        current_move: &Option<Move>,
+    ) -> Vec<(usize, usize)> {
         let (file_idx, rank_idx) = self.coords;
         let move_coord = self.get_file_rank_from_coords(&self.coords);
 
@@ -162,48 +164,28 @@ impl Piece {
 
         match self.piece {
             PieceKind::King => {
-                move_coords = board.get_king_move_coords(
-                    file_idx,
-                    rank_idx,
-                    current_move,
-                );
-            },
+                move_coords = board.get_king_move_coords(file_idx, rank_idx, current_move);
+            }
 
             PieceKind::Queen => {
-                move_coords = board.get_queen_move_coords(
-                    file_idx,
-                    rank_idx,
-                    current_move,
-                );
-            },
+                move_coords = board.get_queen_move_coords(file_idx, rank_idx, current_move);
+            }
 
             PieceKind::Rook => {
-                move_coords = board.get_rook_move_coords(
-                    file_idx,
-                    rank_idx,
-                    current_move,
-                );
-            },
+                move_coords = board.get_rook_move_coords(file_idx, rank_idx, current_move);
+            }
 
             PieceKind::Bishop => {
-                move_coords = board.get_bishop_move_coords(
-                    file_idx,
-                    rank_idx,
-                    current_move,
-                );
-            },
+                move_coords = board.get_bishop_move_coords(file_idx, rank_idx, current_move);
+            }
 
             PieceKind::Knight => {
                 move_coords = board.get_knight_move_coords(file_idx, rank_idx);
-            },
+            }
 
             PieceKind::Pawn => {
-                move_coords = board.get_pawn_move_coords(
-                    file_idx,
-                    rank_idx,
-                    self.color
-                );
-            },
+                move_coords = board.get_pawn_move_coords(file_idx, rank_idx, self.color);
+            }
         }
 
         print!(" > Move coords: ");
@@ -216,9 +198,7 @@ impl Piece {
         move_coords
     }
 
-    pub fn get_file_rank_from_coords(self, move_coord: &(usize, usize))
-    -> (char, usize)
-    {
+    pub fn get_file_rank_from_coords(self, move_coord: &(usize, usize)) -> (char, usize) {
         let alpha_coords: Vec<char> = ('a'..='h').collect();
         let (file_idx, rank_idx) = move_coord;
 
@@ -227,42 +207,18 @@ impl Piece {
 
     pub fn repr(&self) -> (ColoredString, ColoredString) {
         match (self.piece, self.color) {
-            (PieceKind::King, Color::White) => {
-                ("K".yellow().bold(), "♔".yellow().bold())
-            },
-            (PieceKind::Queen, Color::White) => {
-                ("Q".yellow().bold(), "♕".yellow().bold())
-            },
-            (PieceKind::Rook, Color::White) => {
-                ("R".yellow().bold(), "♖".yellow().bold())
-            },
-            (PieceKind::Bishop, Color::White) => {
-                ("B".yellow().bold(), "♗".yellow().bold())
-            },
-            (PieceKind::Knight, Color::White) => {
-                ("N".yellow().bold(), "♘".yellow().bold())
-            },
-            (PieceKind::Pawn, Color::White) => {
-                ("P".yellow().bold(), "♙".yellow().bold())
-            },
-            (PieceKind::King, Color::Black) => {
-                ("k".magenta().bold(), "♚".magenta().bold())
-            },
-            (PieceKind::Queen, Color::Black) => {
-                ("q".magenta().bold(), "♛".magenta().bold())
-            },
-            (PieceKind::Rook, Color::Black) => {
-                ("r".magenta().bold(), "♜".magenta().bold())
-            },
-            (PieceKind::Bishop, Color::Black) => {
-                ("b".magenta().bold(), "♝".magenta().bold())
-            },
-            (PieceKind::Knight, Color::Black) => {
-                ("n".magenta().bold(), "♞".magenta().bold())
-            },
-            (PieceKind::Pawn, Color::Black) => {
-                ("p".magenta().bold(), "♟".magenta().bold())
-            },
+            (PieceKind::King, Color::White) => ("K".yellow().bold(), "♔".yellow().bold()),
+            (PieceKind::Queen, Color::White) => ("Q".yellow().bold(), "♕".yellow().bold()),
+            (PieceKind::Rook, Color::White) => ("R".yellow().bold(), "♖".yellow().bold()),
+            (PieceKind::Bishop, Color::White) => ("B".yellow().bold(), "♗".yellow().bold()),
+            (PieceKind::Knight, Color::White) => ("N".yellow().bold(), "♘".yellow().bold()),
+            (PieceKind::Pawn, Color::White) => ("P".yellow().bold(), "♙".yellow().bold()),
+            (PieceKind::King, Color::Black) => ("k".magenta().bold(), "♚".magenta().bold()),
+            (PieceKind::Queen, Color::Black) => ("q".magenta().bold(), "♛".magenta().bold()),
+            (PieceKind::Rook, Color::Black) => ("r".magenta().bold(), "♜".magenta().bold()),
+            (PieceKind::Bishop, Color::Black) => ("b".magenta().bold(), "♝".magenta().bold()),
+            (PieceKind::Knight, Color::Black) => ("n".magenta().bold(), "♞".magenta().bold()),
+            (PieceKind::Pawn, Color::Black) => ("p".magenta().bold(), "♟".magenta().bold()),
         }
     }
 }
@@ -297,14 +253,10 @@ impl TryFrom<&str> for Piece {
             "n" | "♞" => Ok(Piece::new(PieceKind::Knight, Color::Black)),
             "p" | "♟" => Ok(Piece::new(PieceKind::Pawn, Color::Black)),
 
-            _ => Err(
-                ChuiError::InvalidPiece(
-                    format!(
-                        "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk]",
-                        piece
-                    )
-                )
-            ),
+            _ => Err(ChuiError::InvalidPiece(format!(
+                "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk]",
+                piece
+            ))),
         }
     }
 }
@@ -329,14 +281,10 @@ impl TryFrom<char> for Piece {
             'n' => Ok(Piece::new(PieceKind::Knight, Color::Black)),
             'p' => Ok(Piece::new(PieceKind::Pawn, Color::Black)),
 
-            _ => Err(
-                ChuiError::InvalidPiece(
-                    format!(
-                        "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk]",
-                        piece
-                    )
-                )
-            ),
+            _ => Err(ChuiError::InvalidPiece(format!(
+                "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk]",
+                piece
+            ))),
         }
     }
 }
@@ -347,36 +295,108 @@ mod tests {
 
     #[test]
     fn format_pieces() {
-        assert_eq!("K", &format!("{}", Piece::new(PieceKind::King, Color::White)));
-        assert_eq!("Q", &format!("{}", Piece::new(PieceKind::Queen, Color::White)));
-        assert_eq!("R", &format!("{}", Piece::new(PieceKind::Rook, Color::White)));
-        assert_eq!("B", &format!("{}", Piece::new(PieceKind::Bishop, Color::White)));
-        assert_eq!("N", &format!("{}", Piece::new(PieceKind::Knight, Color::White)));
-        assert_eq!("P", &format!("{}", Piece::new(PieceKind::Pawn, Color::White)));
+        assert_eq!(
+            "K",
+            &format!("{}", Piece::new(PieceKind::King, Color::White))
+        );
+        assert_eq!(
+            "Q",
+            &format!("{}", Piece::new(PieceKind::Queen, Color::White))
+        );
+        assert_eq!(
+            "R",
+            &format!("{}", Piece::new(PieceKind::Rook, Color::White))
+        );
+        assert_eq!(
+            "B",
+            &format!("{}", Piece::new(PieceKind::Bishop, Color::White))
+        );
+        assert_eq!(
+            "N",
+            &format!("{}", Piece::new(PieceKind::Knight, Color::White))
+        );
+        assert_eq!(
+            "P",
+            &format!("{}", Piece::new(PieceKind::Pawn, Color::White))
+        );
 
-        assert_eq!("k", &format!("{}", Piece::new(PieceKind::King, Color::Black)));
-        assert_eq!("q", &format!("{}", Piece::new(PieceKind::Queen, Color::Black)));
-        assert_eq!("r", &format!("{}", Piece::new(PieceKind::Rook, Color::Black)));
-        assert_eq!("b", &format!("{}", Piece::new(PieceKind::Bishop, Color::Black)));
-        assert_eq!("n", &format!("{}", Piece::new(PieceKind::Knight, Color::Black)));
-        assert_eq!("p", &format!("{}", Piece::new(PieceKind::Pawn, Color::Black)));
+        assert_eq!(
+            "k",
+            &format!("{}", Piece::new(PieceKind::King, Color::Black))
+        );
+        assert_eq!(
+            "q",
+            &format!("{}", Piece::new(PieceKind::Queen, Color::Black))
+        );
+        assert_eq!(
+            "r",
+            &format!("{}", Piece::new(PieceKind::Rook, Color::Black))
+        );
+        assert_eq!(
+            "b",
+            &format!("{}", Piece::new(PieceKind::Bishop, Color::Black))
+        );
+        assert_eq!(
+            "n",
+            &format!("{}", Piece::new(PieceKind::Knight, Color::Black))
+        );
+        assert_eq!(
+            "p",
+            &format!("{}", Piece::new(PieceKind::Pawn, Color::Black))
+        );
     }
 
     #[test]
     fn valid_try_from_pieces() {
-        assert_eq!(Piece::new(PieceKind::King, Color::White), Piece::try_from("K").unwrap());
-        assert_eq!(Piece::new(PieceKind::Queen, Color::White), Piece::try_from("Q").unwrap());
-        assert_eq!(Piece::new(PieceKind::Rook, Color::White), Piece::try_from("R").unwrap());
-        assert_eq!(Piece::new(PieceKind::Bishop, Color::White), Piece::try_from("B").unwrap());
-        assert_eq!(Piece::new(PieceKind::Knight, Color::White), Piece::try_from("N").unwrap());
-        assert_eq!(Piece::new(PieceKind::Pawn, Color::White), Piece::try_from("P").unwrap());
+        assert_eq!(
+            Piece::new(PieceKind::King, Color::White),
+            Piece::try_from("K").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Queen, Color::White),
+            Piece::try_from("Q").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Rook, Color::White),
+            Piece::try_from("R").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Bishop, Color::White),
+            Piece::try_from("B").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Knight, Color::White),
+            Piece::try_from("N").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Pawn, Color::White),
+            Piece::try_from("P").unwrap()
+        );
 
-        assert_eq!(Piece::new(PieceKind::King, Color::Black), Piece::try_from("k").unwrap());
-        assert_eq!(Piece::new(PieceKind::Queen, Color::Black), Piece::try_from("q").unwrap());
-        assert_eq!(Piece::new(PieceKind::Rook, Color::Black), Piece::try_from("r").unwrap());
-        assert_eq!(Piece::new(PieceKind::Bishop, Color::Black), Piece::try_from("b").unwrap());
-        assert_eq!(Piece::new(PieceKind::Knight, Color::Black), Piece::try_from("n").unwrap());
-        assert_eq!(Piece::new(PieceKind::Pawn, Color::Black), Piece::try_from("p").unwrap());
+        assert_eq!(
+            Piece::new(PieceKind::King, Color::Black),
+            Piece::try_from("k").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Queen, Color::Black),
+            Piece::try_from("q").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Rook, Color::Black),
+            Piece::try_from("r").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Bishop, Color::Black),
+            Piece::try_from("b").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Knight, Color::Black),
+            Piece::try_from("n").unwrap()
+        );
+        assert_eq!(
+            Piece::new(PieceKind::Pawn, Color::Black),
+            Piece::try_from("p").unwrap()
+        );
     }
 
     #[test]

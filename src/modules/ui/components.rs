@@ -20,5 +20,5 @@ pub struct MouseCursor;
 /// Component to attach to each square on the chessboard.
 #[derive(Component)]
 pub struct Square {
-    pub index: usize
+    pub index: usize,
 }
