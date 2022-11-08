@@ -17,6 +17,14 @@ pub struct MainCamera;
 #[derive(Component)]
 pub struct MouseCursor;
 
+/// Component to mark the "from square" mouse cursor.
+#[derive(Component)]
+pub struct FromSquareCursor;
+
+/// Component to mark the "to square" mouse cursor.
+#[derive(Component)]
+pub struct ToSquareCursor;
+
 /// Component to attach to each square on the chessboard.
 #[derive(Component)]
 pub struct Square {

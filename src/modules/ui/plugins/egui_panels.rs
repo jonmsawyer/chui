@@ -3,7 +3,6 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
 
-use super::super::components::MainCamera;
 use super::super::constants::{ANNOTATION_PANEL_WIDTH, INFO_PANEL_WIDTH};
 use super::super::events::ResizeBoardEvent;
 use super::super::resources::{FpsResource, UiResource};
@@ -18,11 +17,8 @@ fn egui_panels(
     mut egui_ctx: ResMut<EguiContext>,
     mut ui_state: ResMut<UiResource>,
     mut resize_board_event: EventWriter<ResizeBoardEvent>,
-    windows: Res<Windows>,
     fps: Local<FpsResource<25>>,
     time: Res<Time>,
-    mouse_input: Res<Input<MouseButton>>,
-    query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     top_menu(&mut egui_ctx, &mut ui_state, &mut resize_board_event);
 
@@ -66,7 +62,7 @@ fn egui_panels(
             //         "https://github.com/emilk/egui/",
             //     ));
             // });
-            debug_panel(ui_state, windows, fps, time, ui, mouse_input, query);
+            debug_panel(ui_state, fps, time, ui);
 
             // ui.allocate_space(egui::Vec2::new(1.0, 100.0));
             ui.heading("Info Panel");

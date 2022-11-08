@@ -22,6 +22,14 @@ fn configure_state(mut ui_state: ResMut<UiResource>) {
     ui_state.draw_for_white = true;
     ui_state.debug_window = true;
     ui_state.show_mouse_cursor = true;
+    ui_state.mouse_cursor_screen_coords = Vec2::ZERO;
+    ui_state.mouse_cursor_world_coords = Vec2::ZERO;
+    ui_state.mouse_click_board_coords = Vec2::ZERO;
+    ui_state.mouse_click_algebraic_coords = ('-', 9);
+    ui_state.mouse_click_from_square = Vec2::ZERO;
+    ui_state.mouse_click_from_square_clicked = false;
+    ui_state.mouse_click_to_square = Vec2::ZERO;
+    ui_state.mouse_click_to_square_clicked = false;
 }
 
 fn scale_factor(

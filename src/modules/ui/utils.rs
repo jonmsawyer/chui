@@ -7,19 +7,64 @@ use super::components::MainCamera;
 use super::constants::{FILES, RANKS, SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
 use super::resources::UiResource;
 
-pub fn compute_board_coords(mut ui_state: &mut UiResource) {
-    let coords = (ui_state.mouse_click_coords / ui_state.square_pixels).floor() + 4. as f32;
-    let min = 0. as f32;
-    let max = 7. as f32;
-    if coords[0] < min || coords[0] > max || coords[1] < min || coords[1] > max {
-        return;
+pub fn transform_from_square(
+    ui_state: &mut UiResource,
+    mut transform: &mut Transform,
+    mut visibility: &mut Visibility,
+) {
+    let (scale, _, _) = compute_coords(ui_state.square_pixels);
+    let x = (ui_state.mouse_click_from_square[0] - 4. as f32) * ui_state.square_pixels;
+    let y = (ui_state.mouse_click_from_square[1] - 4. as f32) * ui_state.square_pixels;
+    transform.translation = Vec3::new(x, y, 0.15);
+    transform.scale = Vec3::new(scale, scale, 0.);
+    visibility.is_visible = true;
+}
+
+pub fn transform_to_square(
+    ui_state: &mut UiResource,
+    mut transform: &mut Transform,
+    mut visibility: &mut Visibility,
+) {
+    let (scale, _, _) = compute_coords(ui_state.square_pixels);
+    let x = (ui_state.mouse_click_to_square[0] - 4. as f32) * ui_state.square_pixels;
+    let y = (ui_state.mouse_click_to_square[1] - 4. as f32) * ui_state.square_pixels;
+    transform.translation = Vec3::new(x, y, 0.15);
+    transform.scale = Vec3::new(scale, scale, 0.);
+    visibility.is_visible = true;
+}
+
+pub fn hide_from_and_to_square(
+    mut from_visibility: &mut Visibility,
+    mut to_visibility: &mut Visibility,
+) {
+    from_visibility.is_visible = false;
+    to_visibility.is_visible = false;
+}
+
+pub fn compute_board_coords(
+    mut ui_state: &mut UiResource,
+    camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    windows: Res<Windows>,
+) -> bool {
+    let mouse_world_coords = get_world_coords(camera_query, windows);
+    let x = (mouse_world_coords[0] / ui_state.square_pixels).floor() + 4. as f32;
+    let y = (mouse_world_coords[1] / ui_state.square_pixels).floor() + 4. as f32;
+    let min: f32 = 0.;
+    let max: f32 = 7.;
+
+    if x < min || x > max || y < min || y > max {
+        return false;
     }
+
     if ui_state.draw_for_white {
-        ui_state.mouse_click_board_coords = (FILES[coords[0] as usize], RANKS[coords[1] as usize]);
+        ui_state.mouse_click_board_coords = Vec2::new(x, y);
+        ui_state.mouse_click_algebraic_coords = (FILES[x as usize], RANKS[y as usize]);
     } else {
-        ui_state.mouse_click_board_coords =
-            (FILES[7 - coords[0] as usize], RANKS[7 - coords[1] as usize]);
+        ui_state.mouse_click_board_coords = Vec2::new(max - x, max - y);
+        ui_state.mouse_click_algebraic_coords = (FILES[7 - x as usize], RANKS[7 - y as usize]);
     }
+
+    true
 }
 
 pub fn compute_coords(square_pixels: f32) -> (f32, f32, f32) {

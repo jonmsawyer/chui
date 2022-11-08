@@ -21,8 +21,14 @@ pub struct UiResource {
     pub draw_for_white: bool,
     pub debug_window: bool,
     pub show_mouse_cursor: bool,
-    pub mouse_click_coords: Vec2,
-    pub mouse_click_board_coords: (char, usize),
+    pub mouse_cursor_screen_coords: Vec2,
+    pub mouse_cursor_world_coords: Vec2,
+    pub mouse_click_board_coords: Vec2,
+    pub mouse_click_algebraic_coords: (char, usize),
+    pub mouse_click_from_square: Vec2,
+    pub mouse_click_from_square_clicked: bool,
+    pub mouse_click_to_square: Vec2,
+    pub mouse_click_to_square_clicked: bool,
 }
 
 /// Resource for calculating our Frames Per Second
