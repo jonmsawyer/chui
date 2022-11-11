@@ -188,40 +188,80 @@ fn init_coordinates(
 fn update_coordinates(mut query: Query<(&mut Style, &BoardCoordinate)>, ui_state: Res<UiResource>) {
     let last_position = ui_state.camera_last_position.truncate();
     for (mut style, board_coordinate) in query.iter_mut() {
-        let mut x = if last_position == Vec2::ZERO {
-            board_coordinate.file_index as f32 * ui_state.square_pixels
-                + INFO_PANEL_WIDTH
-                + ui_state.square_pixels
-                + ui_state.square_pixels / START_Y_COORD
+        let mut x: f32;
+        let mut y: f32;
+        if ui_state.draw_for_white {
+            x = if last_position == Vec2::ZERO {
+                board_coordinate.file_index as f32 * ui_state.square_pixels
+                    + INFO_PANEL_WIDTH
+                    + ui_state.square_pixels
+                    + ui_state.square_pixels / START_Y_COORD
+            } else {
+                -last_position[0]
+                    + board_coordinate.file_index as f32 * ui_state.square_pixels
+                    + INFO_PANEL_WIDTH
+                    + ui_state.square_pixels
+                    + ui_state.square_pixels / START_Y_COORD
+                    - 4_f32
+            };
+            y = if last_position == Vec2::ZERO {
+                board_coordinate.rank_index as f32 * ui_state.square_pixels
+                    + ui_state.window_height / 2_f32
+                    - START_Y_COORD * ui_state.square_pixels
+                    - (ui_state.board_margin / START_Y_COORD)
+                    + 16_f32
+                    + ui_state.square_pixels / 2_f32
+            } else {
+                -last_position[1]
+                    + board_coordinate.rank_index as f32 * ui_state.square_pixels
+                    + ui_state.window_height / 2_f32
+                    - START_Y_COORD * ui_state.square_pixels
+                    - (ui_state.board_margin / START_Y_COORD)
+                    + 16_f32
+                    + ui_state.square_pixels / 2_f32
+            };
+            if board_coordinate.file_index == -1_isize {
+                x += 24_f32;
+            }
+            if board_coordinate.rank_index == -1_isize {
+                y += 24_f32;
+            }
         } else {
-            -last_position[0]
-                + board_coordinate.file_index as f32 * ui_state.square_pixels
-                + INFO_PANEL_WIDTH
-                + ui_state.square_pixels
-                + ui_state.square_pixels / START_Y_COORD
-                - 4_f32
-        };
-        let mut y = if last_position == Vec2::ZERO {
-            board_coordinate.rank_index as f32 * ui_state.square_pixels
-                + ui_state.window_height / 2_f32
-                - START_Y_COORD * ui_state.square_pixels
-                - (ui_state.board_margin / START_Y_COORD)
-                + 16_f32
-                + ui_state.square_pixels / 2_f32
-        } else {
-            -last_position[1]
-                + board_coordinate.rank_index as f32 * ui_state.square_pixels
-                + ui_state.window_height / 2_f32
-                - START_Y_COORD * ui_state.square_pixels
-                - (ui_state.board_margin / START_Y_COORD)
-                + 16_f32
-                + ui_state.square_pixels / 2_f32
-        };
-        if board_coordinate.file_index == -1_isize {
-            x += 24_f32;
-        }
-        if board_coordinate.rank_index == -1_isize {
-            y += 24_f32;
+            x = if last_position == Vec2::ZERO {
+                (7 - board_coordinate.file_index) as f32 * ui_state.square_pixels
+                    + INFO_PANEL_WIDTH
+                    + ui_state.square_pixels
+                    + ui_state.square_pixels / START_Y_COORD
+            } else {
+                -last_position[0]
+                    + (7 - board_coordinate.file_index) as f32 * ui_state.square_pixels
+                    + INFO_PANEL_WIDTH
+                    + ui_state.square_pixels
+                    + ui_state.square_pixels / START_Y_COORD
+                    - 4_f32
+            };
+            y = if last_position == Vec2::ZERO {
+                (7 - board_coordinate.rank_index) as f32 * ui_state.square_pixels
+                    + ui_state.window_height / 2_f32
+                    - START_Y_COORD * ui_state.square_pixels
+                    - (ui_state.board_margin / START_Y_COORD)
+                    + 16_f32
+                    + ui_state.square_pixels / 2_f32
+            } else {
+                -last_position[1]
+                    + (7 - board_coordinate.rank_index) as f32 * ui_state.square_pixels
+                    + ui_state.window_height / 2_f32
+                    - START_Y_COORD * ui_state.square_pixels
+                    - (ui_state.board_margin / START_Y_COORD)
+                    + 16_f32
+                    + ui_state.square_pixels / 2_f32
+            };
+            if board_coordinate.file_index == -1_isize {
+                x -= 24_f32;
+            }
+            if board_coordinate.rank_index == -1_isize {
+                y -= 24_f32;
+            }
         }
         style.position = UiRect {
             bottom: Val::Px(y),
