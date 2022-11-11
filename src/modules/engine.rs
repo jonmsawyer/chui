@@ -527,10 +527,10 @@ impl Engine {
         for i in row_vec.iter() {
             output = format!("{}║ {} │", output, numeric_coords[*i as usize]);
             for j in col_vec.iter() {
-                output = match &self.board.get_piece(*j as usize, *i as usize) {
-                    Some(piece) => format!("{} {}", output, piece),
-                    None => format!("{} ·", output),
-                };
+                output = self.board.get_piece(*j as usize, *i as usize).map_or_else(
+                    || format!("{} ·", output),
+                    |piece| format!("{} {}", output, piece),
+                );
             }
             output = format!("{} │ {} ║\n", output.trim(), numeric_coords[*i as usize]);
         }

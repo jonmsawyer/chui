@@ -1,7 +1,7 @@
 [package]
 name = "chui"
 version = "0.1.0"
-authors = ["jonmsawyer <jonmsawyer@gmail.com>"]
+authors = ["Jonathan Sawyer <jonmsawyer@gmail.com>"]
 edition = "2021"
 categories = ["command-line-utilities", "games", "parser-implementations", "parsing"]
 description = "A chess UI or command line application that allows you to play against a human, a computer, or online."

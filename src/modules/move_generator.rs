@@ -105,63 +105,63 @@ impl fmt::Display for MoveGenerator<'_> {
         let tab = "    ";
         fmt_str += "[";
         for output in self.move_list.iter() {
-            if output.starts_with(&"a") {
+            if output.starts_with('a') {
                 let _ = write!(a_fmt_str, "{}, ", output);
                 a_count += 1;
             }
-            if output.starts_with(&"b") {
+            if output.starts_with('b') {
                 let _ = write!(b_fmt_str, "{}, ", output);
                 b_count += 1;
             }
-            if output.starts_with(&"c") {
+            if output.starts_with('c') {
                 let _ = write!(c_fmt_str, "{}, ", output);
                 c_count += 1;
             }
-            if output.starts_with(&"d") {
+            if output.starts_with('d') {
                 let _ = write!(d_fmt_str, "{}, ", output);
                 d_count += 1;
             }
-            if output.starts_with(&"e") {
+            if output.starts_with('e') {
                 let _ = write!(e_fmt_str, "{}, ", output);
                 e_count += 1;
             }
-            if output.starts_with(&"f") {
+            if output.starts_with('f') {
                 let _ = write!(f_fmt_str, "{}, ", output);
                 f_count += 1;
             }
-            if output.starts_with(&"g") {
+            if output.starts_with('g') {
                 let _ = write!(g_fmt_str, "{}, ", output);
                 g_count += 1;
             }
-            if output.starts_with(&"h") {
+            if output.starts_with('h') {
                 let _ = write!(h_fmt_str, "{}, ", output);
                 h_count += 1;
             }
-            if output.starts_with(&"K") {
+            if output.starts_with('K') {
                 let _ = write!(king_fmt_str, "{}, ", output);
                 king_count += 1;
             }
-            if output.starts_with(&"Q") {
+            if output.starts_with('Q') {
                 let _ = write!(queen_fmt_str, "{}, ", output);
                 queen_count += 1;
             }
-            if output.starts_with(&"R") {
+            if output.starts_with('R') {
                 let _ = write!(rook_fmt_str, "{}, ", output);
                 rook_count += 1;
             }
-            if output.starts_with(&"B") {
+            if output.starts_with('B') {
                 let _ = write!(bishop_fmt_str, "{}, ", output);
                 bishop_count += 1;
             }
-            if output.starts_with(&"N") {
+            if output.starts_with('N') {
                 let _ = write!(knight_fmt_str, "{}, ", output);
                 knight_count += 1;
             }
-            if output.starts_with(&"O") {
+            if output.starts_with('O') {
                 let _ = write!(castle_valid_fmt_str, "{}, ", output);
                 castle_valid_count += 1;
             }
-            if output.starts_with(&"0") {
+            if output.starts_with('0') {
                 let _ = write!(castle_invalid_fmt_str, "{}, ", output);
                 castle_invalid_count += 1;
             }

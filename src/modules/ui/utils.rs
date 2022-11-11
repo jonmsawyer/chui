@@ -110,10 +110,7 @@ pub fn update_square_pixels(mut ui_state: ResMut<UiResource>) -> ResMut<UiResour
 
 /// Get the screen coordinates of the mouse cursor.
 pub fn get_mouse_coords(window: &Window) -> Vec2 {
-    match window.cursor_position() {
-        Some(cursor) => cursor,
-        None => Vec2::ZERO,
-    }
+    window.cursor_position().map_or(Vec2::ZERO, |cursor| cursor)
 }
 
 /// Get the world coordinates of the mouse cursor.

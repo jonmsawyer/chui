@@ -58,20 +58,19 @@ impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let color = format!("{:?}", self.color);
 
-        let name = match &self.name {
-            Some(name) => name.to_string(),
-            None => String::from("(no name)"),
-        };
+        let name = &self
+            .name
+            .as_ref()
+            .map_or_else(|| "(no name)".to_string(), |name| name.to_string());
 
-        let age = match self.age {
-            Some(age) => format!(" (Age {})", age),
-            None => String::new(),
-        };
+        let age = self
+            .age
+            .map_or_else(|| String::new(), |age| format!(" (Age {})", age));
 
-        let rating = match self.rating {
-            Some(rating) => format!("({} Elo)", rating),
-            None => String::from("(no Elo rating)"),
-        };
+        let rating = self.rating.map_or_else(
+            || "(no Elo rating)".to_string(),
+            |rating| format!("({} Elo)", rating),
+        );
 
         write!(f, "{}: {}{} {}", color, name, age, rating)
     }
