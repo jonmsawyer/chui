@@ -1,6 +1,9 @@
 //! The User Interface
 
-use bevy::{prelude::*, render::settings::{Backends, WgpuSettings}};
+use bevy::{
+    prelude::*,
+    render::settings::{Backends, WgpuSettings},
+};
 use bevy_egui::EguiPlugin;
 //use bevy_editor_pls::prelude::*; // Wait til this is in crates.io
 //use bevy_inspector_egui::WorldInspectorPlugin;
@@ -44,7 +47,8 @@ impl Ui {
             .add_plugin(plugins::AssetsPlugin)
             .add_plugin(plugins::MousePlugin)
             .add_plugin(plugins::EguiPanelsPlugin)
-            .add_plugin(plugins::BoardPlugin)            .add_plugin(plugins::PiecesPlugin)
+            .add_plugin(plugins::BoardPlugin)
+            .add_plugin(plugins::PiecesPlugin)
             // Run it
             .run();
     }
