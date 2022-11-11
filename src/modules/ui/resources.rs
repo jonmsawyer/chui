@@ -78,6 +78,9 @@ pub struct UiResource {
 
     /// Camera last position.
     pub camera_last_position: Vec3,
+
+    /// Show board coordinates?
+    pub show_coords: bool,
 }
 
 /// Resource for calculating our Frames Per Second

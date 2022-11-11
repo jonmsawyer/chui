@@ -72,6 +72,15 @@ pub fn debug_panel(
             options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Show Mouse Cursor");
         });
     }
+    if ui_state.show_coords {
+        ui.vertical_centered_justified(|options_ui| {
+            options_ui.toggle_value(&mut ui_state.show_coords, "Hide Board Coordinates");
+        });
+    } else {
+        ui.vertical_centered_justified(|options_ui| {
+            options_ui.toggle_value(&mut ui_state.show_coords, "Show Board Coordinates");
+        });
+    }
     ui.separator();
 }
 

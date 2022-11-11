@@ -33,6 +33,7 @@ fn configure_state(mut ui_state: ResMut<UiResource>) {
     ui_state.mouse_click_to_square_clicked = false;
     ui_state.move_representation = "No move selected.".to_string();
     ui_state.camera_last_position = Vec3::new(0., 0., 0.);
+    ui_state.show_coords = true;
 }
 
 /// ECS System. Run once. Configure the User Interface visuals.

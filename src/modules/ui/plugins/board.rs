@@ -185,40 +185,47 @@ fn init_coordinates(
 }
 
 /// Update the board coordinates.
-fn update_coordinates(mut query: Query<(&mut Style, &BoardCoordinate)>, ui_state: Res<UiResource>) {
+fn update_coordinates(
+    mut query: Query<(&mut Style, &BoardCoordinate, &mut Visibility)>,
+    ui_state: Res<UiResource>,
+) {
     let last_position = ui_state.camera_last_position.truncate();
-    for (mut style, board_coordinate) in query.iter_mut() {
+    for (mut style, board_coordinate, mut visibility) in query.iter_mut() {
         let mut x: f32;
         let mut y: f32;
+        let offset =
+            INFO_PANEL_WIDTH + ui_state.square_pixels + ui_state.square_pixels / START_Y_COORD;
+        let y_coord_half = START_Y_COORD / 2_f32;
+        let y_coord_ui_pixels = START_Y_COORD * ui_state.square_pixels;
+        let margin_over_y_coord = ui_state.board_margin / START_Y_COORD;
+        let window_height_half = ui_state.window_height / 2_f32;
+        let square_pixels_half = ui_state.square_pixels / 2_f32;
+        let file_index = board_coordinate.file_index as f32 * ui_state.square_pixels;
+        let rank_index = board_coordinate.rank_index as f32 * ui_state.square_pixels;
+        let reverse_file_index = (7 - board_coordinate.file_index) as f32 * ui_state.square_pixels;
+        let reverse_rank_index = (7 - board_coordinate.rank_index) as f32 * ui_state.square_pixels;
+        if !ui_state.show_coords {
+            visibility.is_visible = false;
+            continue;
+        } else {
+            visibility.is_visible = true;
+        }
         if ui_state.draw_for_white {
             x = if last_position == Vec2::ZERO {
-                board_coordinate.file_index as f32 * ui_state.square_pixels
-                    + INFO_PANEL_WIDTH
-                    + ui_state.square_pixels
-                    + ui_state.square_pixels / START_Y_COORD
+                file_index + offset - y_coord_half
             } else {
-                -last_position[0]
-                    + board_coordinate.file_index as f32 * ui_state.square_pixels
-                    + INFO_PANEL_WIDTH
-                    + ui_state.square_pixels
-                    + ui_state.square_pixels / START_Y_COORD
-                    - 4_f32
+                -last_position[0] + file_index + offset - y_coord_half
             };
             y = if last_position == Vec2::ZERO {
-                board_coordinate.rank_index as f32 * ui_state.square_pixels
-                    + ui_state.window_height / 2_f32
-                    - START_Y_COORD * ui_state.square_pixels
-                    - (ui_state.board_margin / START_Y_COORD)
+                rank_index + window_height_half - y_coord_ui_pixels - margin_over_y_coord
                     + 16_f32
-                    + ui_state.square_pixels / 2_f32
+                    + square_pixels_half
             } else {
-                -last_position[1]
-                    + board_coordinate.rank_index as f32 * ui_state.square_pixels
-                    + ui_state.window_height / 2_f32
-                    - START_Y_COORD * ui_state.square_pixels
-                    - (ui_state.board_margin / START_Y_COORD)
+                -last_position[1] + rank_index + window_height_half
+                    - y_coord_ui_pixels
+                    - margin_over_y_coord
                     + 16_f32
-                    + ui_state.square_pixels / 2_f32
+                    + square_pixels_half
             };
             if board_coordinate.file_index == -1_isize {
                 x += 24_f32;
@@ -228,33 +235,20 @@ fn update_coordinates(mut query: Query<(&mut Style, &BoardCoordinate)>, ui_state
             }
         } else {
             x = if last_position == Vec2::ZERO {
-                (7 - board_coordinate.file_index) as f32 * ui_state.square_pixels
-                    + INFO_PANEL_WIDTH
-                    + ui_state.square_pixels
-                    + ui_state.square_pixels / START_Y_COORD
+                reverse_file_index + offset - y_coord_half
             } else {
-                -last_position[0]
-                    + (7 - board_coordinate.file_index) as f32 * ui_state.square_pixels
-                    + INFO_PANEL_WIDTH
-                    + ui_state.square_pixels
-                    + ui_state.square_pixels / START_Y_COORD
-                    - 4_f32
+                -last_position[0] + reverse_file_index + offset - y_coord_half
             };
             y = if last_position == Vec2::ZERO {
-                (7 - board_coordinate.rank_index) as f32 * ui_state.square_pixels
-                    + ui_state.window_height / 2_f32
-                    - START_Y_COORD * ui_state.square_pixels
-                    - (ui_state.board_margin / START_Y_COORD)
+                reverse_rank_index + window_height_half - y_coord_ui_pixels - margin_over_y_coord
                     + 16_f32
-                    + ui_state.square_pixels / 2_f32
+                    + square_pixels_half
             } else {
-                -last_position[1]
-                    + (7 - board_coordinate.rank_index) as f32 * ui_state.square_pixels
-                    + ui_state.window_height / 2_f32
-                    - START_Y_COORD * ui_state.square_pixels
-                    - (ui_state.board_margin / START_Y_COORD)
+                -last_position[1] + reverse_rank_index + window_height_half
+                    - y_coord_ui_pixels
+                    - margin_over_y_coord
                     + 16_f32
-                    + ui_state.square_pixels / 2_f32
+                    + square_pixels_half
             };
             if board_coordinate.file_index == -1_isize {
                 x -= 24_f32;
