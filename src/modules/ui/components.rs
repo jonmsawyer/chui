@@ -36,3 +36,13 @@ pub struct Square {
 /// Component representing the board background.
 #[derive(Component)]
 pub struct BoardBackground;
+
+/// Component representing board coordinates
+#[derive(Component)]
+pub struct BoardCoordinate {
+    /// File index. -1 to 7.
+    pub file_index: isize,
+
+    /// Rank index. -1 to 7.
+    pub rank_index: isize,
+}

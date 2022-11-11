@@ -59,6 +59,10 @@ pub fn debug_panel(
         "Move Represenation: {}",
         ui_state.move_representation
     ));
+    ui.label(format!(
+        "Camera Last Position: {}",
+        ui_state.camera_last_position.truncate()
+    ));
     if ui_state.show_mouse_cursor {
         ui.vertical_centered_justified(|options_ui| {
             options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Hide Mouse Cursor");

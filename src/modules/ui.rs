@@ -26,6 +26,7 @@ impl Ui {
     pub fn run() {
         App::new()
             .add_plugin(plugins::WindowDescriptorPlugin) // Must be first
+            //.add_plugin(WorldInspectorPlugin::new()) // bevy_inspector_egui plugin
             .insert_resource(WgpuSettings {
                 // NOTE: This allows GL support in wgpu, which only has "best-effort" support
                 // NOTE: Additionally, wgpu only supports GL on Windows via ANGLE, which may not be available
@@ -35,20 +36,19 @@ impl Ui {
             .add_plugins(DefaultPlugins) // Default Bevy plugins
             .add_plugin(EguiPlugin) // Default Egui plugins
             //.add_plugin(EditorPlugin) // Wait til this is in crates.io
-            //.add_plugin(WorldInspectorPlugin::new()) // bevy_inspector_egui plugin
             // Chui's resources
             .init_resource::<resources::Engine>()
-            // Chui's custom events
-            .add_event::<events::ResizeBoardEvent>()
             // Chui's plugins
+            .add_plugin(plugins::CameraControllerPlugin)
             .add_plugin(plugins::GameStatePlugin)
             .add_plugin(plugins::UiStatePlugin)
-            .add_plugin(plugins::CameraControllerPlugin)
             .add_plugin(plugins::AssetsPlugin)
             .add_plugin(plugins::MousePlugin)
             .add_plugin(plugins::EguiPanelsPlugin)
             .add_plugin(plugins::BoardPlugin)
             .add_plugin(plugins::PiecesPlugin)
+            // Chui's custom events
+            .add_event::<events::ResizeBoardEvent>()
             // Run it
             .run();
     }

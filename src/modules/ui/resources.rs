@@ -75,6 +75,9 @@ pub struct UiResource {
 
     /// A String representing the move in the currently selected Parser's notation.
     pub move_representation: String,
+
+    /// Camera last position.
+    pub camera_last_position: Vec3,
 }
 
 /// Resource for calculating our Frames Per Second
