@@ -1,6 +1,6 @@
 //! The User Interface
 
-use bevy::prelude::*;
+use bevy::{prelude::*, render::settings::{Backends, WgpuSettings}};
 use bevy_egui::EguiPlugin;
 //use bevy_editor_pls::prelude::*; // Wait til this is in crates.io
 //use bevy_inspector_egui::WorldInspectorPlugin;
@@ -23,6 +23,12 @@ impl Ui {
     pub fn run() {
         App::new()
             .add_plugin(plugins::WindowDescriptorPlugin) // Must be first
+            .insert_resource(WgpuSettings {
+                // NOTE: This allows GL support in wgpu, which only has "best-effort" support
+                // NOTE: Additionally, wgpu only supports GL on Windows via ANGLE, which may not be available
+                backends: Some(Backends::PRIMARY | Backends::GL),
+                ..default()
+            })
             .add_plugins(DefaultPlugins) // Default Bevy plugins
             .add_plugin(EguiPlugin) // Default Egui plugins
             //.add_plugin(EditorPlugin) // Wait til this is in crates.io
