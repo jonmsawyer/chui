@@ -1,3 +1,5 @@
+//! Modules for Chui.
+
 pub mod piece;
 pub use piece::{Color, Piece, PieceKind};
 

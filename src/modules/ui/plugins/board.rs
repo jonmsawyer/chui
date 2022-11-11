@@ -10,6 +10,7 @@ use super::super::utils::compute_coords;
 use super::SpriteCollection;
 use crate::modules::ui::events::ResizeBoardEvent;
 
+/// ECS System. Run once. Initialize the chessboard.
 fn init_board(my_assets: Res<SpriteCollection>, mut commands: Commands, ui_state: Res<UiResource>) {
     let (scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
     let (mut x, mut y, mut row) = (start_x, start_y, 0.);
@@ -48,6 +49,7 @@ fn init_board(my_assets: Res<SpriteCollection>, mut commands: Commands, ui_state
     }
 }
 
+/// ECS System. Run on each frame. Resize the board.
 fn resize_board(
     ui_state: Res<UiResource>,
     mut resize_event: EventReader<ResizeBoardEvent>,

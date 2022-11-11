@@ -9,8 +9,11 @@ use super::super::events::ResizeBoardEvent;
 use super::super::resources::UiResource;
 use super::super::utils::update_square_pixels;
 
+/// Chui's version.
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// ECS System. Run on each frame. Notify Bevy that the window has been resized,
+/// then send a `ResizeBoardEvent`.
 fn resize_notificator(
     mut resize_event: EventReader<WindowResized>,
     mut ui_state: ResMut<UiResource>,
@@ -28,6 +31,7 @@ fn resize_notificator(
     }
 }
 
+/// Window Descriptor Bevy plugin.
 pub struct WindowDescriptorPlugin;
 
 impl Plugin for WindowDescriptorPlugin {

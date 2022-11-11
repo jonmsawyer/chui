@@ -7,7 +7,6 @@ A layout job is the custom way to format [`RichText`].
 use super::{top_menu_text_format, top_menu_text_format_underline};
 use bevy_egui::egui::text::LayoutJob;
 
-/// top_menu_extras()
 /// "Extras"
 pub fn top_menu_extras() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -18,7 +17,6 @@ pub fn top_menu_extras() -> LayoutJob {
     job
 }
 
-/// top_menu_engines()
 /// "Engines"
 pub fn top_menu_engines() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -29,7 +27,6 @@ pub fn top_menu_engines() -> LayoutJob {
     job
 }
 
-/// top_menu_engine_options()
 /// "Engine Options..."
 pub fn top_menu_engine_options() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -41,7 +38,6 @@ pub fn top_menu_engine_options() -> LayoutJob {
     job
 }
 
-/// top_menu_hash_tables()
 /// "Hash Tables..."
 pub fn top_menu_hash_tables() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -51,7 +47,6 @@ pub fn top_menu_hash_tables() -> LayoutJob {
     job
 }
 
-/// top_menu_permanent_brain()
 /// "Permanent Brain"
 pub fn top_menu_permanent_brain() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -62,7 +57,6 @@ pub fn top_menu_permanent_brain() -> LayoutJob {
     job
 }
 
-/// top_menu_install_engine()
 /// "Install Engine..."
 pub fn top_menu_install_engine() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -73,7 +67,6 @@ pub fn top_menu_install_engine() -> LayoutJob {
     job
 }
 
-/// top_menu_uninstall_engine()
 /// "Uninstall Engine..."
 pub fn top_menu_uninstall_engine() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -84,7 +77,6 @@ pub fn top_menu_uninstall_engine() -> LayoutJob {
     job
 }
 
-/// top_menu_edit_engine_file()
 /// "Edit Engine File..."
 pub fn top_menu_edit_engine_file() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -96,7 +88,6 @@ pub fn top_menu_edit_engine_file() -> LayoutJob {
     job
 }
 
-/// top_menu_endgame_databases()
 /// "Endgame Databases..."
 pub fn top_menu_endgame_databases() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -108,7 +99,6 @@ pub fn top_menu_endgame_databases() -> LayoutJob {
     job
 }
 
-/// top_menu_query_online_database()
 /// "Query Online Database"
 pub fn top_menu_query_online_database() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -119,7 +109,6 @@ pub fn top_menu_query_online_database() -> LayoutJob {
     job
 }
 
-/// top_menu_publish_game()
 /// "Publish Game..."
 pub fn top_menu_publish_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -130,7 +119,6 @@ pub fn top_menu_publish_game() -> LayoutJob {
     job
 }
 
-/// top_menu_endgame_oracle()
 /// "Endgame Oracle..."
 pub fn top_menu_endgame_oracle() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -141,7 +129,6 @@ pub fn top_menu_endgame_oracle() -> LayoutJob {
     job
 }
 
-/// top_menu_my_results()
 /// "My Results..."
 pub fn top_menu_my_results() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -152,7 +139,6 @@ pub fn top_menu_my_results() -> LayoutJob {
     job
 }
 
-/// top_menu_options()
 /// "Options..."
 pub fn top_menu_options() -> LayoutJob {
     let mut job = LayoutJob::default();

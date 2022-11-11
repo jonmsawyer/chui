@@ -79,7 +79,11 @@ pub enum CommandKind {
 /// The context of the command.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CommandContext {
+    /// Main context. Top level command processor.
     Main,
+
+    /// Switch parser command. Apply the command within the context
+    /// of switching the parser.
     SwitchParser,
 }
 
@@ -87,8 +91,13 @@ pub enum CommandContext {
 /// in the commands list.
 #[derive(Debug, Clone)]
 pub struct CommandPart {
+    /// A vec of strings containing the commands to apply.
     commands: Vec<String>,
+
+    /// The description.
     description: String,
+
+    /// The kind of command to execute.
     command_kind: CommandKind,
 }
 
@@ -131,7 +140,7 @@ impl Command {
     /// of the `Engine` has changed, such as switching to a new
     /// parser engine.
     pub fn rebuild_commands(&mut self, engine: &Engine) {
-        self.commands = Command::build_commands(&engine);
+        self.commands = Command::build_commands(engine);
     }
 
     /// Print the help message for a given context. Goes through

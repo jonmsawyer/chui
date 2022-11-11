@@ -11,6 +11,7 @@ use super::super::states::GameState;
 use super::super::utils::compute_coords;
 use super::SpriteCollection;
 
+/// ECS System. Run once. Initialize all of the pieces on the chessboard.
 fn init_pieces(
     my_assets: Res<SpriteCollection>,
     mut commands: Commands,
@@ -64,6 +65,8 @@ fn init_pieces(
         });
 }
 
+/// ECS System. Run on each frame. Resize the pieces on the chessboard given a
+/// `ResizeBoardEvent`.
 fn resize_pieces(
     ui_state: Res<UiResource>,
     mut resize_event: EventReader<ResizeBoardEvent>,

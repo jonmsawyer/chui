@@ -5,6 +5,7 @@ use bevy_asset_loader::prelude::*;
 
 use super::super::states::GameState;
 
+/// Sprite collection. Using `bevy_asset_loader` directives, loads the resources indicated.
 #[derive(AssetCollection, Clone)]
 pub struct SpriteCollection {
     /// Light and dark squares, with chess pieces are defined in a texture atlas (aka sprite sheet).
@@ -26,6 +27,7 @@ pub struct SpriteCollection {
     // pub background: Handle<Image>,
 }
 
+/// Assets Bevy plugin.
 pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {

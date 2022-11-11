@@ -1,11 +1,14 @@
+//! Training module.
+
 use super::layout_jobs;
 
 use bevy_egui::egui::{self, InnerResponse, Ui};
 
+/// Training menu.
 pub fn training(ui: &mut Ui) -> InnerResponse<Option<()>> {
-    egui::menu::menu_button(ui, layout_jobs::top_menu_training(), |ui| {
+    egui::menu::menu_button(ui, layout_jobs::top_menu_training(), |ui_egui| {
         // Mode > Training > Openings Training
-        if ui
+        if ui_egui
             .button(layout_jobs::top_menu_openings_training())
             .clicked()
         {
@@ -13,7 +16,7 @@ pub fn training(ui: &mut Ui) -> InnerResponse<Option<()>> {
         }
 
         // Mode > Training > Endgame Training
-        if ui
+        if ui_egui
             .button(layout_jobs::top_menu_endgame_training())
             .clicked()
         {
@@ -21,21 +24,27 @@ pub fn training(ui: &mut Ui) -> InnerResponse<Option<()>> {
         }
 
         // Mode > Training > Handicap Games
-        if ui.button(layout_jobs::top_menu_handicap_games()).clicked() {
+        if ui_egui
+            .button(layout_jobs::top_menu_handicap_games())
+            .clicked()
+        {
             println!("Handicap Games was clicked");
         }
 
-        ui.separator();
+        ui_egui.separator();
 
         // Mode > Training > Chess Puzzles
-        if ui.button(layout_jobs::top_menu_chess_puzzles()).clicked() {
+        if ui_egui
+            .button(layout_jobs::top_menu_chess_puzzles())
+            .clicked()
+        {
             println!("Chess Puzzles was clicked");
         }
 
-        ui.separator();
+        ui_egui.separator();
 
         // Mode > Training > Daily Puzzle - Easy
-        if ui
+        if ui_egui
             .button(layout_jobs::top_menu_daily_puzzle_easy())
             .clicked()
         {
@@ -43,7 +52,7 @@ pub fn training(ui: &mut Ui) -> InnerResponse<Option<()>> {
         }
 
         // Mode > Training > Daily Puzzle - Medium
-        if ui
+        if ui_egui
             .button(layout_jobs::top_menu_daily_puzzle_medium())
             .clicked()
         {
@@ -51,7 +60,7 @@ pub fn training(ui: &mut Ui) -> InnerResponse<Option<()>> {
         }
 
         // Mode > Training > Daily Puzzle - Hard
-        if ui
+        if ui_egui
             .button(layout_jobs::top_menu_daily_puzzle_hard())
             .clicked()
         {

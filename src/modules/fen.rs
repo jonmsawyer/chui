@@ -1,6 +1,11 @@
+//! FEN notation module.
+//!
+//! FEN stands for Forsyth-Edwards Notation.
+
 use super::Engine;
 
-#[derive(Debug)]
+/// Represents the FEN notation of a chess position.
+#[derive(Debug, Copy, Clone)]
 pub struct Fen;
 
 impl Fen {
@@ -72,6 +77,10 @@ impl Fen {
 
     /// Get FEN layout of the board only without the other
     /// attributes.
+    ///
+    /// # Panics
+    ///
+    /// * Panics if `piece` is None after checking that it is Some.
     pub fn get_board_fen(engine: &Engine) -> String {
         let mut fen = String::new();
         let mut empty_squares = 0;
@@ -81,10 +90,15 @@ impl Fen {
             for piece in rank.iter() {
                 if piece.is_some() {
                     if empty_squares > 0 {
-                        fen = format!("{}{}{}", fen, empty_squares, piece.unwrap());
+                        fen = format!(
+                            "{}{}{}",
+                            fen,
+                            empty_squares,
+                            piece.expect("Piece cannot be None.")
+                        );
                         empty_squares = 0;
                     } else {
-                        fen = format!("{}{}", fen, piece.unwrap());
+                        fen = format!("{}{}", fen, piece.expect("Piece cannot be None."));
                     }
                 } else {
                     empty_squares += 1;
@@ -94,7 +108,7 @@ impl Fen {
             // Write out the number of empty squares between
             // pieces on the same rank.
             if empty_squares > 0 {
-                fen = format!("{}{}", fen, empty_squares)
+                fen = format!("{}{}", fen, empty_squares);
             }
 
             // Separate ranks by '/'.

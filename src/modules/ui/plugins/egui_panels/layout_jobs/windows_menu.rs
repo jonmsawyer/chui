@@ -7,7 +7,6 @@ A layout job is the custom way to format [`RichText`].
 use super::{top_menu_text_format, top_menu_text_format_underline};
 use bevy_egui::egui::text::LayoutJob;
 
-/// top_menu_windows()
 /// "Windows"
 pub fn top_menu_windows() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -18,7 +17,6 @@ pub fn top_menu_windows() -> LayoutJob {
     job
 }
 
-/// top_menu_board()
 /// "Board"
 pub fn top_menu_board() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -29,7 +27,6 @@ pub fn top_menu_board() -> LayoutJob {
     job
 }
 
-/// top_menu_clock()
 /// "Clock"
 pub fn top_menu_clock() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -40,7 +37,6 @@ pub fn top_menu_clock() -> LayoutJob {
     job
 }
 
-/// top_menu_notation()
 /// "Notation"
 pub fn top_menu_notation() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -51,7 +47,6 @@ pub fn top_menu_notation() -> LayoutJob {
     job
 }
 
-/// top_menu_engine()
 /// "Engine"
 pub fn top_menu_engine() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -62,7 +57,6 @@ pub fn top_menu_engine() -> LayoutJob {
     job
 }
 
-/// top_menu_moves()
 /// "Moves"
 pub fn top_menu_moves() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -72,7 +66,6 @@ pub fn top_menu_moves() -> LayoutJob {
     job
 }
 
-/// top_menu_histogram()
 /// "Histogram"
 pub fn top_menu_histogram() -> LayoutJob {
     let mut job = LayoutJob::default();

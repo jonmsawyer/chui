@@ -13,9 +13,13 @@ pub mod resources;
 pub mod states;
 pub mod utils;
 
+/// The main struct for the User Interface. Defines one function called `run()`,
+/// which runs the Bevy engine and User Interface.
+#[derive(Debug, Copy, Clone)]
 pub struct Ui;
 
 impl Ui {
+    /// The main function to run the User Interface.
     pub fn run() {
         App::new()
             .add_plugin(plugins::WindowDescriptorPlugin) // Must be first

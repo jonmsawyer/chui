@@ -7,7 +7,6 @@ A layout job is the custom way to format [`RichText`].
 use super::{top_menu_text_format, top_menu_text_format_underline};
 use bevy_egui::egui::text::LayoutJob;
 
-/// top_menu_opening_book()
 /// "Opening Book"
 pub fn top_menu_opening_book() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -18,7 +17,6 @@ pub fn top_menu_opening_book() -> LayoutJob {
     job
 }
 
-/// top_menu_new_opening_book()
 /// "New Opening Book..."
 pub fn top_menu_new_opening_book() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -29,7 +27,6 @@ pub fn top_menu_new_opening_book() -> LayoutJob {
     job
 }
 
-/// top_menu_load_opening_book()
 /// "Load Opening Book..."
 pub fn top_menu_load_opening_book() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -40,7 +37,6 @@ pub fn top_menu_load_opening_book() -> LayoutJob {
     job
 }
 
-/// top_menu_import_opening_book()
 /// "Import Opening Book..."
 pub fn top_menu_import_opening_book() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -51,7 +47,6 @@ pub fn top_menu_import_opening_book() -> LayoutJob {
     job
 }
 
-/// top_menu_import_games()
 /// "Import Games..."
 pub fn top_menu_import_games() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -63,7 +58,6 @@ pub fn top_menu_import_games() -> LayoutJob {
     job
 }
 
-/// top_menu_import_current_game()
 /// "Import Current Game..."
 pub fn top_menu_import_current_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -74,7 +68,6 @@ pub fn top_menu_import_current_game() -> LayoutJob {
     job
 }
 
-/// top_menu_export_opening_book()
 /// "Export Opening Book..."
 pub fn top_menu_export_opening_book() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -85,7 +78,6 @@ pub fn top_menu_export_opening_book() -> LayoutJob {
     job
 }
 
-/// top_menu_count_book_moves()
 /// "Count Book Moves"
 pub fn top_menu_count_book_moves() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -96,7 +88,6 @@ pub fn top_menu_count_book_moves() -> LayoutJob {
     job
 }
 
-/// top_menu_weed_opening_book()
 /// "Weed Opening Book..."
 pub fn top_menu_weed_opening_book() -> LayoutJob {
     let mut job = LayoutJob::default();

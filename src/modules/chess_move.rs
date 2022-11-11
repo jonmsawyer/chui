@@ -12,21 +12,26 @@ use crate::{ChuiError, ChuiResult};
 use super::{Color, Piece, PieceKind};
 
 /// Represents the type of move to be performed.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MoveType {
+    /// This move is a pawn move.
     PawnMove,
 
+    /// This move is a pawn capture.
     PawnCapture,
 
+    /// This move is a piece move (not pawn).
     PieceMove,
 
+    /// This move is a piece capture (not pawn).
     PieceCapture,
 
+    /// This move is a castling move, king side or queen side.
     Castle,
 }
 
 /// Represents a chess move.
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Eq, Clone)]
 pub struct Move {
     /// Represents a move's "from" coordinate (e.g., `('a', 1)`).
     pub from_coord: (char, u8),
@@ -126,7 +131,7 @@ impl fmt::Display for Move {
 
 impl Move {
     /// Return a new default `Move`.
-    pub fn new() -> Move {
+    pub const fn new() -> Move {
         Move {
             from_coord: ('-', 9),
             to_coord: ('-', 9),
@@ -150,47 +155,47 @@ impl Move {
     //
 
     /// Is pawn move?
-    pub fn is_pawn_move(&self) -> bool {
+    pub const fn is_pawn_move(&self) -> bool {
         matches!(self.move_type, Some(MoveType::PawnMove))
     }
 
     /// Is pawn capture?
-    pub fn is_pawn_capture(&self) -> bool {
+    pub const fn is_pawn_capture(&self) -> bool {
         matches!(self.move_type, Some(MoveType::PawnCapture))
     }
 
     /// Is piece move?
-    pub fn is_piece_move(&self) -> bool {
+    pub const fn is_piece_move(&self) -> bool {
         matches!(self.move_type, Some(MoveType::PieceMove))
     }
 
     /// Is piece capture?
-    pub fn is_piece_capture(&self) -> bool {
+    pub const fn is_piece_capture(&self) -> bool {
         matches!(self.move_type, Some(MoveType::PieceCapture))
     }
 
     /// Is castle?
-    pub fn is_castle(&self) -> bool {
+    pub const fn is_castle(&self) -> bool {
         matches!(self.move_type, Some(MoveType::Castle))
     }
 
     /// Is check?
-    pub fn is_check(&self) -> bool {
+    pub const fn is_check(&self) -> bool {
         self.check
     }
 
     /// Is castling?
-    pub fn is_castling(&self) -> bool {
+    pub const fn is_castling(&self) -> bool {
         self.is_castling && (self.is_castling_king || self.is_castling_queen)
     }
 
     /// Is castling king side?
-    pub fn is_castling_king(&self) -> bool {
+    pub const fn is_castling_king(&self) -> bool {
         self.is_castling && self.is_castling_king && !self.is_castling_queen
     }
 
     /// Is castling queen side?
-    pub fn is_castling_queen(&self) -> bool {
+    pub const fn is_castling_queen(&self) -> bool {
         self.is_castling && !self.is_castling_king && self.is_castling_queen
     }
 
@@ -199,7 +204,7 @@ impl Move {
     //
 
     /// Get moving piece.
-    pub fn get_piece(&self) -> Option<Piece> {
+    pub const fn get_piece(&self) -> Option<Piece> {
         self.piece
     }
 
@@ -214,25 +219,32 @@ impl Move {
 
     /// Set the moving piece.
     pub fn set_piece(&mut self, piece: Piece) {
-        self.piece = Some(piece)
+        self.piece = Some(piece);
     }
 
     /// Set the move type.
     pub fn set_move_type(&mut self, move_type: MoveType) {
-        self.move_type = Some(move_type)
+        self.move_type = Some(move_type);
     }
 
     /// Set the color of the pieces (after they have already been
     /// parsed).
+    ///
+    /// # Panics
+    ///
+    /// * Panics when `self.piece` is None after checking if it's Some.
     pub fn set_color(&mut self, color: Color) {
         if self.piece.is_some() {
-            let piece = self.piece.as_mut().unwrap();
+            let piece = self.piece.as_mut().expect("Piece cannot be None.");
             piece.set_color(color);
             self.piece = Some(*piece);
         }
 
         if self.promotion_piece.is_some() {
-            let piece = self.promotion_piece.as_mut().unwrap();
+            let piece = self
+                .promotion_piece
+                .as_mut()
+                .expect("Promotion piece cannot be None.");
             piece.set_color(color);
             self.promotion_piece = Some(*piece);
         }
@@ -271,6 +283,10 @@ impl Move {
     /// If there is a pawn move or piece move registered, set either
     /// one of those to a capture move. If the move type is invalid,
     /// return an error.
+    ///
+    /// # Errors
+    ///
+    /// * Returns an error if the move type is invalid for capture.
     pub fn set_capture(&mut self) -> ChuiResult<()> {
         self.move_type = match self.move_type {
             Some(MoveType::PawnMove) => Some(MoveType::PawnCapture),
@@ -338,13 +354,17 @@ impl Move {
     //
 
     /// Return the verbose move text.
+    ///
+    /// # Panics
+    ///
+    /// * Panics when `self.piece` is None after checking that it's Some.
     pub fn get_move_text(&self) -> String {
         if self.piece.is_none() || self.move_type.is_none() {
             return String::new();
         }
 
         // E.g., "White King"
-        let mut move_text = self.piece.unwrap().get_text();
+        let mut move_text = self.piece.expect("Piece cannot be None.").get_text();
 
         let mut is_capture = false;
 

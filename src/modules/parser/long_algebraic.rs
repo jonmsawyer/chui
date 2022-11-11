@@ -1,13 +1,16 @@
+//! Long Algebraic notation module.
+
 #![allow(clippy::new_ret_no_self)]
 
 //use std::fmt;
 
-use super::super::{Color, Move};
+use super::super::{Color, Engine, Move};
 use super::Parser;
 use crate::{ChuiError, ChuiResult};
 
 /// A parser that will parse long algebraic chess notation.
 /// Example moves: `e2e4`, `e7e5`, `d2d3`, `Bf8b4+`, `Bb5xc6`, etc.
+#[derive(Debug, Copy, Clone)]
 pub struct LongAlgebraicParser;
 
 impl Parser for LongAlgebraicParser {
@@ -25,6 +28,29 @@ impl Parser for LongAlgebraicParser {
 
     fn eg(&self) -> String {
         format!("Examples for {}", self.name())
+    }
+
+    /// Return a String representing the move from board coordinates to this
+    /// parser's notation.
+    fn generate_move_from_board_coordinates(
+        &self,
+        engine: &Engine,
+        from_index: (usize, usize),
+        _to_index: (usize, usize),
+    ) -> ChuiResult<String> {
+        let board = &(engine.board.get_board());
+
+        let piece = match board[from_index.0][from_index.1] {
+            Some(piece) => piece,
+            None => {
+                return Err(ChuiError::InvalidMove(format!(
+                    "Invalid move. No piece at ({}, {})",
+                    from_index.0, from_index.1
+                )))
+            }
+        };
+
+        Ok(format!("Piece: {}", piece))
     }
 }
 

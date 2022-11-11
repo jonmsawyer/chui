@@ -30,23 +30,26 @@ pub use windows_menu::*;
 mod design_menu;
 pub use design_menu::*;
 
+/// Menu font size.
 const MENU_FONT_SIZE: f32 = 14.0; // 14.0 pt
+
+/// Menu color.
 const MENU_COLOR: Color32 = Color32::GRAY;
 
-/// top_menu_font()
-fn top_menu_font() -> FontId {
+/// Top menu font.
+const fn top_menu_font() -> FontId {
     FontId::new(MENU_FONT_SIZE, FontFamily::Proportional)
 }
 
-/// top_menu_underline()
-fn top_menu_underline() -> Stroke {
+/// Top menu underline.
+const fn top_menu_underline() -> Stroke {
     Stroke {
         width: 1.0,
         color: MENU_COLOR,
     }
 }
 
-/// top_menu_text_format()
+/// Top menu text format.
 fn top_menu_text_format() -> TextFormat {
     TextFormat {
         font_id: top_menu_font(),
@@ -55,7 +58,7 @@ fn top_menu_text_format() -> TextFormat {
     }
 }
 
-/// top_menu_text_format_underline()
+/// Top menu text format underline.
 fn top_menu_text_format_underline() -> TextFormat {
     TextFormat {
         font_id: top_menu_font(),

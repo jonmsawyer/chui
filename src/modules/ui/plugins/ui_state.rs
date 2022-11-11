@@ -8,6 +8,7 @@ use super::super::events::ResizeBoardEvent;
 use super::super::resources::UiResource;
 use super::super::utils::update_square_pixels;
 
+/// ECS System. Run once. Configure the state of the User Interface.
 fn configure_state(mut ui_state: ResMut<UiResource>) {
     ui_state.is_window_open = false;
     ui_state.ui_scale_factor = 1.0;
@@ -30,8 +31,20 @@ fn configure_state(mut ui_state: ResMut<UiResource>) {
     ui_state.mouse_click_from_square_clicked = false;
     ui_state.mouse_click_to_square = Vec2::ZERO;
     ui_state.mouse_click_to_square_clicked = false;
+    ui_state.move_representation = "No move selected.".to_string();
 }
 
+/// ECS System. Run once. Configure the User Interface visuals.
+fn configure_visuals(mut egui_ctx: ResMut<EguiContext>) {
+    // Default is Dark Mode
+    egui_ctx.ctx_mut().set_visuals(egui::Visuals {
+        window_rounding: (5.0).into(), // 5 points radius for window borders
+        ..Default::default()
+    });
+}
+
+/// ECS System. Run on each frame. Given the proper keyboard input, update
+/// the UI Scale Factor as understood by egui.
 fn scale_factor(
     keyboard_input: Res<Input<KeyCode>>,
     mut egui_settings: ResMut<EguiSettings>,
@@ -75,14 +88,6 @@ fn scale_factor(
     }
 
     egui_settings.scale_factor = ui_state.ui_scale_factor as f64;
-}
-
-fn configure_visuals(mut egui_ctx: ResMut<EguiContext>) {
-    // Default is Dark Mode
-    egui_ctx.ctx_mut().set_visuals(egui::Visuals {
-        window_rounding: (5.0).into(), // 5 points radius for window borders
-        ..Default::default()
-    });
 }
 
 /// Our UI State plugin

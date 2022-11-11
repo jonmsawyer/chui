@@ -1,4 +1,4 @@
-//! MainUi plugin
+//! Main Ui plugin
 
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext};
@@ -13,6 +13,7 @@ pub mod layout_jobs;
 pub mod top_menu;
 use top_menu::top_menu;
 
+/// ECS System. Run on each frame. Render the egui panels.
 fn egui_panels(
     mut egui_ctx: ResMut<EguiContext>,
     mut ui_state: ResMut<UiResource>,
@@ -106,6 +107,7 @@ fn egui_panels(
     //     });
 }
 
+/// egui panels Bevy plugin.
 pub struct EguiPanelsPlugin;
 
 impl Plugin for EguiPanelsPlugin {

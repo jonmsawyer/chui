@@ -28,5 +28,7 @@ pub struct ToSquareCursor;
 /// Component to attach to each square on the chessboard.
 #[derive(Component)]
 pub struct Square {
+    /// The index associated with this Square. 0-63 (one for each square
+    /// on the chessboard).
     pub index: usize,
 }

@@ -17,9 +17,11 @@ use super::super::utils::{
     compute_board_coords, compute_coords, get_mouse_coords, get_world_coords,
     hide_from_and_to_square, transform_from_square, transform_to_square,
 };
+use crate::Engine;
 
+/// ECS System. Run once. Initialize the on-board mouse cursor.
 fn init_mouse_cursor(mut commands: Commands) {
-    let mut rng = SmallRng::seed_from_u64(1 as u64);
+    let mut rng = SmallRng::seed_from_u64(1_u64);
     let mut color = Color::from(rng.gen::<[f32; 3]>());
     color.set_a(0.65);
 
@@ -41,8 +43,9 @@ fn init_mouse_cursor(mut commands: Commands) {
         .insert(MouseCursor);
 }
 
+/// ECS System. Run once. Initialize the From Square on-board cursor.
 fn init_from_square_cursor(mut commands: Commands) {
-    let mut rng = SmallRng::seed_from_u64(2 as u64);
+    let mut rng = SmallRng::seed_from_u64(2_u64);
     let mut color = Color::from(rng.gen::<[f32; 3]>());
     color.set_a(0.65);
 
@@ -64,8 +67,9 @@ fn init_from_square_cursor(mut commands: Commands) {
         .insert(FromSquareCursor);
 }
 
+/// ECS System. Run once. Initialize the To Square on-board cursor.
 fn init_to_square_cursor(mut commands: Commands) {
-    let mut rng = SmallRng::seed_from_u64(3 as u64);
+    let mut rng = SmallRng::seed_from_u64(3_u64);
     let mut color = Color::from(rng.gen::<[f32; 3]>());
     color.set_a(0.65);
 
@@ -87,6 +91,7 @@ fn init_to_square_cursor(mut commands: Commands) {
         .insert(ToSquareCursor);
 }
 
+/// ECS System. Run on each frame. Update the on-board mouse cursor.
 fn update_mouse_cursor(
     mut mouse_query: Query<(&mut Visibility, &mut Transform), With<MouseCursor>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
@@ -107,7 +112,7 @@ fn update_mouse_cursor(
     let max = START_Y_COORD * ui_state.square_pixels;
 
     ui_state.mouse_cursor_screen_coords = mouse_coords;
-    ui_state.mouse_cursor_world_coords = world_coords.clone();
+    ui_state.mouse_cursor_world_coords = world_coords;
 
     if x < min
         || x >= max
@@ -124,6 +129,9 @@ fn update_mouse_cursor(
     visibility.is_visible = ui_state.show_mouse_cursor;
 }
 
+/// ECS System. Run on each frame. Update the on-board From Square and To Square
+/// mouse cursors on each mouse click.
+#[allow(clippy::type_complexity)]
 pub fn update_mouse_click(
     mut ui_state: ResMut<UiResource>,
     windows: Res<Windows>,
@@ -134,6 +142,7 @@ pub fn update_mouse_click(
         (&mut Transform, &mut Visibility),
         (With<ToSquareCursor>, Without<FromSquareCursor>),
     >,
+    engine: Res<Engine>,
 ) {
     if mouse_input.is_empty() {
         return;
@@ -142,35 +151,57 @@ pub fn update_mouse_click(
     compute_board_coords(&mut ui_state, camera_query, windows);
 
     for input in mouse_input.iter() {
-        match (input.button, input.state) {
-            (MouseButton::Left, ButtonState::Pressed) => {
-                let (mut from_transform, mut from_visibility) = from_square_query.single_mut();
-                let (mut to_transform, mut to_visibility) = to_square_query.single_mut();
+        if let (MouseButton::Left, ButtonState::Pressed) = (input.button, input.state) {
+            let (mut from_transform, mut from_visibility) = from_square_query.single_mut();
+            let (mut to_transform, mut to_visibility) = to_square_query.single_mut();
 
-                if !ui_state.mouse_click_from_square_clicked
-                    && !ui_state.mouse_click_to_square_clicked
-                {
-                    ui_state.mouse_click_from_square_clicked = true;
-                    ui_state.mouse_click_from_square = ui_state.mouse_click_board_coords.clone();
-                    transform_from_square(&mut ui_state, &mut from_transform, &mut from_visibility);
-                } else if ui_state.mouse_click_from_square_clicked
-                    && !ui_state.mouse_click_to_square_clicked
-                {
-                    ui_state.mouse_click_to_square_clicked = true;
-                    ui_state.mouse_click_to_square = ui_state.mouse_click_board_coords.clone();
-                    transform_to_square(&mut ui_state, &mut to_transform, &mut to_visibility);
-                } else if ui_state.mouse_click_from_square_clicked
-                    && ui_state.mouse_click_to_square_clicked
-                {
+            if !ui_state.mouse_click_from_square_clicked && !ui_state.mouse_click_to_square_clicked
+            {
+                ui_state.mouse_click_from_square_clicked = true;
+                ui_state.mouse_click_from_square = ui_state.mouse_click_board_coords;
+                transform_from_square(&mut ui_state, &mut from_transform, &mut from_visibility);
+            } else if ui_state.mouse_click_from_square_clicked
+                && !ui_state.mouse_click_to_square_clicked
+            {
+                // If the "from" square is equal to the "to" square, zero out fields and return.
+                if ui_state.mouse_click_from_square == ui_state.mouse_click_board_coords {
                     ui_state.mouse_click_from_square_clicked = false;
                     ui_state.mouse_click_from_square = Vec2::ZERO;
                     ui_state.mouse_click_to_square_clicked = false;
                     ui_state.mouse_click_to_square = Vec2::ZERO;
                     hide_from_and_to_square(&mut from_visibility, &mut to_visibility);
+                    return;
                 }
+
+                ui_state.mouse_click_to_square_clicked = true;
+                ui_state.mouse_click_to_square = ui_state.mouse_click_board_coords;
+
+                transform_to_square(&mut ui_state, &mut to_transform, &mut to_visibility);
+
+                match engine.parser.generate_move_from_board_coordinates(
+                    &engine,
+                    (
+                        ui_state.mouse_click_from_square[0] as usize,
+                        ui_state.mouse_click_from_square[1] as usize,
+                    ),
+                    (
+                        ui_state.mouse_click_to_square[0] as usize,
+                        ui_state.mouse_click_to_square[1] as usize,
+                    ),
+                ) {
+                    Ok(result) => ui_state.move_representation = result,
+                    Err(error) => ui_state.move_representation = format!("{}", error),
+                }
+            } else if ui_state.mouse_click_from_square_clicked
+                && ui_state.mouse_click_to_square_clicked
+            {
+                ui_state.mouse_click_from_square_clicked = false;
+                ui_state.mouse_click_from_square = Vec2::ZERO;
+                ui_state.mouse_click_to_square_clicked = false;
+                ui_state.mouse_click_to_square = Vec2::ZERO;
+                hide_from_and_to_square(&mut from_visibility, &mut to_visibility);
             }
-            _ => {}
-        }
+        };
 
         // match mouse_input.into() {
         //     MouseButton::Left => {
@@ -183,6 +214,7 @@ pub fn update_mouse_click(
     }
 }
 
+/// Mouse Bevy plugin.
 pub struct MousePlugin;
 
 impl Plugin for MousePlugin {

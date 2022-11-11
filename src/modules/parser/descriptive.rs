@@ -1,13 +1,16 @@
+//! Descriptive notation module.
+
 #![allow(clippy::new_ret_no_self)]
 
 //use std::fmt;
 
-use super::super::{Color, Move};
+use super::super::{Color, Engine, Move};
 use super::Parser;
 use crate::{ChuiError, ChuiResult};
 
 /// A parser that will parse English descriptive chess notation.
 /// Example moves: `P-K4`, `NxN`, `QxRch`, `Q-KR4 mate`, `O-O`, etc.
+#[derive(Debug, Copy, Clone)]
 pub struct DescriptiveParser;
 
 impl Parser for DescriptiveParser {
@@ -25,6 +28,29 @@ impl Parser for DescriptiveParser {
 
     fn eg(&self) -> String {
         format!("Examples for {}", self.name())
+    }
+
+    /// Return a String representing the move from board coordinates to this
+    /// parser's notation.
+    fn generate_move_from_board_coordinates(
+        &self,
+        engine: &Engine,
+        from_index: (usize, usize),
+        _to_index: (usize, usize),
+    ) -> ChuiResult<String> {
+        let board = &(engine.board.get_board());
+
+        let piece = match board[from_index.0][from_index.1] {
+            Some(piece) => piece,
+            None => {
+                return Err(ChuiError::InvalidMove(format!(
+                    "Invalid move. No piece at ({}, {})",
+                    from_index.0, from_index.1
+                )))
+            }
+        };
+
+        Ok(format!("Piece: {}", piece))
     }
 }
 

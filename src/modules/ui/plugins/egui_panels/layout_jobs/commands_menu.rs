@@ -7,7 +7,6 @@ A layout job is the custom way to format [`RichText`].
 use super::{top_menu_text_format, top_menu_text_format_underline};
 use bevy_egui::egui::text::LayoutJob;
 
-/// top_menu_file()
 /// "File"
 pub fn top_menu_commands() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -18,7 +17,6 @@ pub fn top_menu_commands() -> LayoutJob {
     job
 }
 
-/// top_menu_new_game()
 /// "New Game..."
 pub fn top_menu_compute() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -29,7 +27,6 @@ pub fn top_menu_compute() -> LayoutJob {
     job
 }
 
-/// top_menu_interrupt()
 /// "Interrupt"
 pub fn top_menu_interrupt() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -39,7 +36,6 @@ pub fn top_menu_interrupt() -> LayoutJob {
     job
 }
 
-/// top_menu_copy()
 /// "Copy"
 pub fn top_menu_copy() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -50,7 +46,6 @@ pub fn top_menu_copy() -> LayoutJob {
     job
 }
 
-/// top_menu_copy_pgn()
 /// "Game (PGN)"
 pub fn top_menu_copy_pgn() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -62,7 +57,6 @@ pub fn top_menu_copy_pgn() -> LayoutJob {
     job
 }
 
-/// top_menu_copy_epd()
 /// "Position (EPD)"
 pub fn top_menu_copy_epd() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -74,7 +68,6 @@ pub fn top_menu_copy_epd() -> LayoutJob {
     job
 }
 
-/// top_menu_copy_analysis_window()
 /// "Analysis Window"
 pub fn top_menu_copy_analysis_window() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -85,7 +78,6 @@ pub fn top_menu_copy_analysis_window() -> LayoutJob {
     job
 }
 
-/// top_menu_copy_last_analysis()
 /// "Last Analysis"
 pub fn top_menu_copy_last_analysis() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -96,7 +88,6 @@ pub fn top_menu_copy_last_analysis() -> LayoutJob {
     job
 }
 
-/// top_menu_copy_notation()
 /// "Notation"
 pub fn top_menu_copy_notation() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -107,7 +98,6 @@ pub fn top_menu_copy_notation() -> LayoutJob {
     job
 }
 
-/// top_menu_paste()
 /// "Paste"
 pub fn top_menu_paste() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -118,7 +108,6 @@ pub fn top_menu_paste() -> LayoutJob {
     job
 }
 
-/// top_menu_offer_draw()
 /// "Offer Draw"
 pub fn top_menu_offer_draw() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -129,7 +118,6 @@ pub fn top_menu_offer_draw() -> LayoutJob {
     job
 }
 
-/// top_menu_resign()
 /// "Resign"
 pub fn top_menu_resign() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -140,7 +128,6 @@ pub fn top_menu_resign() -> LayoutJob {
     job
 }
 
-/// top_menu_goto_move()
 /// "Goto Move..."
 pub fn top_menu_goto_move() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -151,7 +138,6 @@ pub fn top_menu_goto_move() -> LayoutJob {
     job
 }
 
-/// top_menu_replay_game()
 /// "Replay Game"
 pub fn top_menu_replay_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -163,7 +149,6 @@ pub fn top_menu_replay_game() -> LayoutJob {
     job
 }
 
-/// top_menu_show_main_line()
 /// "Show Main Line"
 pub fn top_menu_show_main_line() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -175,7 +160,6 @@ pub fn top_menu_show_main_line() -> LayoutJob {
     job
 }
 
-/// top_menu_insert_main_line()
 /// "Insert Main Line"
 pub fn top_menu_insert_main_line() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -186,7 +170,6 @@ pub fn top_menu_insert_main_line() -> LayoutJob {
     job
 }
 
-/// top_menu_insert_best_move()
 /// "Insert Best Move"
 pub fn top_menu_insert_best_move() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -198,7 +181,6 @@ pub fn top_menu_insert_best_move() -> LayoutJob {
     job
 }
 
-/// top_menu_game_details()
 /// "Game Details..."
 pub fn top_menu_game_details() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -209,7 +191,6 @@ pub fn top_menu_game_details() -> LayoutJob {
     job
 }
 
-/// top_menu_flip_board()
 /// "Flip Board"
 pub fn top_menu_flip_board() -> LayoutJob {
     let mut job = LayoutJob::default();

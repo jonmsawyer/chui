@@ -1,4 +1,4 @@
-/// Constants module
+//! Constants module.
 
 /// The left four squares of the chessboard, in world coordinates.
 pub const START_X_COORD: f32 = -4.0;

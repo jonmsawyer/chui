@@ -1,3 +1,5 @@
+//! Commands module.
+
 use super::super::{Command, CommandContext, CommandKind, Engine};
 use super::parser::ParserEngine;
 

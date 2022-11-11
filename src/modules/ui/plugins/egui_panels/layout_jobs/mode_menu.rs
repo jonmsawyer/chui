@@ -7,7 +7,6 @@ A layout job is the custom way to format [`RichText`].
 use super::{top_menu_text_format, top_menu_text_format_underline};
 use bevy_egui::egui::text::LayoutJob;
 
-/// top_menu_mode()
 /// "Mode"
 pub fn top_menu_mode() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -18,7 +17,6 @@ pub fn top_menu_mode() -> LayoutJob {
     job
 }
 
-/// top_menu_analysis()
 /// "Analysis"
 pub fn top_menu_analysis() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -29,7 +27,6 @@ pub fn top_menu_analysis() -> LayoutJob {
     job
 }
 
-/// top_menu_play_against_computer()
 /// "Play Against Computer"
 pub fn top_menu_play_against_computer() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -40,7 +37,6 @@ pub fn top_menu_play_against_computer() -> LayoutJob {
     job
 }
 
-/// top_menu_enter_moves()
 /// "Enter Moves"
 pub fn top_menu_enter_moves() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -51,7 +47,6 @@ pub fn top_menu_enter_moves() -> LayoutJob {
     job
 }
 
-/// top_menu_training()
 /// "Training"
 pub fn top_menu_training() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -62,7 +57,6 @@ pub fn top_menu_training() -> LayoutJob {
     job
 }
 
-/// top_menu_openings_training()
 /// "Openings Training"
 pub fn top_menu_openings_training() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -73,7 +67,6 @@ pub fn top_menu_openings_training() -> LayoutJob {
     job
 }
 
-/// top_menu_endgame_training()
 /// "Endgame Training"
 pub fn top_menu_endgame_training() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -84,7 +77,6 @@ pub fn top_menu_endgame_training() -> LayoutJob {
     job
 }
 
-/// top_menu_handicap_games()
 /// "Handicap Games"
 pub fn top_menu_handicap_games() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -95,7 +87,6 @@ pub fn top_menu_handicap_games() -> LayoutJob {
     job
 }
 
-/// top_menu_chess_puzzles()
 /// "Chess Puzzles"
 pub fn top_menu_chess_puzzles() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -106,7 +97,6 @@ pub fn top_menu_chess_puzzles() -> LayoutJob {
     job
 }
 
-/// top_menu_daily_puzzle_easy()
 /// "Daily Puzzle - Easy"
 pub fn top_menu_daily_puzzle_easy() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -118,7 +108,6 @@ pub fn top_menu_daily_puzzle_easy() -> LayoutJob {
     job
 }
 
-/// top_menu_daily_puzzle_medium()
 /// "Daily Puzzle - Medium"
 pub fn top_menu_daily_puzzle_medium() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -130,7 +119,6 @@ pub fn top_menu_daily_puzzle_medium() -> LayoutJob {
     job
 }
 
-/// top_menu_daily_puzzle_hard()
 /// "Daily Puzzle - Hard"
 pub fn top_menu_daily_puzzle_hard() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -142,7 +130,6 @@ pub fn top_menu_daily_puzzle_hard() -> LayoutJob {
     job
 }
 
-/// top_menu_triple_brain()
 /// "Triple Brain..."
 pub fn top_menu_triple_brain() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -154,7 +141,6 @@ pub fn top_menu_triple_brain() -> LayoutJob {
     job
 }
 
-/// top_menu_analyse_game()
 /// "Analyse Game..."
 pub fn top_menu_analyse_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -166,7 +152,6 @@ pub fn top_menu_analyse_game() -> LayoutJob {
     job
 }
 
-/// top_menu_analyse_positions()
 /// "Analyse Positions..."
 pub fn top_menu_analyse_positions() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -178,7 +163,6 @@ pub fn top_menu_analyse_positions() -> LayoutJob {
     job
 }
 
-/// top_menu_computer_vs_computer()
 /// "Computer vs Computer"
 pub fn top_menu_computer_vs_computer() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -190,7 +174,6 @@ pub fn top_menu_computer_vs_computer() -> LayoutJob {
     job
 }
 
-/// top_menu_shootout()
 /// "Shootout..."
 pub fn top_menu_shootout() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -201,7 +184,6 @@ pub fn top_menu_shootout() -> LayoutJob {
     job
 }
 
-/// top_menu_autoplayer()
 /// "Autoplayer..."
 pub fn top_menu_autoplayer() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -212,7 +194,6 @@ pub fn top_menu_autoplayer() -> LayoutJob {
     job
 }
 
-/// top_menu_engine_match()
 /// "Engine Match..."
 pub fn top_menu_engine_match() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -223,7 +204,6 @@ pub fn top_menu_engine_match() -> LayoutJob {
     job
 }
 
-/// top_menu_engine_tournament()
 /// "Engine Tournament"
 pub fn top_menu_engine_tournament() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -235,7 +215,6 @@ pub fn top_menu_engine_tournament() -> LayoutJob {
     job
 }
 
-/// top_menu_dgt_board()
 /// "DGT Board"
 pub fn top_menu_dgt_board() -> LayoutJob {
     let mut job = LayoutJob::default();

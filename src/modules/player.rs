@@ -44,11 +44,9 @@ impl Player {
     /// Creates a new `Player` instance when provided with `color`.
     /// Most fields are `Option`al.
     pub fn new(color: Color, name: Option<&str>, age: Option<u8>, rating: Option<u32>) -> Player {
-        let name = name.map(|name| name.to_string());
-
         Player {
             color,
-            name,
+            name: name.map(|the_name| the_name.to_string()),
             age,
             rating,
         }
@@ -95,7 +93,7 @@ mod test {
         assert_eq!(
             format!("{}", player),
             String::from("White: Dr. John Smith III (Age 47) (1500 Elo)")
-        )
+        );
     }
 
     #[test]
@@ -105,7 +103,7 @@ mod test {
         assert_eq!(
             format!("{}", player),
             String::from("Black: John Smith IV (Age 12) (no Elo rating)")
-        )
+        );
     }
 
     #[test]
@@ -120,7 +118,7 @@ mod test {
         assert_eq!(
             format!("{}", player),
             String::from("Black: Billy Bob Joe Bob Jr. (2639 Elo)")
-        )
+        );
     }
 
     #[test]
@@ -130,7 +128,7 @@ mod test {
         assert_eq!(
             format!("{}", player),
             String::from("Black: Smith (no Elo rating)")
-        )
+        );
     }
 
     #[test]
@@ -140,7 +138,7 @@ mod test {
         assert_eq!(
             format!("{}", player),
             String::from("White: (no name) (Age 47) (1500 Elo)")
-        )
+        );
     }
 
     #[test]
@@ -150,7 +148,7 @@ mod test {
         assert_eq!(
             format!("{}", player),
             String::from("Black: (no name) (Age 12) (no Elo rating)")
-        )
+        );
     }
 
     #[test]
@@ -160,7 +158,7 @@ mod test {
         assert_eq!(
             format!("{}", player),
             String::from("Black: (no name) (2639 Elo)")
-        )
+        );
     }
 
     #[test]
@@ -170,6 +168,6 @@ mod test {
         assert_eq!(
             format!("{}", player),
             String::from("Black: (no name) (no Elo rating)")
-        )
+        );
     }
 }

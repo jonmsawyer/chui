@@ -1,3 +1,5 @@
+//! FEN module.
+
 use super::super::{Color, Engine, Fen};
 
 /// Get the FEN to move character.
@@ -67,8 +69,8 @@ pub fn get_fen_full_move_counter(engine: &Engine) -> String {
 pub fn get_fen(engine: &Engine) -> String {
     format!(
         "FEN: {}\nX-FEN: {}\nShredder-FEN: {}",
-        Fen::get_fen(&engine),
-        Fen::get_x_fen(&engine),
-        Fen::get_shredder_fen(&engine),
+        Fen::get_fen(engine),
+        Fen::get_x_fen(engine),
+        Fen::get_shredder_fen(engine),
     )
 }

@@ -1,3 +1,8 @@
+//! Algebraic parser module.
+//!
+//! This module represents the Algebraic Parser. Algebraic notation (e.g., Qa4)
+//! is the current standard chess notation used internationally.
+
 #![allow(clippy::new_ret_no_self)]
 
 //use std::fmt;
@@ -6,7 +11,7 @@ use std::convert::TryFrom;
 
 use crate::{ChuiError, ChuiResult};
 
-use super::super::{Color, Move, MoveGenerator, Piece};
+use super::super::{Color, Engine, Move, MoveGenerator, Piece, PieceKind};
 use super::Parser;
 //use super::super::parser::ParserEngine;
 
@@ -14,7 +19,10 @@ use super::Parser;
 /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
 #[derive(Debug)]
 pub struct AlgebraicParser<'a> {
+    /// The move generator. Generates chess moves in Algebraic Notation.
     pub move_generator: MoveGenerator<'a>,
+
+    /// The chess move to move.
     pub move_obj: Move,
 }
 
@@ -132,11 +140,11 @@ impl<'a> Parser for AlgebraicParser<'a> {
         let the_move = self.trim_and_check_whitespace(the_move)?;
 
         if the_move.len() < 2 {
-            self.invalid_input("Input move is too small in length (<2)")?
+            self.invalid_input("Input move is too small in length (<2)")?;
         }
 
         if the_move.len() > 8 {
-            self.invalid_input("Input move is too large in length (>8)")?
+            self.invalid_input("Input move is too large in length (>8)")?;
         }
 
         // Record the input move.
@@ -153,7 +161,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
                 5 => self.parse_token_6(token)?,
                 6 => self.parse_token_7(token)?,
                 7 => self.parse_token_8(token)?,
-                _ => self.move_index_not_implemented(move_idx)?,
+                _ => AlgebraicParser::move_index_not_implemented(move_idx)?,
             }
         }
 
@@ -175,6 +183,63 @@ impl<'a> Parser for AlgebraicParser<'a> {
     /// Some examples of the moves parsed by this parser.
     fn eg(&self) -> String {
         format!("e4, Bxc6, Qb4, exf8=Q++ ({})", self.name())
+    }
+
+    /// Return a String representing the move from board coordinates to this
+    /// parser's notation.
+    fn generate_move_from_board_coordinates(
+        &self,
+        engine: &Engine,
+        from_index: (usize, usize),
+        to_index: (usize, usize),
+    ) -> ChuiResult<String> {
+        if from_index.0 > 7 || from_index.1 > 7 || to_index.0 > 7 || to_index.1 > 7 {
+            return Err(ChuiError::IndexOutOfRange(
+                "Index must be between 0 and 7, includsive".to_string(),
+            ));
+        }
+        let mut move_string: String;
+        let mut the_move = Move::new();
+        let piece = match engine.board.get_board()[from_index.1][from_index.0] {
+            Some(piece) => piece,
+            None => {
+                return Err(ChuiError::InvalidMove(format!(
+                    "No piece at ({}, {})",
+                    from_index.0, from_index.1
+                )))
+            }
+        };
+        match piece.get_piece() {
+            PieceKind::Pawn => {
+                the_move.set_pawn_move();
+                let file = self.match_index_to_file(from_index.0 as u8).unwrap();
+                move_string = format!("{}", file);
+            }
+            _ => {
+                the_move.set_piece_move(piece);
+                move_string = format!("{}", piece);
+            }
+        }
+        let to_square = engine.board.get_board()[to_index.1][to_index.0];
+        if to_square.is_some() {
+            move_string.push('x');
+        }
+        let piece_move_coords = piece.get_move_coords(&(engine.board), &Some(the_move));
+        for coord in piece_move_coords.iter() {
+            if &to_index == coord {
+                let file = self.match_index_to_file(to_index.0 as u8).unwrap();
+                let rank = self.match_index_to_rank(to_index.1 as u8).unwrap();
+                move_string.push(file);
+                move_string.push(rank);
+                println!("Valid move.");
+                break;
+            } else {
+                move_string = "Invalid move.".to_string();
+                println!("{}", move_string);
+            }
+        }
+
+        Ok(move_string)
     }
 }
 
@@ -215,7 +280,7 @@ impl<'a> AlgebraicParser<'a> {
 
         // If all else fails, this token could not be parsed
         // (i.e., invalid file such as 's').
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a valid file. Must
@@ -228,7 +293,7 @@ impl<'a> AlgebraicParser<'a> {
             return Ok(());
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a capture. Must be
@@ -239,7 +304,7 @@ impl<'a> AlgebraicParser<'a> {
             return Ok(());
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a valid rank. Must
@@ -252,7 +317,7 @@ impl<'a> AlgebraicParser<'a> {
             return Ok(());
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a valid check. Must
@@ -271,7 +336,7 @@ impl<'a> AlgebraicParser<'a> {
             return Ok(());
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a valid check mate.
@@ -284,7 +349,7 @@ impl<'a> AlgebraicParser<'a> {
             }
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a valid promotion
@@ -300,7 +365,7 @@ impl<'a> AlgebraicParser<'a> {
             }
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a promotion piece. The
@@ -314,7 +379,7 @@ impl<'a> AlgebraicParser<'a> {
             }
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a castle move. Note: this
@@ -328,7 +393,7 @@ impl<'a> AlgebraicParser<'a> {
             }
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a castle king side
@@ -341,7 +406,7 @@ impl<'a> AlgebraicParser<'a> {
             return Ok(());
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a castle queen side
@@ -356,7 +421,7 @@ impl<'a> AlgebraicParser<'a> {
             return Ok(());
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a castle queen side.
@@ -369,7 +434,7 @@ impl<'a> AlgebraicParser<'a> {
             }
         }
 
-        self.token_not_satisfied(token)
+        AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Parse the first token in the input move.
@@ -459,7 +524,7 @@ impl<'a> AlgebraicParser<'a> {
             return Ok(());
         }
 
-        self.invalid_pawn_or_piece_move(token)
+        AlgebraicParser::invalid_pawn_or_piece_move(token)
     }
 
     /// Parse the second token in the input move.
@@ -1044,7 +1109,7 @@ impl<'a> AlgebraicParser<'a> {
 
     /// Return `ChuiError::InvalidMove` indicating that the move
     /// is an invalid pawn or piece move.
-    fn invalid_pawn_or_piece_move(&self, token: char) -> ChuiResult<()> {
+    fn invalid_pawn_or_piece_move(token: char) -> ChuiResult<()> {
         Err(ChuiError::InvalidMove(format!(
             "`{}` is not a valid pawn or piece move",
             token
@@ -1055,7 +1120,7 @@ impl<'a> AlgebraicParser<'a> {
     /// the input token has not been reasonably satisfied in any
     /// given context. This usually indicates that further processing
     /// of the token is necessary.
-    fn token_not_satisfied(&self, token: char) -> ChuiResult<()> {
+    fn token_not_satisfied(token: char) -> ChuiResult<()> {
         Err(ChuiError::TokenNotSatisfied(format!(
             "`{}` token is not satisfied",
             token
@@ -1065,7 +1130,7 @@ impl<'a> AlgebraicParser<'a> {
     /// Return `ChuiError:NotImplemented` indicating that the move
     /// index of the current token has not been implemented. This
     /// means there are more tokens to process than are accounted for.
-    fn move_index_not_implemented(&self, move_idx: usize) -> ChuiResult<()> {
+    fn move_index_not_implemented(move_idx: usize) -> ChuiResult<()> {
         Err(ChuiError::NotImplemented(format!(
             "move index `{}` not implemented",
             move_idx
@@ -1120,7 +1185,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1151,7 +1216,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1182,7 +1247,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1213,7 +1278,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1244,7 +1309,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1275,7 +1340,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1306,7 +1371,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1337,7 +1402,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1368,7 +1433,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1399,7 +1464,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1430,7 +1495,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1461,7 +1526,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1492,7 +1557,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1523,7 +1588,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1554,7 +1619,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1585,7 +1650,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnMove),
                 }
             );
@@ -1616,7 +1681,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1647,7 +1712,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1678,7 +1743,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1709,7 +1774,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1740,7 +1805,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1771,7 +1836,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1802,7 +1867,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1833,7 +1898,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PawnCapture),
                 }
             );
@@ -1864,7 +1929,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -1895,7 +1960,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -1926,7 +1991,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -1957,7 +2022,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -1988,7 +2053,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2019,7 +2084,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2050,7 +2115,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2081,7 +2146,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2112,7 +2177,7 @@ mod test {
                     is_castling: true,
                     is_castling_king: true,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::Castle),
                 }
             );
@@ -2143,7 +2208,7 @@ mod test {
                     is_castling: true,
                     is_castling_king: true,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::Castle),
                 }
             );
@@ -2174,7 +2239,7 @@ mod test {
                     is_castling: true,
                     is_castling_king: true,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::Castle),
                 }
             );
@@ -2205,7 +2270,7 @@ mod test {
                     is_castling: true,
                     is_castling_king: true,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::Castle),
                 }
             );
@@ -2236,7 +2301,7 @@ mod test {
                     is_castling: true,
                     is_castling_king: false,
                     is_castling_queen: true,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::Castle),
                 }
             );
@@ -2267,7 +2332,7 @@ mod test {
                     is_castling: true,
                     is_castling_king: false,
                     is_castling_queen: true,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::Castle),
                 }
             );
@@ -2298,7 +2363,7 @@ mod test {
                     is_castling: true,
                     is_castling_king: false,
                     is_castling_queen: true,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::Castle),
                 }
             );
@@ -2329,7 +2394,7 @@ mod test {
                     is_castling: true,
                     is_castling_king: false,
                     is_castling_queen: true,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::Castle),
                 }
             );
@@ -2360,7 +2425,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2391,7 +2456,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2422,7 +2487,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2453,7 +2518,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2484,7 +2549,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2515,7 +2580,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2546,7 +2611,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2577,7 +2642,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2608,7 +2673,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2639,7 +2704,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2670,7 +2735,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2701,7 +2766,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2732,7 +2797,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2763,7 +2828,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2794,7 +2859,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2825,7 +2890,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2856,7 +2921,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2887,7 +2952,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2918,7 +2983,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -2949,7 +3014,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -2980,7 +3045,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -3011,7 +3076,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );
@@ -3042,7 +3107,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceMove),
                 }
             );
@@ -3073,7 +3138,7 @@ mod test {
                     is_castling: false,
                     is_castling_king: false,
                     is_castling_queen: false,
-                    input_move: input_move,
+                    input_move,
                     move_type: Some(MoveType::PieceCapture),
                 }
             );

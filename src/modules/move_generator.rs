@@ -8,6 +8,7 @@
 
 use std::collections::HashSet;
 use std::fmt;
+use std::fmt::Write as _; // import without risk of name clashing
 
 /// Contains all the needed information to generate all
 /// possible Algebraic and Coordinate Notation moves.
@@ -23,7 +24,7 @@ use std::fmt;
 ///
 /// println!("{:?}", g.move_list);
 /// ```
-#[derive(Debug, Default, PartialEq, Clone)]
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub struct MoveGenerator<'a> {
     /// The 8 files (e.g., `a`, `b`, `c`, `d`, `e`, `f`, `g`, `h`).
     pub files: [&'a str; 8],
@@ -105,123 +106,138 @@ impl fmt::Display for MoveGenerator<'_> {
         fmt_str += "[";
         for output in self.move_list.iter() {
             if output.starts_with(&"a") {
-                a_fmt_str += &format!("{}, ", output);
+                let _ = write!(a_fmt_str, "{}, ", output);
                 a_count += 1;
             }
             if output.starts_with(&"b") {
-                b_fmt_str += &format!("{}, ", output);
+                let _ = write!(b_fmt_str, "{}, ", output);
                 b_count += 1;
             }
             if output.starts_with(&"c") {
-                c_fmt_str += &format!("{}, ", output);
+                let _ = write!(c_fmt_str, "{}, ", output);
                 c_count += 1;
             }
             if output.starts_with(&"d") {
-                d_fmt_str += &format!("{}, ", output);
+                let _ = write!(d_fmt_str, "{}, ", output);
                 d_count += 1;
             }
             if output.starts_with(&"e") {
-                e_fmt_str += &format!("{}, ", output);
+                let _ = write!(e_fmt_str, "{}, ", output);
                 e_count += 1;
             }
             if output.starts_with(&"f") {
-                f_fmt_str += &format!("{}, ", output);
+                let _ = write!(f_fmt_str, "{}, ", output);
                 f_count += 1;
             }
             if output.starts_with(&"g") {
-                g_fmt_str += &format!("{}, ", output);
+                let _ = write!(g_fmt_str, "{}, ", output);
                 g_count += 1;
             }
             if output.starts_with(&"h") {
-                h_fmt_str += &format!("{}, ", output);
+                let _ = write!(h_fmt_str, "{}, ", output);
                 h_count += 1;
             }
             if output.starts_with(&"K") {
-                king_fmt_str += &format!("{}, ", output);
+                let _ = write!(king_fmt_str, "{}, ", output);
                 king_count += 1;
             }
             if output.starts_with(&"Q") {
-                queen_fmt_str += &format!("{}, ", output);
+                let _ = write!(queen_fmt_str, "{}, ", output);
                 queen_count += 1;
             }
             if output.starts_with(&"R") {
-                rook_fmt_str += &format!("{}, ", output);
+                let _ = write!(rook_fmt_str, "{}, ", output);
                 rook_count += 1;
             }
             if output.starts_with(&"B") {
-                bishop_fmt_str += &format!("{}, ", output);
+                let _ = write!(bishop_fmt_str, "{}, ", output);
                 bishop_count += 1;
             }
             if output.starts_with(&"N") {
-                knight_fmt_str += &format!("{}, ", output);
+                let _ = write!(knight_fmt_str, "{}, ", output);
                 knight_count += 1;
             }
             if output.starts_with(&"O") {
-                castle_valid_fmt_str += &format!("{}, ", output);
+                let _ = write!(castle_valid_fmt_str, "{}, ", output);
                 castle_valid_count += 1;
             }
             if output.starts_with(&"0") {
-                castle_invalid_fmt_str += &format!("{}, ", output);
+                let _ = write!(castle_invalid_fmt_str, "{}, ", output);
                 castle_invalid_count += 1;
             }
         }
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) a: [\n{}{}{}\n{}],",
             tab, a_count, tab, tab, a_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) b: [\n{}{}{}\n{}],",
             tab, b_count, tab, tab, b_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) c: [\n{}{}{}\n{}],",
             tab, c_count, tab, tab, c_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) d: [\n{}{}{}\n{}],",
             tab, d_count, tab, tab, d_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) e: [\n{}{}{}\n{}],",
             tab, e_count, tab, tab, e_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) f: [\n{}{}{}\n{}],",
             tab, f_count, tab, tab, f_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) g: [\n{}{}{}\n{}],",
             tab, g_count, tab, tab, g_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) h: [\n{}{}{}\n{}],",
             tab, h_count, tab, tab, h_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) K: [\n{}{}{}\n{}],",
             tab, king_count, tab, tab, king_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) Q: [\n{}{}{}\n{}],",
             tab, queen_count, tab, tab, queen_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) R: [\n{}{}{}\n{}],",
             tab, rook_count, tab, tab, rook_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) B: [\n{}{}{}\n{}],",
             tab, bishop_count, tab, tab, bishop_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) N: [\n{}{}{}\n{}],",
             tab, knight_count, tab, tab, knight_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) O: [\n{}{}{}\n{}],",
             tab, castle_valid_count, tab, tab, castle_valid_fmt_str, tab
         );
-        fmt_str += &format!(
+        let _ = write!(
+            fmt_str,
             "\n{}({}) 0: [\n{}{}{}\n{}],",
             tab, castle_invalid_count, tab, tab, castle_invalid_fmt_str, tab
         );
@@ -259,7 +275,7 @@ impl<'a> MoveGenerator<'a> {
     ///     }
     /// );
     /// ```
-    pub fn new() -> MoveGenerator<'a> {
+    pub const fn new() -> MoveGenerator<'a> {
         MoveGenerator {
             files: ["a", "b", "c", "d", "e", "f", "g", "h"],
             ranks: ["1", "2", "3", "4", "5", "6", "7", "8"],
@@ -328,7 +344,7 @@ impl<'a> MoveGenerator<'a> {
     ///     )
     /// );
     /// ```
-    pub fn move_is_valid(
+    pub const fn move_is_valid(
         file_a_idx: usize,
         rank_a_idx: usize,
         file_b_idx: usize,
@@ -391,7 +407,7 @@ impl<'a> MoveGenerator<'a> {
     ///     )
     /// );
     /// ```
-    pub fn move_is_valid_promotion(
+    pub const fn move_is_valid_promotion(
         file_a_idx: usize,
         rank_a_idx: usize,
         file_b_idx: usize,
@@ -1576,114 +1592,133 @@ mod test {
 
     #[test]
     pub fn move_valid_for_same_file() {
-        let file_a: usize = 2;
-        let rank_a: usize = 0; // c1
-        let file_b: usize = 2;
-        let rank_b: usize = 1; // c2
+        {
+            let file_a: usize = 2;
+            let rank_a: usize = 0; // c1
+            let file_b: usize = 2;
+            let rank_b: usize = 1; // c2
 
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
 
-        let file_a: usize = 0;
-        let rank_a: usize = 6; // a7
-        let file_b: usize = 0;
-        let rank_b: usize = 7; // a8
+        {
+            let file_a: usize = 0;
+            let rank_a: usize = 6; // a7
+            let file_b: usize = 0;
+            let rank_b: usize = 7; // a8
 
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
     }
 
     #[test]
     pub fn move_valid_for_same_rank() {
-        let file_a: usize = 1;
-        let rank_a: usize = 0; // b1
-        let file_b: usize = 2;
-        let rank_b: usize = 0; // c1
+        {
+            let file_a: usize = 1;
+            let rank_a: usize = 0; // b1
+            let file_b: usize = 2;
+            let rank_b: usize = 0; // c1
 
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
+        {
+            let file_a: usize = 1;
+            let rank_a: usize = 5; // b6
+            let file_b: usize = 2;
+            let rank_b: usize = 5; // c6
 
-        let file_a: usize = 1;
-        let rank_a: usize = 5; // b6
-        let file_b: usize = 2;
-        let rank_b: usize = 5; // c6
-
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
     }
 
     #[test]
     pub fn move_valid_for_same_diagonal() {
-        let file_a: usize = 0;
-        let rank_a: usize = 0; // a1
-        let file_b: usize = 7;
-        let rank_b: usize = 7; // h8
+        {
+            let file_a: usize = 0;
+            let rank_a: usize = 0; // a1
+            let file_b: usize = 7;
+            let rank_b: usize = 7; // h8
 
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
+        {
+            let file_a: usize = 1;
+            let rank_a: usize = 4; // b5
+            let file_b: usize = 0;
+            let rank_b: usize = 5; // a6
 
-        let file_a: usize = 1;
-        let rank_a: usize = 4; // b5
-        let file_b: usize = 0;
-        let rank_b: usize = 5; // a6
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
+        {
+            let file_a: usize = 1;
+            let rank_a: usize = 4; // b5
+            let file_b: usize = 2;
+            let rank_b: usize = 6; // a6
 
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
-
-        let file_a: usize = 1;
-        let rank_a: usize = 4; // b5
-        let file_b: usize = 2;
-        let rank_b: usize = 6; // a6
-
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
     }
 
     #[test]
     pub fn move_valid_for_knight_move() {
-        let file_a: usize = 0;
-        let rank_a: usize = 0; // a1
-        let file_b: usize = 1;
-        let rank_b: usize = 2; // b3
+        {
+            let file_a: usize = 0;
+            let rank_a: usize = 0; // a1
+            let file_b: usize = 1;
+            let rank_b: usize = 2; // b3
 
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
+        {
+            let file_a: usize = 7;
+            let rank_a: usize = 4; // h5
+            let file_b: usize = 5;
+            let rank_b: usize = 5; // f6
 
-        let file_a: usize = 7;
-        let rank_a: usize = 4; // h5
-        let file_b: usize = 5;
-        let rank_b: usize = 5; // f6
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
+        {
+            let file_a: usize = 4;
+            let rank_a: usize = 3; // e4
+            let file_b: usize = 3;
+            let rank_b: usize = 1; // d2
 
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
-
-        let file_a: usize = 4;
-        let rank_a: usize = 3; // e4
-        let file_b: usize = 3;
-        let rank_b: usize = 1; // d2
-
-        assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+            assert!(MoveGenerator::move_is_valid(file_a, rank_a, file_b, rank_b));
+        }
     }
 
     #[test]
     pub fn move_is_invalid() {
-        let file_a: usize = 0;
-        let rank_a: usize = 0; // a1
-        let file_b: usize = 3;
-        let rank_b: usize = 6; // d7
+        {
+            let file_a: usize = 0;
+            let rank_a: usize = 0; // a1
+            let file_b: usize = 3;
+            let rank_b: usize = 6; // d7
 
-        assert!(!MoveGenerator::move_is_valid(
-            file_a, rank_a, file_b, rank_b
-        ));
+            assert!(!MoveGenerator::move_is_valid(
+                file_a, rank_a, file_b, rank_b
+            ));
+        }
+        {
+            let file_a: usize = 7;
+            let rank_a: usize = 7; // h8
+            let file_b: usize = 0;
+            let rank_b: usize = 3; // a4
 
-        let file_a: usize = 7;
-        let rank_a: usize = 7; // h8
-        let file_b: usize = 0;
-        let rank_b: usize = 3; // a4
+            assert!(!MoveGenerator::move_is_valid(
+                file_a, rank_a, file_b, rank_b
+            ));
+        }
+        {
+            let file_a: usize = 0;
+            let rank_a: usize = 7; // a8
+            let file_b: usize = 7;
+            let rank_b: usize = 3; // h4
 
-        assert!(!MoveGenerator::move_is_valid(
-            file_a, rank_a, file_b, rank_b
-        ));
-
-        let file_a: usize = 0;
-        let rank_a: usize = 7; // a8
-        let file_b: usize = 7;
-        let rank_b: usize = 3; // h4
-
-        assert!(!MoveGenerator::move_is_valid(
-            file_a, rank_a, file_b, rank_b
-        ));
+            assert!(!MoveGenerator::move_is_valid(
+                file_a, rank_a, file_b, rank_b
+            ));
+        }
     }
 
     //
@@ -1692,41 +1727,46 @@ mod test {
 
     #[test]
     pub fn move_is_valid_promotion() {
-        let file_a: usize = 0;
-        let rank_a: usize = 6; // a7
-        let file_b: usize = 0;
-        let rank_b: usize = 7; // a8
+        {
+            let file_a: usize = 0;
+            let rank_a: usize = 6; // a7
+            let file_b: usize = 0;
+            let rank_b: usize = 7; // a8
 
-        assert!(MoveGenerator::move_is_valid_promotion(
-            file_a, rank_a, file_b, rank_b
-        ));
+            assert!(MoveGenerator::move_is_valid_promotion(
+                file_a, rank_a, file_b, rank_b
+            ));
+        }
+        {
+            let file_a: usize = 3;
+            let rank_a: usize = 6; // d7
+            let file_b: usize = 2;
+            let rank_b: usize = 7; // c8
 
-        let file_a: usize = 3;
-        let rank_a: usize = 6; // d7
-        let file_b: usize = 2;
-        let rank_b: usize = 7; // c8
+            assert!(MoveGenerator::move_is_valid_promotion(
+                file_a, rank_a, file_b, rank_b
+            ));
+        }
+        {
+            let file_a: usize = 0;
+            let rank_a: usize = 1; // a2
+            let file_b: usize = 0;
+            let rank_b: usize = 0; // a1
 
-        assert!(MoveGenerator::move_is_valid_promotion(
-            file_a, rank_a, file_b, rank_b
-        ));
+            assert!(MoveGenerator::move_is_valid_promotion(
+                file_a, rank_a, file_b, rank_b
+            ));
+        }
+        {
+            let file_a: usize = 3;
+            let rank_a: usize = 1; // d2
+            let file_b: usize = 2;
+            let rank_b: usize = 0; // c1
 
-        let file_a: usize = 0;
-        let rank_a: usize = 1; // a2
-        let file_b: usize = 0;
-        let rank_b: usize = 0; // a1
-
-        assert!(MoveGenerator::move_is_valid_promotion(
-            file_a, rank_a, file_b, rank_b
-        ));
-
-        let file_a: usize = 3;
-        let rank_a: usize = 1; // d2
-        let file_b: usize = 2;
-        let rank_b: usize = 0; // c1
-
-        assert!(MoveGenerator::move_is_valid_promotion(
-            file_a, rank_a, file_b, rank_b
-        ));
+            assert!(MoveGenerator::move_is_valid_promotion(
+                file_a, rank_a, file_b, rank_b
+            ));
+        }
     }
 
     #[test]

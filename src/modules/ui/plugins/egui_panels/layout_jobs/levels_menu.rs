@@ -7,7 +7,6 @@ A layout job is the custom way to format [`RichText`].
 use super::{top_menu_text_format, top_menu_text_format_underline};
 use bevy_egui::egui::text::LayoutJob;
 
-/// top_menu_levels()
 /// "Levels"
 pub fn top_menu_levels() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -18,7 +17,6 @@ pub fn top_menu_levels() -> LayoutJob {
     job
 }
 
-/// top_menu_playing_strength()
 /// "Playing Strength..."
 pub fn top_menu_playing_strength() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -29,7 +27,6 @@ pub fn top_menu_playing_strength() -> LayoutJob {
     job
 }
 
-/// top_menu_blitz()
 /// "Blitz..."
 pub fn top_menu_blitz() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -41,7 +38,6 @@ pub fn top_menu_blitz() -> LayoutJob {
     job
 }
 
-/// top_menu_time_per_move()
 /// "Time Per Move..."
 pub fn top_menu_time_per_move() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -52,7 +48,6 @@ pub fn top_menu_time_per_move() -> LayoutJob {
     job
 }
 
-/// top_menu_time_controls()
 /// "Time Controls..."
 pub fn top_menu_time_controls() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -64,7 +59,6 @@ pub fn top_menu_time_controls() -> LayoutJob {
     job
 }
 
-/// top_menu_fixed_search_depth()
 /// "Fixed Search Depth..."
 pub fn top_menu_fixed_search_depth() -> LayoutJob {
     let mut job = LayoutJob::default();

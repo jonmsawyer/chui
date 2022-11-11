@@ -1,22 +1,25 @@
+//! Copy module.
+
 use super::layout_jobs;
 
 use bevy_egui::egui::{self, InnerResponse, Ui};
 
+/// Copy menu.
 pub fn copy(ui: &mut Ui) -> InnerResponse<Option<()>> {
     // Commands > Copy
-    egui::menu::menu_button(ui, layout_jobs::top_menu_copy(), |ui| {
+    egui::menu::menu_button(ui, layout_jobs::top_menu_copy(), |ui_egui| {
         // Commands > Copy > Game (PGN)
-        if ui.button(layout_jobs::top_menu_copy_pgn()).clicked() {
+        if ui_egui.button(layout_jobs::top_menu_copy_pgn()).clicked() {
             println!("Copy Game (PGN) was clicked");
         }
 
         // Commands > Copy > Position (EPD)
-        if ui.button(layout_jobs::top_menu_copy_epd()).clicked() {
+        if ui_egui.button(layout_jobs::top_menu_copy_epd()).clicked() {
             println!("Copy Position (EPD) was clicked");
         }
 
         // Commands > Copy > Analysis Window
-        if ui
+        if ui_egui
             .button(layout_jobs::top_menu_copy_analysis_window())
             .clicked()
         {
@@ -24,7 +27,7 @@ pub fn copy(ui: &mut Ui) -> InnerResponse<Option<()>> {
         }
 
         // Commands > Copy > Last Analysis
-        if ui
+        if ui_egui
             .button(layout_jobs::top_menu_copy_last_analysis())
             .clicked()
         {
@@ -32,7 +35,10 @@ pub fn copy(ui: &mut Ui) -> InnerResponse<Option<()>> {
         }
 
         // Commands > Copy > Notation
-        if ui.button(layout_jobs::top_menu_copy_notation()).clicked() {
+        if ui_egui
+            .button(layout_jobs::top_menu_copy_notation())
+            .clicked()
+        {
             println!("Copy Notation was clicked");
         }
     })

@@ -7,7 +7,6 @@ A layout job is the custom way to format [`RichText`].
 use super::{top_menu_text_format, top_menu_text_format_underline};
 use bevy_egui::egui::text::LayoutJob;
 
-/// top_menu_file()
 /// "File"
 pub fn top_menu_file() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -18,7 +17,6 @@ pub fn top_menu_file() -> LayoutJob {
     job
 }
 
-/// top_menu_new_game()
 /// "New Game..."
 pub fn top_menu_new_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -29,7 +27,6 @@ pub fn top_menu_new_game() -> LayoutJob {
     job
 }
 
-/// top_menu_new_chess960_game()
 /// "New Chess960 Game..."
 pub fn top_menu_new_chess960_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -41,7 +38,6 @@ pub fn top_menu_new_chess960_game() -> LayoutJob {
     job
 }
 
-/// top_menu_load_game()
 /// "Load Game..."
 pub fn top_menu_load_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -52,7 +48,6 @@ pub fn top_menu_load_game() -> LayoutJob {
     job
 }
 
-/// top_menu_save_game()
 /// "Save Game..."
 pub fn top_menu_save_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -63,7 +58,6 @@ pub fn top_menu_save_game() -> LayoutJob {
     job
 }
 
-/// top_menu_delete_game()
 /// "Delete Game..."
 pub fn top_menu_delete_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -74,7 +68,6 @@ pub fn top_menu_delete_game() -> LayoutJob {
     job
 }
 
-/// top_menu_load_position()
 /// "Load Position..."
 pub fn top_menu_load_position() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -86,7 +79,6 @@ pub fn top_menu_load_position() -> LayoutJob {
     job
 }
 
-/// top_menu_save_position()
 /// "Save Position..."
 pub fn top_menu_save_position() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -98,7 +90,6 @@ pub fn top_menu_save_position() -> LayoutJob {
     job
 }
 
-/// top_menu_recent_files()
 /// "Recent Files..."
 pub fn top_menu_recent_files() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -109,7 +100,6 @@ pub fn top_menu_recent_files() -> LayoutJob {
     job
 }
 
-/// top_menu_edit_position()
 /// "Edit Position..."
 pub fn top_menu_edit_position() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -120,7 +110,6 @@ pub fn top_menu_edit_position() -> LayoutJob {
     job
 }
 
-/// top_menu_print_game()
 /// "Print Game..."
 pub fn top_menu_print_game() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -130,7 +119,7 @@ pub fn top_menu_print_game() -> LayoutJob {
 
     job
 }
-/// top_menu_exit()
+
 /// "Exit"
 pub fn top_menu_exit() -> LayoutJob {
     let mut job = LayoutJob::default();

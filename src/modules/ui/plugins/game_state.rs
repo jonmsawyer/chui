@@ -3,6 +3,7 @@
 use super::super::states::GameState;
 use bevy::prelude::*;
 
+/// Game state Bevy plugin.
 pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {

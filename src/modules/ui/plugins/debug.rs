@@ -5,66 +5,70 @@ use bevy_egui::egui::Ui;
 
 use super::super::resources::{FpsResource, UiResource};
 
+/// Render the egui debug panel.
 pub fn debug_panel(
     mut ui_state: ResMut<UiResource>,
     mut fps: Local<FpsResource<25>>,
     time: Res<Time>,
     ui: &mut Ui,
 ) {
-    if ui_state.debug_window {
-        ui.heading("Debug");
-
-        fps.add(time.delta_seconds());
-
-        if fps.average > f32::EPSILON {
-            ui.label(format!("FPS: {:.2}", fps.average));
-        }
-        ui.label(format!(
-            "Mouse Cursor Screen Coords: {}, {}",
-            ui_state.mouse_cursor_screen_coords[0] as i32,
-            ui_state.mouse_cursor_screen_coords[1] as i32
-        ));
-        ui.label(format!(
-            "Mouse Cursor World Coords: {}, {}",
-            ui_state.mouse_cursor_world_coords[0] as i32,
-            ui_state.mouse_cursor_world_coords[1] as i32
-        ));
-        ui.label(format!(
-            "Mouse Click Board Coords: {}, {}",
-            ui_state.mouse_click_board_coords[0] as i32,
-            ui_state.mouse_click_board_coords[1] as i32
-        ));
-        ui.label(format!(
-            "Mouse Click Algebraic Coords: {}{}",
-            ui_state.mouse_click_algebraic_coords.0, ui_state.mouse_click_algebraic_coords.1
-        ));
-        ui.label(format!(
-            "Mouse Click From Square: {}, {}",
-            ui_state.mouse_click_from_square[0], ui_state.mouse_click_from_square[1]
-        ));
-        ui.label(format!(
-            "Mouse Click From Square Clicked: {}",
-            ui_state.mouse_click_from_square_clicked
-        ));
-        ui.label(format!(
-            "Mouse Click To Square: {}, {}",
-            ui_state.mouse_click_to_square[0], ui_state.mouse_click_to_square[1]
-        ));
-        ui.label(format!(
-            "Mouse Click To Square Clicked: {}",
-            ui_state.mouse_click_to_square_clicked
-        ));
-        if ui_state.show_mouse_cursor {
-            ui.vertical_centered_justified(|options_ui| {
-                options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Hide Mouse Cursor");
-            });
-        } else {
-            ui.vertical_centered_justified(|options_ui| {
-                options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Show Mouse Cursor");
-            });
-        }
-        ui.separator();
+    if !ui_state.debug_window {
+        return;
     }
+    ui.heading("Debug");
+
+    fps.add(time.delta_seconds());
+
+    if fps.average > f32::EPSILON {
+        ui.label(format!("FPS: {:.2}", fps.average));
+    }
+    ui.label(format!(
+        "Mouse Cursor Screen Coords: {}, {}",
+        ui_state.mouse_cursor_screen_coords[0] as i32,
+        ui_state.mouse_cursor_screen_coords[1] as i32
+    ));
+    ui.label(format!(
+        "Mouse Cursor World Coords: {}, {}",
+        ui_state.mouse_cursor_world_coords[0] as i32, ui_state.mouse_cursor_world_coords[1] as i32
+    ));
+    ui.label(format!(
+        "Mouse Click Board Coords: {}, {}",
+        ui_state.mouse_click_board_coords[0] as i32, ui_state.mouse_click_board_coords[1] as i32
+    ));
+    ui.label(format!(
+        "Mouse Click Algebraic Coords: {}{}",
+        ui_state.mouse_click_algebraic_coords.0, ui_state.mouse_click_algebraic_coords.1
+    ));
+    ui.label(format!(
+        "Mouse Click From Square: {}, {}",
+        ui_state.mouse_click_from_square[0], ui_state.mouse_click_from_square[1]
+    ));
+    ui.label(format!(
+        "Mouse Click From Square Clicked: {}",
+        ui_state.mouse_click_from_square_clicked
+    ));
+    ui.label(format!(
+        "Mouse Click To Square: {}, {}",
+        ui_state.mouse_click_to_square[0], ui_state.mouse_click_to_square[1]
+    ));
+    ui.label(format!(
+        "Mouse Click To Square Clicked: {}",
+        ui_state.mouse_click_to_square_clicked
+    ));
+    ui.label(format!(
+        "Move Represenation: {}",
+        ui_state.move_representation
+    ));
+    if ui_state.show_mouse_cursor {
+        ui.vertical_centered_justified(|options_ui| {
+            options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Hide Mouse Cursor");
+        });
+    } else {
+        ui.vertical_centered_justified(|options_ui| {
+            options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Show Mouse Cursor");
+        });
+    }
+    ui.separator();
 }
 
 // fn _debug_window(

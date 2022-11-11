@@ -7,7 +7,6 @@ A layout job is the custom way to format [`RichText`].
 use super::{top_menu_text_format, top_menu_text_format_underline};
 use bevy_egui::egui::text::LayoutJob;
 
-/// top_menu_design()
 /// "Design"
 pub fn top_menu_design() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -18,7 +17,6 @@ pub fn top_menu_design() -> LayoutJob {
     job
 }
 
-/// top_menu_default()
 /// "Default"
 pub fn top_menu_default() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -29,7 +27,6 @@ pub fn top_menu_default() -> LayoutJob {
     job
 }
 
-/// top_menu_change_design()
 /// "Change Design"
 pub fn top_menu_change_design() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -40,7 +37,6 @@ pub fn top_menu_change_design() -> LayoutJob {
     job
 }
 
-/// top_menu_load_design()
 /// "Load Design"
 pub fn top_menu_load_design() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -51,7 +47,6 @@ pub fn top_menu_load_design() -> LayoutJob {
     job
 }
 
-/// top_menu_save_design()
 /// "Save Design"
 pub fn top_menu_save_design() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -62,7 +57,6 @@ pub fn top_menu_save_design() -> LayoutJob {
     job
 }
 
-/// top_menu_background()
 /// "Background..."
 pub fn top_menu_background() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -72,7 +66,6 @@ pub fn top_menu_background() -> LayoutJob {
     job
 }
 
-/// top_menu_colors()
 /// "Colors..."
 pub fn top_menu_colors() -> LayoutJob {
     let mut job = LayoutJob::default();
@@ -83,7 +76,6 @@ pub fn top_menu_colors() -> LayoutJob {
     job
 }
 
-/// top_menu_window_title_bars()
 /// "Window Title Bars"
 pub fn top_menu_window_title_bars() -> LayoutJob {
     let mut job = LayoutJob::default();

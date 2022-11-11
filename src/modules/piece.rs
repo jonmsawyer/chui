@@ -11,9 +11,12 @@ use super::{Board, Move};
 use crate::{ChuiError, ChuiResult};
 
 /// Piece color. Either `White` or `Black` variants.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Color {
+    /// Player color White.
     White,
+
+    /// Player color Black.
     Black,
 }
 
@@ -32,13 +35,24 @@ impl fmt::Display for Color {
 
 /// Piece kind. One of `King`, `Queen`, `Rook`, `Knight`,
 /// `Bishop`, `Knight`, `Pawn`.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PieceKind {
+    /// The King.
     King,
+
+    /// The Queen.
     Queen,
+
+    /// A Rook.
     Rook,
+
+    /// A Bishop.
     Bishop,
+
+    /// A Knight.
     Knight,
+
+    /// A Pawn.
     Pawn,
 }
 
@@ -56,7 +70,7 @@ pub enum PieceKind {
 /// println!("{}: {:?}", white_pawn.get_text(), white_pawn);
 /// println!("{}: {:?}", black_queen.get_text(), black_queen);
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Component)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Component)]
 pub struct Piece {
     /// The kind of piece.
     piece: PieceKind,
@@ -76,7 +90,8 @@ impl Piece {
     // Constructors.
     //
 
-    pub fn new(piece: PieceKind, color: Color) -> Piece {
+    /// Return a new Piece given a `PieceKind` and a `Color`.
+    pub const fn new(piece: PieceKind, color: Color) -> Piece {
         let sprite_index = match (piece, color) {
             (PieceKind::King, Color::White) => 7,
             (PieceKind::Queen, Color::White) => 6,
@@ -105,22 +120,22 @@ impl Piece {
     //
 
     /// Get the kind of the piece.
-    pub fn get_piece(&self) -> PieceKind {
+    pub const fn get_piece(&self) -> PieceKind {
         self.piece
     }
 
     /// Get the color of the piece.
-    pub fn get_color(&self) -> Color {
+    pub const fn get_color(&self) -> Color {
         self.color
     }
 
     /// Get the coordinates of the piece.
-    pub fn get_coords(&self) -> (usize, usize) {
+    pub const fn get_coords(&self) -> (usize, usize) {
         self.coords
     }
 
     /// Get the sprite index of the piece.
-    pub fn get_sprite_index(&self) -> usize {
+    pub const fn get_sprite_index(&self) -> usize {
         self.sprite_index
     }
 
@@ -140,7 +155,7 @@ impl Piece {
 
     /// Set the piece coordinates.
     pub fn set_coords(&mut self, file_idx: usize, rank_idx: usize) {
-        self.coords = (file_idx, rank_idx)
+        self.coords = (file_idx, rank_idx);
     }
 
     /// Get the rendered `String` representation of the piece.
@@ -156,56 +171,45 @@ impl Piece {
         current_move: &Option<Move>,
     ) -> Vec<(usize, usize)> {
         let (file_idx, rank_idx) = self.coords;
-        let move_coord = self.get_file_rank_from_coords(&self.coords);
+        let move_coord = Piece::get_file_rank_from_coords(&self.coords);
 
         println!("Found {} at {}{}", self, move_coord.0, move_coord.1);
 
-        let move_coords;
+        let move_coords = match self.piece {
+            PieceKind::King => board.get_king_move_coords(file_idx, rank_idx, current_move),
 
-        match self.piece {
-            PieceKind::King => {
-                move_coords = board.get_king_move_coords(file_idx, rank_idx, current_move);
-            }
+            PieceKind::Queen => board.get_queen_move_coords(file_idx, rank_idx, current_move),
 
-            PieceKind::Queen => {
-                move_coords = board.get_queen_move_coords(file_idx, rank_idx, current_move);
-            }
+            PieceKind::Rook => board.get_rook_move_coords(file_idx, rank_idx, current_move),
 
-            PieceKind::Rook => {
-                move_coords = board.get_rook_move_coords(file_idx, rank_idx, current_move);
-            }
+            PieceKind::Bishop => board.get_bishop_move_coords(file_idx, rank_idx, current_move),
 
-            PieceKind::Bishop => {
-                move_coords = board.get_bishop_move_coords(file_idx, rank_idx, current_move);
-            }
+            PieceKind::Knight => board.get_knight_move_coords(file_idx, rank_idx),
 
-            PieceKind::Knight => {
-                move_coords = board.get_knight_move_coords(file_idx, rank_idx);
-            }
-
-            PieceKind::Pawn => {
-                move_coords = board.get_pawn_move_coords(file_idx, rank_idx, self.color);
-            }
-        }
+            PieceKind::Pawn => board.get_pawn_move_coords(file_idx, rank_idx, self.color),
+        };
 
         print!(" > Move coords: ");
-        for move_coord in move_coords.iter() {
-            let move_coord = self.get_file_rank_from_coords(&move_coord);
-            print!("{}{}, ", move_coord.0, move_coord.1)
+        for coord in move_coords.iter() {
+            let move_coordinate = Piece::get_file_rank_from_coords(coord);
+            print!("{}{}, ", move_coordinate.0, move_coordinate.1);
         }
         println!();
 
         move_coords
     }
 
-    pub fn get_file_rank_from_coords(self, move_coord: &(usize, usize)) -> (char, usize) {
+    /// Get the file and rank from board coordinates.
+    pub fn get_file_rank_from_coords(move_coord: &(usize, usize)) -> (char, usize) {
         let alpha_coords: Vec<char> = ('a'..='h').collect();
         let (file_idx, rank_idx) = move_coord;
 
         (alpha_coords[*file_idx], rank_idx + 1)
     }
 
-    pub fn repr(&self) -> (ColoredString, ColoredString) {
+    /// Return a colored string containing the alpha representation of a piece
+    /// and a UTF-8 representation of a piece.
+    pub fn repr_colored(&self) -> (ColoredString, ColoredString) {
         match (self.piece, self.color) {
             (PieceKind::King, Color::White) => ("K".yellow().bold(), "♔".yellow().bold()),
             (PieceKind::Queen, Color::White) => ("Q".yellow().bold(), "♕".yellow().bold()),
@@ -221,6 +225,25 @@ impl Piece {
             (PieceKind::Pawn, Color::Black) => ("p".magenta().bold(), "♟".magenta().bold()),
         }
     }
+
+    /// Return a string containing the alpha representation of a piece
+    /// and a UTF-8 representation of a piece.
+    pub fn repr(&self) -> (String, String) {
+        match (self.piece, self.color) {
+            (PieceKind::King, Color::White) => ("K".to_string(), "♔".to_string()),
+            (PieceKind::Queen, Color::White) => ("Q".to_string(), "♕".to_string()),
+            (PieceKind::Rook, Color::White) => ("R".to_string(), "♖".to_string()),
+            (PieceKind::Bishop, Color::White) => ("B".to_string(), "♗".to_string()),
+            (PieceKind::Knight, Color::White) => ("N".to_string(), "♘".to_string()),
+            (PieceKind::Pawn, Color::White) => ("P".to_string(), "♙".to_string()),
+            (PieceKind::King, Color::Black) => ("k".to_string(), "♚".to_string()),
+            (PieceKind::Queen, Color::Black) => ("q".to_string(), "♛".to_string()),
+            (PieceKind::Rook, Color::Black) => ("r".to_string(), "♜".to_string()),
+            (PieceKind::Bishop, Color::Black) => ("b".to_string(), "♝".to_string()),
+            (PieceKind::Knight, Color::Black) => ("n".to_string(), "♞".to_string()),
+            (PieceKind::Pawn, Color::Black) => ("p".to_string(), "♟".to_string()),
+        }
+    }
 }
 
 /// Returns a UTF-8, colored, string containing the string
@@ -234,7 +257,7 @@ impl fmt::Display for Piece {
     }
 }
 
-/// Returns a `Piece` given a `&str` if `&str` is one of \[PKQRBNpkqrbn\].
+/// Returns a `Piece` given a `&str` if `&str` is one of `[PKQRBNpkqrbn]`.
 impl TryFrom<&str> for Piece {
     type Error = ChuiError;
 
@@ -261,7 +284,7 @@ impl TryFrom<&str> for Piece {
     }
 }
 
-/// Returns a `Piece` given a `char` if `char` is one of \[PKQRBNpkqrbn\].
+/// Returns a `Piece` given a `char` if `char` is one of `[PKQRBNpkqrbn]`.
 impl TryFrom<char> for Piece {
     type Error = ChuiError;
 

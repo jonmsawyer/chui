@@ -1,3 +1,5 @@
+//! Top Menu module.
+
 use bevy::prelude::{EventWriter, ResMut};
 use bevy_egui::{egui, EguiContext};
 
@@ -45,26 +47,27 @@ pub use help::help;
 
 pub use super::layout_jobs;
 
+/// Generate the top menu using egui.
 pub fn top_menu(
     egui_ctx: &mut ResMut<EguiContext>,
     ui_state: &mut ResMut<UiResource>,
     resize_board_event: &mut EventWriter<ResizeBoardEvent>,
 ) {
     egui::TopBottomPanel::top("menu").show(egui_ctx.ctx_mut(), |ui| {
-        egui::menu::bar(ui, |ui| {
-            file(ui);
-            commands(ui, ui_state, resize_board_event);
-            copy(ui);
-            levels(ui);
-            mode(ui);
-            training(ui);
-            cpu_vs_cpu(ui);
-            engines(ui);
-            opening_book(ui);
-            extras(ui);
-            windows(ui);
-            design(ui);
-            help(ui);
+        egui::menu::bar(ui, |ui_egui| {
+            file(ui_egui);
+            commands(ui_egui, ui_state, resize_board_event);
+            copy(ui_egui);
+            levels(ui_egui);
+            mode(ui_egui);
+            training(ui_egui);
+            cpu_vs_cpu(ui_egui);
+            engines(ui_egui);
+            opening_book(ui_egui);
+            extras(ui_egui);
+            windows(ui_egui);
+            design(ui_egui);
+            help(ui_egui);
         });
     });
 }

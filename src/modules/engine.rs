@@ -17,15 +17,20 @@ mod commands;
 mod fen;
 
 /// The win condition.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WinCondition {
+    /// Checkmate.
     Checkmate,
+
+    /// White resigns.
     WhiteResigns,
+
+    /// Black resigns.
     BlackResigns,
 }
 
 /// The draw condition.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DrawCondition {
     /// Both players agree to a draw.
     AgreeToDraw,
@@ -85,6 +90,7 @@ pub struct Engine {
     /// an `Option<Piece>`.
     pub board: Board,
 
+    /// A vec containing the pieces that have been captured.
     pub captured_pieces: Vec<Piece>,
 
     /// Represents the current move parser.
@@ -146,12 +152,16 @@ pub struct Engine {
     */
     pub move_list: Vec<Move>,
 
+    /// The current move.
     pub current_move: Option<Move>,
 
+    /// The win condition.
     pub win_condition: Option<WinCondition>,
 
+    /// The draw condition.
     pub draw_condition: Option<DrawCondition>,
 
+    /// Display the chessboard for a particular `Color`.
     pub display_for: Option<Color>,
 }
 
@@ -161,10 +171,7 @@ impl Default for Engine {
 
         let black = Player::new(Color::Black, Some("Klaes Ashford"), Some(72), Some(1500));
 
-        let engine = Engine::new(white, black, ParserEngine::Algebraic)
-            .expect("Failed to initialize engine");
-
-        engine
+        Engine::new(white, black, ParserEngine::Algebraic).expect("Failed to initialize engine")
     }
 }
 
@@ -178,6 +185,11 @@ impl fmt::Display for Engine {
 impl Engine {
     /// Return a new instance of `Ok<Engine>` given a white
     /// `Player` and a black `Player`.
+    ///
+    /// # Errors
+    ///
+    /// * Returns a `ChuiError` when the engine was initialized with incompatible
+    ///   sides.
     pub fn new(
         player_1: Player,
         player_2: Player,
@@ -189,16 +201,11 @@ impl Engine {
             ));
         }
 
-        let white;
-        let black;
-
-        if player_1.color == Color::White {
-            white = player_1;
-            black = player_2;
+        let (white, black) = if player_1.color == Color::White {
+            (player_1, player_2)
         } else {
-            white = player_2;
-            black = player_1;
-        }
+            (player_2, player_1)
+        };
 
         Ok(Engine {
             white,
@@ -229,8 +236,12 @@ impl Engine {
     }
 
     /// Run the engine.
+    ///
+    /// # Errors
+    ///
+    /// * Errors when...
     pub fn run(&mut self) -> ChuiResult<()> {
-        let mut command = Command::new(&self);
+        let mut command = Command::new(self);
         let context = CommandContext::Main;
         let mut break_loop = false;
         let mut display_board = true;
@@ -244,10 +255,10 @@ impl Engine {
             println!();
             println!("Please input move(s) or command. (q to quit, h for help)");
 
-            let the_move = Engine::get_input();
+            let move_input = Engine::get_input();
 
-            for the_move in the_move.split_whitespace() {
-                let the_move = String::from(the_move);
+            for move_str in move_input.split_whitespace() {
+                let the_move = String::from(move_str);
                 let command_move = the_move.clone();
                 match command.process_command(context, command_move) {
                     Some(CommandKind::Quit) => {
@@ -262,7 +273,7 @@ impl Engine {
 
                     Some(CommandKind::SwitchParser) => {
                         self.switch_parser(&command);
-                        command.rebuild_commands(&self);
+                        command.rebuild_commands(self);
                         continue;
                     }
 
@@ -329,14 +340,14 @@ impl Engine {
 
                         println!();
 
-                        for (move_idx, move_str) in self.move_list.iter().enumerate() {
-                            let mut numeral = String::new();
+                        for (move_idx, move_obj) in self.move_list.iter().enumerate() {
+                            let numeral = if move_idx % 2 == 0 {
+                                format!("\n{}. ", (move_idx + 2) / 2)
+                            } else {
+                                String::new()
+                            };
 
-                            if move_idx % 2 == 0 {
-                                numeral = format!("\n{}. ", (move_idx + 2) / 2);
-                            }
-
-                            output = format!("{}{}{} ", output, numeral, move_str);
+                            output = format!("{}{}{} ", output, numeral, move_obj);
                         }
 
                         if self.move_list.is_empty() {
@@ -405,11 +416,15 @@ impl Engine {
 
     /// Switch the current move parser based on a `CommandKind`.
     pub fn switch_parser(&mut self, command: &Command) {
-        commands::switch_parser(self, command)
+        commands::switch_parser(self, command);
     }
 
     /// Parse the move. Returns an Ok(Move) if the parsing of the
     /// move is successful, otherwise a `ChuiError` will result.
+    ///
+    /// # Errors
+    ///
+    /// * Errors when the parser cannot parse the move.
     pub fn parse(&mut self, the_move: String, to_move: Color) -> ChuiResult<Move> {
         self.parser.parse(the_move, to_move)
     }
@@ -529,7 +544,7 @@ impl Engine {
         output = format!(
             "{} {}",
             output,
-            format!("  {} ║\n╚═════════════════════════╝", self.to_move)
+            format_args!("  {} ║\n╚═════════════════════════╝", self.to_move)
         );
 
         let output = output.trim();
@@ -555,16 +570,23 @@ impl Engine {
 
     /// Display the chessboard for whomever's turn it is.
     pub fn to_move_to_string(&self) -> String {
-        if let Some(display_for) = self.display_for {
-            self.to_string(display_for)
-        } else if self.to_move == Color::White {
-            self.to_string(Color::White)
-        } else {
-            self.to_string(Color::Black)
-        }
+        self.display_for.map_or_else(
+            || {
+                if self.to_move == Color::White {
+                    self.to_string(Color::White)
+                } else {
+                    self.to_string(Color::Black)
+                }
+            },
+            |display_for| self.to_string(display_for),
+        )
     }
 
     /// Apply the move.
+    ///
+    /// # Errors
+    ///
+    /// * Errors if the piece we're moving is `None`.
     pub fn apply_move(&mut self) -> ChuiResult<()> {
         let apply = self.board.apply_move(&self.current_move);
 

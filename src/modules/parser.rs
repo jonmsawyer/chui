@@ -6,7 +6,7 @@
 
 use std::fmt;
 
-use super::{Color, Move};
+use super::{Color, Engine, Move};
 use crate::{ChuiError, ChuiResult};
 
 pub mod algebraic;
@@ -57,6 +57,10 @@ pub mod smith;
 pub trait Parser: Send + Sync {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
+    ///
+    /// # Errors
+    ///
+    /// * Errors when the parser cannot parse a move.
     fn parse(&mut self, the_move: String, to_move: Color) -> ChuiResult<Move>;
 
     /// The name of the parser. Used in help messages and debug.
@@ -65,8 +69,25 @@ pub trait Parser: Send + Sync {
     /// Example inputs.
     fn eg(&self) -> String;
 
+    /// Generate move from board coordinates into this parser's notation.
+    ///
+    /// # Errors
+    ///
+    /// * Errors when the parser cannot generate a move from the board coordinates.
+    fn generate_move_from_board_coordinates(
+        &self,
+        engine: &Engine,
+        from_index: (usize, usize),
+        to_index: (usize, usize),
+    ) -> ChuiResult<String>;
+
     /// Trim the whitespace from `the_move` and check to see that
     /// the move doesn't contain any whitespace after the trim.
+    ///
+    /// # Errors
+    ///
+    /// * Errors when the input move is empty.
+    /// * Errors when the input move contains whitespace.
     fn trim_and_check_whitespace(&self, the_move: String) -> ChuiResult<String> {
         let the_move = the_move.trim().to_string();
 
@@ -75,7 +96,7 @@ pub trait Parser: Send + Sync {
         }
 
         if the_move.contains(char::is_whitespace) {
-            self.invalid_input("Input move contains whitespace")?
+            self.invalid_input("Input move contains whitespace")?;
         }
 
         Ok(the_move)
@@ -111,6 +132,41 @@ pub trait Parser: Send + Sync {
         }
     }
 
+    /// Match the given index (`u8`) to its file (`char`).
+    fn match_index_to_file(&self, index: u8) -> Option<char> {
+        match index {
+            0 => Some('a'),
+            1 => Some('b'),
+            2 => Some('c'),
+            3 => Some('d'),
+            4 => Some('e'),
+            5 => Some('f'),
+            6 => Some('g'),
+            7 => Some('h'),
+            _ => None,
+        }
+    }
+
+    /// Match the given index (`u8`) to its rank (`char`).
+    fn match_index_to_rank(&self, index: u8) -> Option<char> {
+        match index {
+            0 => Some('1'),
+            1 => Some('2'),
+            2 => Some('3'),
+            3 => Some('4'),
+            4 => Some('5'),
+            5 => Some('6'),
+            6 => Some('7'),
+            7 => Some('8'),
+            _ => None,
+        }
+    }
+
+    /// Return a `ChuiError` indicating Invalid Input.
+    ///
+    /// # Errors
+    ///
+    /// * Errors all the time.
     fn invalid_input(&self, reason: &str) -> ChuiResult<()> {
         Err(ChuiError::InvalidInput(reason.to_string()))
     }
@@ -124,7 +180,7 @@ impl fmt::Debug for dyn Parser + Send + Sync {
 
 /// Represents the different available supported parser engines for
 /// chess moves.
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum ParserEngine {
     /// This engine variant helps to return an `AlgebraicParser`, which
     /// parses moves in algebraic notation.
