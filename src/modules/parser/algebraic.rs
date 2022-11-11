@@ -254,7 +254,7 @@ impl<'a> AlgebraicParser<'a> {
 
     /// In algebraic notation, there's no differentiation between
     /// white and black pieces. Try to obtain a piece from this token
-    /// which should end up being a white piece. During processing,
+    /// which should end up being a `White` piece. During processing,
     /// the color of the piece will be ignored. If the token begins
     /// with a castling move, the piece is a `King`. If no piece matches
     /// then the move is presumably a `Pawn` move.

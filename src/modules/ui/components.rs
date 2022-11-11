@@ -32,3 +32,7 @@ pub struct Square {
     /// on the chessboard).
     pub index: usize,
 }
+
+/// Component representing the board background.
+#[derive(Component)]
+pub struct BoardBackground;

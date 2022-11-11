@@ -9,6 +9,9 @@ pub const START_Y_COORD: f32 = 4.0;
 /// The size of the sprite in x*y dimentions (square).
 pub const SPRITE_WIDTH: f32 = 256.0;
 
+/// Board background sprite width.
+pub const BOARD_BACKGROUND_SPRITE_WIDTH: f32 = 1518.0;
+
 /// The width of the Information egui panel.
 pub const INFO_PANEL_WIDTH: f32 = 300.0;
 

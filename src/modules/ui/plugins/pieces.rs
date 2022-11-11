@@ -18,18 +18,19 @@ fn init_pieces(
     ui_state: Res<UiResource>,
     engine: Res<Engine>,
 ) {
-    let (scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
-    let (mut x, mut y, mut row) = (start_x, start_y, 0.);
+    let (scale, _, _) = compute_coords(ui_state.square_pixels);
 
     engine
         .board
         .get_board()
         .iter()
         .enumerate()
-        .for_each(|(x_idx, rank)| {
-            rank.iter().enumerate().for_each(|(y_idx, piece)| {
-                let idx = (x_idx * 8) + y_idx;
+        .for_each(|(_, rank)| {
+            rank.iter().enumerate().for_each(|(_, piece)| {
                 if let Some(piece) = piece {
+                    let (x, y) = piece.get_coords();
+                    let x = (x as f32 + START_X_COORD) * ui_state.square_pixels;
+                    let y = (y as f32 - START_Y_COORD) * ui_state.square_pixels;
                     commands
                         .spawn_bundle(SpriteSheetBundle {
                             transform: Transform {
@@ -51,15 +52,6 @@ fn init_pieces(
                             ..Default::default()
                         })
                         .insert(*piece);
-                }
-
-                x += ui_state.square_pixels;
-
-                if (idx + 1) % 8 == 0 {
-                    // 8 squares per row
-                    row += 1.0_f32;
-                    x = start_x;
-                    y = start_y - (row * ui_state.square_pixels);
                 }
             });
         });

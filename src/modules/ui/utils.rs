@@ -14,8 +14,17 @@ pub fn transform_from_square(
     mut visibility: &mut Visibility,
 ) {
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
-    let x = (ui_state.mouse_click_from_square[0] - 4_f32) * ui_state.square_pixels;
-    let y = (ui_state.mouse_click_from_square[1] - 4_f32) * ui_state.square_pixels;
+    let (x, y) = if ui_state.draw_for_white {
+        (
+            (ui_state.mouse_click_from_square[0] - START_Y_COORD) * ui_state.square_pixels,
+            (ui_state.mouse_click_from_square[1] - START_Y_COORD) * ui_state.square_pixels,
+        )
+    } else {
+        (
+            (7_f32 - ui_state.mouse_click_from_square[0] - START_Y_COORD) * ui_state.square_pixels,
+            (7_f32 - ui_state.mouse_click_from_square[1] - START_Y_COORD) * ui_state.square_pixels,
+        )
+    };
     transform.translation = Vec3::new(x, y, 0.15);
     transform.scale = Vec3::new(scale, scale, 0.);
     visibility.is_visible = true;
@@ -28,8 +37,17 @@ pub fn transform_to_square(
     mut visibility: &mut Visibility,
 ) {
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
-    let x = (ui_state.mouse_click_to_square[0] - 4_f32) * ui_state.square_pixels;
-    let y = (ui_state.mouse_click_to_square[1] - 4_f32) * ui_state.square_pixels;
+    let (x, y) = if ui_state.draw_for_white {
+        (
+            (ui_state.mouse_click_to_square[0] - START_Y_COORD) * ui_state.square_pixels,
+            (ui_state.mouse_click_to_square[1] - START_Y_COORD) * ui_state.square_pixels,
+        )
+    } else {
+        (
+            (7_f32 - ui_state.mouse_click_to_square[0] - START_Y_COORD) * ui_state.square_pixels,
+            (7_f32 - ui_state.mouse_click_to_square[1] - START_Y_COORD) * ui_state.square_pixels,
+        )
+    };
     transform.translation = Vec3::new(x, y, 0.15);
     transform.scale = Vec3::new(scale, scale, 0.);
     visibility.is_visible = true;
@@ -51,8 +69,8 @@ pub fn compute_board_coords(
     windows: Res<Windows>,
 ) -> bool {
     let mouse_world_coords = get_world_coords(camera_query, windows);
-    let x = (mouse_world_coords[0] / ui_state.square_pixels).floor() + 4_f32;
-    let y = (mouse_world_coords[1] / ui_state.square_pixels).floor() + 4_f32;
+    let x = (mouse_world_coords[0] / ui_state.square_pixels).floor() + START_Y_COORD;
+    let y = (mouse_world_coords[1] / ui_state.square_pixels).floor() + START_Y_COORD;
     let min: f32 = 0.;
     let max: f32 = 7.;
 

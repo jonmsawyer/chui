@@ -22,9 +22,9 @@ pub struct SpriteCollection {
     // #[asset(texture_atlas(tile_size_x = 32., tile_size_y = 32., columns = 5, rows = 1))]
     // #[asset(path = "cursor.png")]
     // pub cursors: Handle<TextureAtlas>,
-    // /// The background image
-    // #[asset(path = "nasa-mars.png")]
-    // pub background: Handle<Image>,
+    /// The board background image
+    #[asset(path = "board_background.png")]
+    pub board_background: Handle<Image>,
 }
 
 /// Assets Bevy plugin.

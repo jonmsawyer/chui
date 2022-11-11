@@ -3,12 +3,42 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 
-use super::super::components::Square;
+use super::super::components::{BoardBackground, Square};
+use super::super::constants::{BOARD_BACKGROUND_SPRITE_WIDTH, START_X_COORD};
 use super::super::resources::UiResource;
 use super::super::states::GameState;
 use super::super::utils::compute_coords;
 use super::SpriteCollection;
 use crate::modules::ui::events::ResizeBoardEvent;
+
+/// ECS System. Run once. Initialize the chessboard.
+fn init_board_background(
+    my_assets: Res<SpriteCollection>,
+    mut commands: Commands,
+    ui_state: Res<UiResource>,
+) {
+    let x = START_X_COORD * ui_state.square_pixels - 25_f32;
+    let y = x;
+    let scale = (ui_state.square_pixels * 8_f32 + 50_f32) / BOARD_BACKGROUND_SPRITE_WIDTH;
+
+    commands
+        .spawn_bundle(SpriteBundle {
+            transform: Transform {
+                translation: Vec3::new(x, y, 0.),
+                ..Default::default()
+            }
+            .with_scale(Vec3::new(scale, scale, 0.)),
+            // sprite: TextureAtlasSprite::new(color_id),
+            sprite: Sprite {
+                //custom_size: Some(Vec2::new(custom_size, custom_size)),
+                anchor: Anchor::BottomLeft,
+                ..Default::default()
+            },
+            texture: my_assets.board_background.clone(),
+            ..Default::default()
+        })
+        .insert(BoardBackground);
+}
 
 /// ECS System. Run once. Initialize the chessboard.
 fn init_board(my_assets: Res<SpriteCollection>, mut commands: Commands, ui_state: Res<UiResource>) {
@@ -23,7 +53,7 @@ fn init_board(my_assets: Res<SpriteCollection>, mut commands: Commands, ui_state
         commands
             .spawn_bundle(SpriteSheetBundle {
                 transform: Transform {
-                    translation: Vec3::new(x, y, 0.),
+                    translation: Vec3::new(x, y, 0.1),
                     ..Default::default()
                 }
                 .with_scale(Vec3::new(scale, scale, 0.)),
@@ -50,6 +80,24 @@ fn init_board(my_assets: Res<SpriteCollection>, mut commands: Commands, ui_state
 }
 
 /// ECS System. Run on each frame. Resize the board.
+fn resize_board_background(
+    ui_state: Res<UiResource>,
+    mut resize_event: EventReader<ResizeBoardEvent>,
+    mut query: Query<&mut Transform, With<BoardBackground>>,
+) {
+    for _ in resize_event.iter() {
+        let x = START_X_COORD * ui_state.square_pixels - 25_f32;
+        let y = x;
+        let scale = (ui_state.square_pixels * 8_f32 + 50_f32) / BOARD_BACKGROUND_SPRITE_WIDTH;
+
+        query.for_each_mut(|mut transform| {
+            transform.translation = Vec3::new(x, y, 0.);
+            transform.scale = Vec3::new(scale, scale, 0.);
+        });
+    }
+}
+
+/// ECS System. Run on each frame. Resize the board.
 fn resize_board(
     ui_state: Res<UiResource>,
     mut resize_event: EventReader<ResizeBoardEvent>,
@@ -63,7 +111,7 @@ fn resize_board(
         let mut row: f32 = 0.;
 
         query.for_each_mut(|(square, mut transform)| {
-            transform.translation = Vec3::new(x, y, 0.);
+            transform.translation = Vec3::new(x, y, 0.1);
             transform.scale = Vec3::new(scale, scale, 0.);
 
             x += ui_state.square_pixels;
@@ -83,7 +131,15 @@ pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(GameState::Next).with_system(init_board))
-            .add_system_set(SystemSet::on_update(GameState::Next).with_system(resize_board));
+        app.add_system_set(
+            SystemSet::on_enter(GameState::Next)
+                .with_system(init_board_background)
+                .with_system(init_board),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::Next)
+                .with_system(resize_board_background)
+                .with_system(resize_board),
+        );
     }
 }

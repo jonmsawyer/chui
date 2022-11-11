@@ -65,7 +65,7 @@ impl fmt::Display for Player {
 
         let age = self
             .age
-            .map_or_else(|| String::new(), |age| format!(" (Age {})", age));
+            .map_or_else(String::new, |age| format!(" (Age {})", age));
 
         let rating = self.rating.map_or_else(
             || "(no Elo rating)".to_string(),
