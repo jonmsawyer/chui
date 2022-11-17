@@ -1,30 +1,37 @@
 //! Assets plugin
 
-use bevy::prelude::*;
-use bevy_asset_loader::prelude::*;
+use bevy::{asset::LoadState, prelude::*};
 
 use super::super::states::GameState;
 
-/// Sprite collection. Using `bevy_asset_loader` directives, loads the resources indicated.
-#[derive(AssetCollection, Clone)]
-pub struct SpriteCollection {
-    /// Light and dark squares, with chess pieces are defined in a texture atlas (aka sprite sheet).
-    ///
-    /// Consts cannot be used in attribute macros, so we have to hardcode tile size into here
-    #[asset(texture_atlas(tile_size_x = 256., tile_size_y = 256., columns = 14, rows = 1))]
-    #[asset(path = "default_board.png")]
-    pub tiles: Handle<TextureAtlas>,
-    // /// Atlas for our character sprites
-    // #[asset(texture_atlas(tile_size_x = 32., tile_size_y = 32., columns = 6, rows = 10))]
-    // #[asset(path = "characters.png")]
-    // pub characters: Handle<TextureAtlas>,
-    // /// Texture atlas for our cursor/selection sprites
-    // #[asset(texture_atlas(tile_size_x = 32., tile_size_y = 32., columns = 5, rows = 1))]
-    // #[asset(path = "cursor.png")]
-    // pub cursors: Handle<TextureAtlas>,
-    /// The board background image
-    #[asset(path = "board_background.png")]
-    pub board_background: Handle<Image>,
+asset_collection!(
+    SpriteCollection,
+    Atlas(tiles, "default_board.png", 256., 256., 14, 1),
+    Image(board_background, "board_background.png")
+);
+
+/// System to initialize our asset collection
+fn init_collection(
+    mut commands: Commands,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    server: Res<AssetServer>,
+) {
+    let collection = SpriteCollection::init(&server, &mut texture_atlases);
+    commands.insert_resource(collection);
+}
+
+/// System to check that our asset collection is ready
+fn check_assets_ready(
+    server: Res<AssetServer>,
+    collection: Res<SpriteCollection>,
+    atlases: Res<Assets<TextureAtlas>>,
+    mut app_state: ResMut<State<GameState>>,
+) {
+    if let LoadState::Loaded = collection.get_collection_load_state(&server, &atlases) {
+        app_state
+            .set(GameState::Next)
+            .expect("We don't run in this state so changing to it won't fail");
+    }
 }
 
 /// Assets Bevy plugin.
@@ -32,10 +39,13 @@ pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_loading_state(
-            LoadingState::new(GameState::AssetLoading)
-                .continue_to_state(GameState::Next)
-                .with_collection::<SpriteCollection>(),
+        app.add_system_set(
+            // Load our assets during the AssetLoading state
+            SystemSet::on_enter(GameState::AssetLoading).with_system(init_collection),
+        )
+        .add_system_set(
+            // Load our assets during the AssetLoading state
+            SystemSet::on_update(GameState::AssetLoading).with_system(check_assets_ready),
         );
     }
 }

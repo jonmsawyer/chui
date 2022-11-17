@@ -47,6 +47,9 @@
 
 use std::fmt;
 
+#[macro_use]
+mod macros;
+
 mod modules;
 pub use modules::{
     parser::{self, ParserEngine},
