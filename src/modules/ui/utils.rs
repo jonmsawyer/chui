@@ -174,7 +174,7 @@ pub fn get_world_coords(
 
     window.cursor_position().map_or(Vec2::ZERO, |screen_pos| {
         // get the size of the window
-        let window_size = Vec2::new(window.width() as f32, window.height() as f32);
+        let window_size = Vec2::new(window.width(), window.height());
 
         // convert screen position [0..resolution] to ndc [-1..1] (gpu coordinates)
         let ndc = (screen_pos / window_size) * 2.0 - Vec2::ONE;
