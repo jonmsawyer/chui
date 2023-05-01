@@ -62,6 +62,15 @@ pub fn hide_from_and_to_square(
     to_visibility.is_visible = false;
 }
 
+/// Compute the world coords from the chessboard coordinates (zero-indexed).
+pub fn compute_world_coords(coord: (usize, usize), ui_state_square_pixels: f32) -> Vec2 {
+    let x = coord.0 as f32;
+    let y = coord.1 as f32;
+    let world_coords_x = (x - START_Y_COORD) * ui_state_square_pixels;
+    let world_coords_y = (y - START_Y_COORD) * ui_state_square_pixels;
+    Vec2::new(world_coords_x, world_coords_y)
+}
+
 /// Compute the chessboard coordinates (zero-indexed) from mouse click coordinates.
 pub fn compute_board_coords(
     mut ui_state: &mut UiResource,
