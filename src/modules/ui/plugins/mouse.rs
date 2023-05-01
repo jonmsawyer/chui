@@ -17,7 +17,8 @@ use super::super::utils::{
     compute_board_coords, compute_coords, get_mouse_coords, get_world_coords,
     hide_from_and_to_square, transform_from_square, transform_to_square,
 };
-use crate::Engine;
+use crate::modules::ui::utils::compute_world_coords;
+use crate::{Engine, Move, MoveType, Piece, PieceKind};
 
 /// ECS System. Run once. Initialize the on-board mouse cursor.
 fn init_mouse_cursor(mut commands: Commands) {
@@ -142,7 +143,8 @@ pub fn update_mouse_click(
         (&mut Transform, &mut Visibility),
         (With<ToSquareCursor>, Without<FromSquareCursor>),
     >,
-    engine: Res<Engine>,
+    mut engine: ResMut<Engine>,
+    mut piece_query: Query<(&mut Piece, &mut Transform), (Without<FromSquareCursor>, Without<ToSquareCursor>)>,
 ) {
     if mouse_input.is_empty() {
         return;
@@ -177,19 +179,63 @@ pub fn update_mouse_click(
                 ui_state.mouse_click_to_square = ui_state.mouse_click_board_coords;
 
                 transform_to_square(&mut ui_state, &mut to_transform, &mut to_visibility);
+                let from_index = (
+                    ui_state.mouse_click_from_square[0] as usize,
+                    ui_state.mouse_click_from_square[1] as usize,
+                );
+                
+                let to_index = (
+                    ui_state.mouse_click_to_square[0] as usize,
+                    ui_state.mouse_click_to_square[1] as usize,
+                );
 
                 match engine.parser.generate_move_from_board_coordinates(
                     &engine,
-                    (
-                        ui_state.mouse_click_from_square[0] as usize,
-                        ui_state.mouse_click_from_square[1] as usize,
-                    ),
-                    (
-                        ui_state.mouse_click_to_square[0] as usize,
-                        ui_state.mouse_click_to_square[1] as usize,
-                    ),
-                ) {
-                    Ok(result) => ui_state.move_representation = result,
+                    from_index,
+                    to_index,                ) {
+                    Ok(result) => {
+                        ui_state.move_representation = result;
+                        let mut chess_move = Move::new();
+                        chess_move.from_index = (from_index.0 as u8, from_index.1 as u8);
+                        chess_move.to_index = (to_index.0 as u8, to_index.1 as u8);
+                        let from_piece = engine.board.get_piece(from_index.0, from_index.1);
+                        let to_piece = engine.board.get_piece(to_index.0, to_index.1);
+                        chess_move.piece = from_piece;
+                        
+                        if from_piece.is_none() {
+                            return;
+                        }
+                        
+                        let kind = from_piece.unwrap().get_piece();
+
+                        if to_piece.is_none() {
+                            chess_move.move_type = match kind {
+                                PieceKind::Pawn => Some(MoveType::PawnMove),
+                                _ => Some(MoveType::PieceMove),
+                            };
+                        } else {
+                            chess_move.move_type = match kind {
+                                PieceKind::Pawn => Some(MoveType::PawnCapture),
+                                _ => Some(MoveType::PieceCapture)
+                            };
+                        }
+
+                        match engine.board.apply_move(&Some(chess_move)) {
+                            Ok(_) => (),
+                            Err(_) => return,
+                        }
+
+                        piece_query.for_each_mut(|(mut piece, mut transform)| {
+                            if piece.get_coords() == from_index {
+                                piece.set_coords(to_index.0, to_index.1);
+                                let world_coords = compute_world_coords(to_index, ui_state.square_pixels);
+                                transform.translation.x = world_coords.x;
+                                transform.translation.y = world_coords.y;
+                                return;
+                            }
+                        });
+
+                    },
                     Err(error) => ui_state.move_representation = format!("{}", error),
                 }
             } else if ui_state.mouse_click_from_square_clicked
