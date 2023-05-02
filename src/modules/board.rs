@@ -258,9 +258,9 @@ impl Board {
     ) -> Vec<(usize, usize)> {
         let mut coords = Vec::<(usize, usize)>::new();
         let mut max = if FILES <= RANKS {
-            RANKS as usize
+            RANKS
         } else {
-            FILES as usize
+            FILES
         };
 
         coords.extend(self.get_top_left_coords(file_idx, rank_idx, &mut max, current_move));
@@ -284,9 +284,9 @@ impl Board {
     ) -> Vec<(usize, usize)> {
         let mut coords = Vec::<(usize, usize)>::new();
         let mut max = if FILES <= RANKS {
-            RANKS as usize
+            RANKS
         } else {
-            FILES as usize
+            FILES
         };
 
         coords.extend(self.get_top_coords(file_idx, rank_idx, max, false));
@@ -306,9 +306,9 @@ impl Board {
     ) -> Vec<(usize, usize)> {
         let mut coords = Vec::<(usize, usize)>::new();
         let mut max = if FILES <= RANKS {
-            RANKS as usize
+            RANKS
         } else {
-            FILES as usize
+            FILES
         };
 
         coords.extend(self.get_top_left_coords(file_idx, rank_idx, &mut max, current_move));
