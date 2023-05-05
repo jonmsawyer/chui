@@ -183,7 +183,7 @@ pub fn update_mouse_click(
                     ui_state.mouse_click_from_square[0] as usize,
                     ui_state.mouse_click_from_square[1] as usize,
                 );
-                
+
                 let to_index = (
                     ui_state.mouse_click_to_square[0] as usize,
                     ui_state.mouse_click_to_square[1] as usize,
@@ -201,11 +201,11 @@ pub fn update_mouse_click(
                         let from_piece = engine.board.get_piece(from_index.0, from_index.1);
                         let to_piece = engine.board.get_piece(to_index.0, to_index.1);
                         chess_move.piece = from_piece;
-                        
+
                         if from_piece.is_none() {
                             return;
                         }
-                        
+
                         let kind = from_piece.unwrap().get_piece();
 
                         if to_piece.is_none() {
@@ -231,10 +231,8 @@ pub fn update_mouse_click(
                                 let world_coords = compute_world_coords(to_index, ui_state.square_pixels);
                                 transform.translation.x = world_coords.x;
                                 transform.translation.y = world_coords.y;
-                                return;
                             }
                         });
-
                     },
                     Err(error) => ui_state.move_representation = format!("{}", error),
                 }
