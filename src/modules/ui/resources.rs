@@ -6,7 +6,7 @@ use bevy::prelude::*;
 pub use crate::Engine;
 
 /// Resource to keep track of the state of the User Interface.
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Resource)]
 pub struct UiResource {
     /// Is the window open? (Needed anymore?)
     pub is_window_open: bool,

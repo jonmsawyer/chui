@@ -43,12 +43,16 @@ impl Plugin for WindowDescriptorPlugin {
         // the function names are similar if I didn't get them exactly right, but they're
         // on the Window object.
         // -Travis Veazey <https://github.com/Kromey>
-        app.insert_resource(WindowDescriptor {
-            title: format!(r#"Chui: Chess UI v{}"#, VERSION),
-            position: WindowPosition::Centered(MonitorSelection::Current),
-            present_mode: PresentMode::AutoVsync,
+        app.add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                title: format!(r#"Chui: Chess UI v{}"#, VERSION),
+                position: WindowPosition::Centered,
+                monitor: MonitorSelection::Current,
+                present_mode: PresentMode::AutoVsync,
+                ..default()
+            },
             ..default()
-        })
+        }))
         .add_system(resize_notificator);
     }
 }

@@ -19,7 +19,7 @@ fn setup_camera(mut commands: Commands) {
     // Position our camera in the center of the world
     //camera.transform.translation = WorldPoint::center().as_vec3(camera.transform.translation.z);
 
-    commands.spawn_bundle(camera).insert(MainCamera::default());
+    commands.spawn(camera).insert(MainCamera::default());
 }
 
 /// Fire pan camera event

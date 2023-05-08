@@ -2,6 +2,8 @@
 //!
 //! Thanks to Travis Veazey <https://github.com/Kromey> for the `asset_collection!()`,
 //! `asset_collection_struct!()`, and `asset_collection_impl!()` macros.
+//!
+//! Edited by Jonathan Sawyer <https://github.com/jonmsawyer> for Bevy 0.9.
 
 /// This macro defines a DSL-like syntax for creating asset collections.
 ///
@@ -69,7 +71,7 @@ macro_rules! asset_collection {
 /// Internal macro used to create the actual structure of the asset collection
 macro_rules! asset_collection_struct {
     ( $name:ident {  } -> ( $($result:tt)*) ) => {
-        #[derive(Default, Debug, Clone, PartialEq, Eq)]
+        #[derive(Default, Debug, Clone, PartialEq, Eq, Resource)]
         pub struct $name {
             $($result)*
         }
@@ -80,7 +82,7 @@ macro_rules! asset_collection_struct {
             pub $asset: Handle<Image>,
         ));
     };
-    ($name:ident { Atlas($asset:ident, $path:expr, $width:expr, $height:expr, $columns:expr, $rows:expr), $($assets:tt)* } -> ($($result:tt)*) ) => {
+    ($name:ident { Atlas($asset:ident, $path:expr, $width:expr, $height:expr, $columns:expr, $rows:expr, $padding:expr, $offset:expr), $($assets:tt)* } -> ($($result:tt)*) ) => {
         asset_collection_struct!($name { $($assets)* } -> (
             $($result)*
             pub $asset: Handle<TextureAtlas>,
@@ -130,7 +132,7 @@ macro_rules! asset_collection_impl {
             }
         ));
     };
-    ($name:ident $self:ident $ctx:ident $server:ident $atlases:ident { Atlas($asset:ident, $path:expr, $width:expr, $height:expr, $columns:expr, $rows:expr), $($assets:tt)* } -> ($($init:tt)*)($($status:tt)*) ) => {
+    ($name:ident $self:ident $ctx:ident $server:ident $atlases:ident { Atlas($asset:ident, $path:expr, $width:expr, $height:expr, $columns:expr, $rows:expr, $padding:expr, $offset:expr), $($assets:tt)* } -> ($($init:tt)*)($($status:tt)*) ) => {
         asset_collection_impl!($name $self $ctx $server $atlases { $($assets)* } -> (
             $($init)*
             let img = $server.load($path);
@@ -138,7 +140,9 @@ macro_rules! asset_collection_impl {
                 img,
                 Vec2 { x: $width, y: $height },
                 $columns,
-                $rows
+                $rows,
+                $padding,
+                $offset
             ));
         )(
             $($status)*

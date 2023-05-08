@@ -6,7 +6,7 @@ use super::super::states::GameState;
 
 asset_collection!(
     SpriteCollection,
-    Atlas(tiles, "default_board.png", 256., 256., 14, 1),
+    Atlas(tiles, "default_board.png", 256., 256., 14, 1, None, None),
     Image(board_background, "board_background.png")
 );
 

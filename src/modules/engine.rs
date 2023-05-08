@@ -3,7 +3,7 @@
 use std::fmt;
 use std::io;
 
-//use bevy::prelude::*;
+use bevy::prelude::*;
 
 use super::board::{Board, ChessVariant};
 use super::chess_move::Move;
@@ -80,7 +80,7 @@ pub enum DrawCondition {
 ///     println!("{}", engine.white_to_string());
 /// };
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Resource)]
 pub struct Engine {
     /// Represents the `White` player.
     pub white: Player,

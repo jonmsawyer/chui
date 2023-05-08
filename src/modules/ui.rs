@@ -33,7 +33,7 @@ impl Ui {
                 backends: Some(Backends::PRIMARY | Backends::GL),
                 ..default()
             })
-            .add_plugins(DefaultPlugins) // Default Bevy plugins
+            // .add_plugins(DefaultPlugins) // Default Bevy plugins
             .add_plugin(EguiPlugin) // Default Egui plugins
             //.add_plugin(EditorPlugin) // Wait til this is in crates.io
             // Chui's resources

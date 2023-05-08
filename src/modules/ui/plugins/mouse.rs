@@ -27,7 +27,7 @@ fn init_mouse_cursor(mut commands: Commands) {
     color.set_a(0.65);
 
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(SPRITE_WIDTH, SPRITE_WIDTH)),
                 color,
@@ -51,7 +51,7 @@ fn init_from_square_cursor(mut commands: Commands) {
     color.set_a(0.65);
 
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(SPRITE_WIDTH, SPRITE_WIDTH)),
                 color,
@@ -75,7 +75,7 @@ fn init_to_square_cursor(mut commands: Commands) {
     color.set_a(0.65);
 
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(SPRITE_WIDTH, SPRITE_WIDTH)),
                 color,
@@ -132,7 +132,7 @@ fn update_mouse_cursor(
 
 /// ECS System. Run on each frame. Update the on-board From Square and To Square
 /// mouse cursors on each mouse click.
-#[allow(clippy::type_complexity)]
+#[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn update_mouse_click(
     mut ui_state: ResMut<UiResource>,
     windows: Res<Windows>,

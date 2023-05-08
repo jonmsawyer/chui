@@ -32,7 +32,7 @@ fn init_pieces(
                     let x = (x as f32 + START_X_COORD) * ui_state.square_pixels;
                     let y = (y as f32 - START_Y_COORD) * ui_state.square_pixels;
                     commands
-                        .spawn_bundle(SpriteSheetBundle {
+                        .spawn(SpriteSheetBundle {
                             transform: Transform {
                                 translation: Vec3::new(x, y, 0.5),
                                 ..Default::default()

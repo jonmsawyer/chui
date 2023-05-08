@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 //use bevy::text::{Text, TextStyle};
-use bevy::ui::entity::TextBundle;
+use bevy::ui::node_bundles::TextBundle;
 use bevy::ui::{AlignSelf, Style};
 
 use crate::modules::ui::constants::START_Y_COORD;
@@ -29,7 +29,7 @@ fn init_board_background(
     let scale = (ui_state.square_pixels * 8_f32 + 50_f32) / BOARD_BACKGROUND_SPRITE_WIDTH;
 
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             transform: Transform {
                 translation: Vec3::new(x, y, 0.),
                 ..Default::default()
@@ -58,7 +58,7 @@ fn init_board(my_assets: Res<SpriteCollection>, mut commands: Commands, ui_state
         let color_id = ((idx / 8) % 2 + idx % 2) % 2; // 8 squares per row
 
         commands
-            .spawn_bundle(SpriteSheetBundle {
+            .spawn(SpriteSheetBundle {
                 transform: Transform {
                     translation: Vec3::new(x, y, 0.1),
                     ..Default::default()
@@ -108,7 +108,7 @@ fn init_coordinates(
             + 6_f32;
         // let (scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
         commands
-            .spawn_bundle(
+            .spawn(
                 // Create a TextBundle that has a Text with a single section.
                 TextBundle::from_section(
                     // Accepts a `String` or any type that converts into a `String`, such as `&str`
@@ -151,7 +151,7 @@ fn init_coordinates(
             + ui_state.square_pixels / 2_f32;
         // let (scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
         commands
-            .spawn_bundle(
+            .spawn(
                 // Create a TextBundle that has a Text with a single section.
                 TextBundle::from_section(
                     // Accepts a `String` or any type that converts into a `String`, such as `&str`
