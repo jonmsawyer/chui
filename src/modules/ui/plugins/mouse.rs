@@ -149,7 +149,10 @@ pub fn update_mouse_click(
         (With<ToSquareCursor>, Without<FromSquareCursor>),
     >,
     mut engine: ResMut<Engine>,
-    mut piece_query: Query<(&mut Piece, &mut Transform), (Without<FromSquareCursor>, Without<ToSquareCursor>)>,
+    mut piece_query: Query<
+        (&mut Piece, &mut Transform),
+        (Without<FromSquareCursor>, Without<ToSquareCursor>),
+    >,
 ) {
     if mouse_input.is_empty() {
         return;
@@ -194,10 +197,10 @@ pub fn update_mouse_click(
                     ui_state.mouse_click_to_square[1] as usize,
                 );
 
-                match engine.parser.generate_move_from_board_coordinates(
-                    &engine,
-                    from_index,
-                    to_index,                ) {
+                match engine
+                    .parser
+                    .generate_move_from_board_coordinates(&engine, from_index, to_index)
+                {
                     Ok(result) => {
                         ui_state.move_representation = result;
                         let mut chess_move = Move::new();
@@ -221,7 +224,7 @@ pub fn update_mouse_click(
                         } else {
                             chess_move.move_type = match kind {
                                 PieceKind::Pawn => Some(MoveType::PawnCapture),
-                                _ => Some(MoveType::PieceCapture)
+                                _ => Some(MoveType::PieceCapture),
                             };
                         }
 
@@ -233,12 +236,13 @@ pub fn update_mouse_click(
                         piece_query.for_each_mut(|(mut piece, mut transform)| {
                             if piece.get_coords() == from_index {
                                 piece.set_coords(to_index.0, to_index.1);
-                                let world_coords = compute_world_coords(to_index, ui_state.square_pixels);
+                                let world_coords =
+                                    compute_world_coords(to_index, ui_state.square_pixels);
                                 transform.translation.x = world_coords.x;
                                 transform.translation.y = world_coords.y;
                             }
                         });
-                    },
+                    }
                     Err(error) => ui_state.move_representation = format!("{}", error),
                 }
             } else if ui_state.mouse_click_from_square_clicked
@@ -268,14 +272,14 @@ pub struct MousePlugin;
 
 impl Plugin for MousePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems((
-            init_mouse_cursor,
-            init_from_square_cursor,
-            init_to_square_cursor
-        ).in_schedule(OnEnter(GameState::Next)))
-        .add_systems((
-            update_mouse_cursor,
-            update_mouse_click
-        ).in_set(OnUpdate(GameState::Next)));
+        app.add_systems(
+            (
+                init_mouse_cursor,
+                init_from_square_cursor,
+                init_to_square_cursor,
+            )
+                .in_schedule(OnEnter(GameState::Next)),
+        )
+        .add_systems((update_mouse_cursor, update_mouse_click).in_set(OnUpdate(GameState::Next)));
     }
 }

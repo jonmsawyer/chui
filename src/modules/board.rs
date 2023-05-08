@@ -257,11 +257,7 @@ impl Board {
         current_move: &Option<Move>,
     ) -> Vec<(usize, usize)> {
         let mut coords = Vec::<(usize, usize)>::new();
-        let mut max = if FILES <= RANKS {
-            RANKS
-        } else {
-            FILES
-        };
+        let mut max = if FILES <= RANKS { RANKS } else { FILES };
 
         coords.extend(self.get_top_left_coords(file_idx, rank_idx, &mut max, current_move));
         coords.extend(self.get_top_coords(file_idx, rank_idx, max, false));
@@ -283,11 +279,7 @@ impl Board {
         current_move: &Option<Move>,
     ) -> Vec<(usize, usize)> {
         let mut coords = Vec::<(usize, usize)>::new();
-        let mut max = if FILES <= RANKS {
-            RANKS
-        } else {
-            FILES
-        };
+        let mut max = if FILES <= RANKS { RANKS } else { FILES };
 
         coords.extend(self.get_top_coords(file_idx, rank_idx, max, false));
         coords.extend(self.get_right_coords(file_idx, rank_idx, &mut max, false, current_move));
@@ -305,11 +297,7 @@ impl Board {
         current_move: &Option<Move>,
     ) -> Vec<(usize, usize)> {
         let mut coords = Vec::<(usize, usize)>::new();
-        let mut max = if FILES <= RANKS {
-            RANKS
-        } else {
-            FILES
-        };
+        let mut max = if FILES <= RANKS { RANKS } else { FILES };
 
         coords.extend(self.get_top_left_coords(file_idx, rank_idx, &mut max, current_move));
         coords.extend(self.get_top_right_coords(file_idx, rank_idx, &mut max, current_move));

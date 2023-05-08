@@ -5,11 +5,7 @@
 //! also gives us the ability to easily create other binaries that run parts of it
 //! here.
 
-#![allow(
-    clippy::nonminimal_bool,
-    clippy::print_stdout,
-    clippy::use_debug,
-)]
+#![allow(clippy::nonminimal_bool, clippy::print_stdout, clippy::use_debug)]
 #![warn(
     clippy::cognitive_complexity,
     clippy::dbg_macro,
@@ -44,7 +40,7 @@
     clippy::used_underscore_binding,
     clippy::useless_let_if_seq,
     clippy::wildcard_dependencies,
-    clippy::wildcard_imports,
+    clippy::wildcard_imports
 )]
 
 use std::fmt;

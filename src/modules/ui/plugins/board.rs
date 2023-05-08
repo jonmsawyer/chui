@@ -317,15 +317,13 @@ pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems((
-            init_board_background,
-            init_board,
-            init_coordinates
-        ).in_schedule(OnEnter(GameState::Next)))
-        .add_systems((
-            resize_board_background,
-            resize_board,
-            update_coordinates
-        ).in_set(OnUpdate(GameState::Next)));
+        app.add_systems(
+            (init_board_background, init_board, init_coordinates)
+                .in_schedule(OnEnter(GameState::Next)),
+        )
+        .add_systems(
+            (resize_board_background, resize_board, update_coordinates)
+                .in_set(OnUpdate(GameState::Next)),
+        );
     }
 }

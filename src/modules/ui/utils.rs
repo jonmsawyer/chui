@@ -54,10 +54,7 @@ pub fn transform_to_square(
 }
 
 /// Hide the From Square and To Square cursors.
-pub fn hide_from_and_to_square(
-    from_visibility: &mut Visibility,
-    to_visibility: &mut Visibility,
-) {
+pub fn hide_from_and_to_square(from_visibility: &mut Visibility, to_visibility: &mut Visibility) {
     *from_visibility = Visibility::Hidden;
     *to_visibility = Visibility::Hidden;
 }
