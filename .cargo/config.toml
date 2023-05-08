@@ -2,5 +2,5 @@
 linker = "clang"
 rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/mold"]
 
-# [target.x86_64-pc-windows-msvc]
-# linker = "lld-link.exe"
+[target.x86_64-pc-windows-msvc]
+linker = "lld-link.exe"
