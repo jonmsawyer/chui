@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 
 /// Component to attach to the rendering of the pieces.
-pub use crate::Piece;
+pub use chui_core::Piece;
 
 /// Component to attach to the camera we're controlling.
 ///

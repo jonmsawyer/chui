@@ -3,8 +3,8 @@
 use bevy::prelude::{EventWriter, ResMut};
 use bevy_egui::{egui, EguiContexts};
 
-use crate::modules::ui::events::ResizeBoardEvent;
-use crate::modules::ui::resources::UiResource;
+use crate::ui::events::ResizeBoardEvent;
+use crate::ui::resources::UiResource;
 
 pub mod file;
 pub use file::file;

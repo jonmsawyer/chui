@@ -12,14 +12,14 @@ use rand::{Rng, SeedableRng};
 
 use super::super::components::{FromSquareCursor, MainCamera, MouseCursor, ToSquareCursor};
 use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
-use super::super::resources::UiResource;
+use super::super::resources::{Engine, UiResource};
 use super::super::states::GameState;
 use super::super::utils::{
     compute_board_coords, compute_coords, get_mouse_coords, get_world_coords,
     hide_from_and_to_square, transform_from_square, transform_to_square,
 };
-use crate::modules::ui::utils::compute_world_coords;
-use crate::{Engine, Move, MoveType, Piece, PieceKind};
+use crate::ui::utils::compute_world_coords;
+use chui_core::{Move, MoveType, Piece, PieceKind};
 
 /// ECS System. Run once. Initialize the on-board mouse cursor.
 fn init_mouse_cursor(mut commands: Commands) {
@@ -198,16 +198,17 @@ pub fn update_mouse_click(
                 );
 
                 match engine
+                    .0
                     .parser
-                    .generate_move_from_board_coordinates(&engine, from_index, to_index)
+                    .generate_move_from_board_coordinates(&engine.0, from_index, to_index)
                 {
                     Ok(result) => {
                         ui_state.move_representation = result;
                         let mut chess_move = Move::new();
                         chess_move.from_index = (from_index.0 as u8, from_index.1 as u8);
                         chess_move.to_index = (to_index.0 as u8, to_index.1 as u8);
-                        let from_piece = engine.board.get_piece(from_index.0, from_index.1);
-                        let to_piece = engine.board.get_piece(to_index.0, to_index.1);
+                        let from_piece = engine.0.board.get_piece(from_index.0, from_index.1);
+                        let to_piece = engine.0.board.get_piece(to_index.0, to_index.1);
                         chess_move.piece = from_piece;
 
                         if from_piece.is_none() {
@@ -228,7 +229,7 @@ pub fn update_mouse_click(
                             };
                         }
 
-                        match engine.board.apply_move(&Some(chess_move)) {
+                        match engine.0.board.apply_move(&Some(chess_move)) {
                             Ok(_) => (),
                             Err(_) => return,
                         }

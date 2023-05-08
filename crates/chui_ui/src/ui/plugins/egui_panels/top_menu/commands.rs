@@ -5,8 +5,8 @@ use bevy::prelude::ResMut;
 use bevy_egui::egui::{self, InnerResponse, Ui};
 
 use super::layout_jobs;
-use crate::modules::ui::events;
-use crate::modules::ui::resources::UiResource;
+use crate::ui::events;
+use crate::ui::resources::UiResource;
 
 /// Commands menu.
 pub fn commands(

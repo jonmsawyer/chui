@@ -6,7 +6,7 @@ use bevy::sprite::Anchor;
 use bevy::ui::node_bundles::TextBundle;
 use bevy::ui::{AlignSelf, Style};
 
-use crate::modules::ui::constants::START_Y_COORD;
+use crate::ui::constants::START_Y_COORD;
 
 use super::super::components::{BoardBackground, BoardCoordinate, Square};
 use super::super::constants::{

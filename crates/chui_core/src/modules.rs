@@ -26,6 +26,3 @@ pub mod fen;
 pub use fen::Fen;
 
 pub mod parser;
-
-pub mod ui;
-pub use ui::Ui;

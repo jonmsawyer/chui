@@ -1,9 +1,28 @@
 //! Main resources module
 
+use std::fmt;
+
 use bevy::prelude::*;
 
 /// Chui game engine.
-pub use crate::Engine;
+pub use chui_core;
+
+/// Resource to engage the core Engine
+#[derive(Resource, Debug)]
+pub struct Engine(pub chui_core::Engine);
+
+impl Default for Engine {
+    fn default() -> Engine {
+        Engine(chui_core::Engine::default())
+    }
+}
+
+/// Formats the position for white.
+impl fmt::Display for Engine {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0.white_to_string())
+    }
+}
 
 /// Resource to keep track of the state of the User Interface.
 #[derive(Default, Clone, Resource)]

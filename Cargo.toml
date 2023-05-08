@@ -15,7 +15,13 @@ publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.dependencies]
+chui_core = { path = "crates/chui_core" }
+chui_ui = { path = "crates/chui_ui" }
 colored = "2"
 bevy_egui = "0.20"
 #bevy-inspector-egui = "0.12"
@@ -26,7 +32,7 @@ bevy_egui = "0.20"
 rand = { version = "0.8", features = ["small_rng"] }
 
 # See https://bevy-cheatbook.github.io/setup/bevy-config.html
-[dependencies.bevy]
+[workspace.dependencies.bevy]
 version = "0.10"
 # Disable the default features if there are any that you do not want
 default-features = false
@@ -48,8 +54,9 @@ features = [
   "png",
 ]
 
-[workspace]
-resolver = "2"
+[dependencies]
+chui_core.workspace = true
+chui_ui.workspace = true
 
 # Enable first level optimizations in debug mode
 [profile.dev]

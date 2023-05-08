@@ -21,6 +21,7 @@ fn init_pieces(
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
 
     engine
+        .0
         .board
         .get_board()
         .iter()

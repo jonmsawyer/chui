@@ -1,4 +1,4 @@
-use chui::{Color, Engine, ParserEngine, Player};
+use chui_core::{Color, Engine, ParserEngine, Player};
 
 #[test]
 fn init_engine() {

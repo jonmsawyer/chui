@@ -1,3 +1,3 @@
 pub enum Result {
-    Err
+    Err,
 }
