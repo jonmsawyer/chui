@@ -3,6 +3,7 @@ name = "chui"
 version = "0.1.0"
 authors = ["Jonathan Sawyer <jonmsawyer@gmail.com>"]
 edition = "2021"
+rust-version = "1.69.0"
 categories = ["command-line-utilities", "games", "parser-implementations", "parsing"]
 description = "A chess UI or command line application that allows you to play against a human, a computer, or online."
 readme = "README.md"
@@ -22,7 +23,7 @@ bevy_egui = "0.20"
 #bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls" }
 #bevy_asset_loader = { version = "0.13", features = ["2d"] }
 #leafwing-input-manager = "0.6.1"
-rand = { version = "0.8.5", features = ["small_rng"] }
+rand = { version = "0.8", features = ["small_rng"] }
 
 # See https://bevy-cheatbook.github.io/setup/bevy-config.html
 [dependencies.bevy]
