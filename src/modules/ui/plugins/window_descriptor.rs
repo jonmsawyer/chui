@@ -3,6 +3,7 @@
 use bevy::{
     prelude::*,
     window::{MonitorSelection, PresentMode, WindowResized},
+    render::{settings::{Backends, WgpuSettings}, RenderPlugin},
 };
 
 use super::super::events::ResizeBoardEvent;
@@ -44,14 +45,22 @@ impl Plugin for WindowDescriptorPlugin {
         // on the Window object.
         // -Travis Veazey <https://github.com/Kromey>
         app.add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
+            primary_window: Some(Window {
                 title: format!(r#"Chui: Chess UI v{}"#, VERSION),
-                position: WindowPosition::Centered,
-                monitor: MonitorSelection::Current,
+                position: WindowPosition::Centered(MonitorSelection::Primary),
+                resolution: (1280., 720.).into(),
                 present_mode: PresentMode::AutoVsync,
                 ..default()
-            },
+            }),
             ..default()
+        })
+        .set(RenderPlugin {
+            wgpu_settings: WgpuSettings {
+                // NOTE: This allows GL support in wgpu, which only has "best-effort" support
+                // NOTE: Additionally, wgpu only supports GL on Windows via ANGLE, which may not be available
+                backends: Some(Backends::PRIMARY | Backends::GL),
+                ..default()
+            },
         }))
         .add_system(resize_notificator);
     }

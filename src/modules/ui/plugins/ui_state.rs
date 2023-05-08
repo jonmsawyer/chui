@@ -1,7 +1,7 @@
 //! Maintain the state of the User Interface
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext, EguiSettings};
+use bevy_egui::{egui, EguiContexts, EguiSettings};
 
 use super::super::constants::{ANNOTATION_PANEL_WIDTH, INFO_PANEL_WIDTH};
 use super::super::events::ResizeBoardEvent;
@@ -37,7 +37,7 @@ fn configure_state(mut ui_state: ResMut<UiResource>) {
 }
 
 /// ECS System. Run once. Configure the User Interface visuals.
-fn configure_visuals(mut egui_ctx: ResMut<EguiContext>) {
+fn configure_visuals(mut egui_ctx: EguiContexts) {
     // Default is Dark Mode
     egui_ctx.ctx_mut().set_visuals(egui::Visuals {
         window_rounding: (5.0).into(), // 5 points radius for window borders

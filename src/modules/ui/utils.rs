@@ -1,7 +1,8 @@
 //! Utils module.
 
 use bevy::prelude::*;
-use bevy::render::camera::RenderTarget;
+// use bevy::render::camera::RenderTarget;
+use bevy::window::PrimaryWindow;
 
 use super::components::MainCamera;
 use super::constants::{FILES, RANKS, SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
@@ -11,7 +12,7 @@ use super::resources::UiResource;
 pub fn transform_from_square(
     ui_state: &mut UiResource,
     mut transform: &mut Transform,
-    mut visibility: &mut Visibility,
+    visibility: &mut Visibility,
 ) {
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
     let (x, y) = if ui_state.draw_for_white {
@@ -27,14 +28,14 @@ pub fn transform_from_square(
     };
     transform.translation = Vec3::new(x, y, 0.15);
     transform.scale = Vec3::new(scale, scale, 0.);
-    visibility.is_visible = true;
+    *visibility = Visibility::Inherited;
 }
 
 /// Transform the to square cursor to to the indicated mouse coordinates.
 pub fn transform_to_square(
     ui_state: &mut UiResource,
     mut transform: &mut Transform,
-    mut visibility: &mut Visibility,
+    visibility: &mut Visibility,
 ) {
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
     let (x, y) = if ui_state.draw_for_white {
@@ -50,16 +51,16 @@ pub fn transform_to_square(
     };
     transform.translation = Vec3::new(x, y, 0.15);
     transform.scale = Vec3::new(scale, scale, 0.);
-    visibility.is_visible = true;
+    *visibility = Visibility::Inherited;
 }
 
 /// Hide the From Square and To Square cursors.
 pub fn hide_from_and_to_square(
-    mut from_visibility: &mut Visibility,
-    mut to_visibility: &mut Visibility,
+    from_visibility: &mut Visibility,
+    to_visibility: &mut Visibility,
 ) {
-    from_visibility.is_visible = false;
-    to_visibility.is_visible = false;
+    *from_visibility = Visibility::Hidden;
+    *to_visibility = Visibility::Hidden;
 }
 
 /// Compute the world coords from the chessboard coordinates (zero-indexed).
@@ -75,7 +76,7 @@ pub fn compute_world_coords(coord: (usize, usize), ui_state_square_pixels: f32) 
 pub fn compute_board_coords(
     mut ui_state: &mut UiResource,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    windows: Res<Windows>,
+    windows: Query<&Window, With<PrimaryWindow>>,
 ) -> bool {
     let mouse_world_coords = get_world_coords(camera_query, windows);
     let x = (mouse_world_coords[0] / ui_state.square_pixels).floor() + START_Y_COORD;
@@ -142,21 +143,26 @@ pub fn get_mouse_coords(window: &Window) -> Vec2 {
 
 /// Get the world coordinates of the mouse cursor.
 pub fn get_world_coords(
-    query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    windows: Res<Windows>,
+    camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
 ) -> Vec2 {
     // get the camera info and transform
     // assuming there is exactly one main camera entity, so query::single() is OK
-    let (camera, camera_transform) = query.single();
+    let (camera, camera_transform) = camera_query.single();
 
-    // get the window that the camera is displaying to (or the primary window)
-    let window = if let RenderTarget::Window(id) = camera.target {
-        match windows.get(id) {
-            Some(win) => win,
-            None => return Vec2::ZERO,
-        }
-    } else {
-        windows.get_primary().unwrap()
+    // // get the window that the camera is displaying to (or the primary window)
+    // let window = if let RenderTarget::Window(id) = camera.target {
+    //     match windows.get(id) {
+    //         Some(win) => win,
+    //         None => return Vec2::ZERO,
+    //     }
+    // } else {
+    //     windows.get_primary().unwrap()
+    // };
+
+    let window = match window_query.get_single() {
+        Ok(window) => window,
+        _ => return Vec2::ZERO,
     };
 
     // check if the cursor is inside the window and get its position

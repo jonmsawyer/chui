@@ -1,7 +1,7 @@
 //! Main Ui plugin
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 
 use super::super::constants::{ANNOTATION_PANEL_WIDTH, INFO_PANEL_WIDTH};
 use super::super::events::ResizeBoardEvent;
@@ -15,7 +15,7 @@ use top_menu::top_menu;
 
 /// ECS System. Run on each frame. Render the egui panels.
 fn egui_panels(
-    mut egui_ctx: ResMut<EguiContext>,
+    mut egui_ctx: EguiContexts,
     mut ui_state: ResMut<UiResource>,
     mut resize_board_event: EventWriter<ResizeBoardEvent>,
     fps: Local<FpsResource<25>>,
@@ -114,6 +114,6 @@ impl Plugin for EguiPanelsPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(egui_panels)
             // Set multi-sample anti-aliasing (WGPU only supports 1 or 4)
-            .insert_resource(Msaa { samples: 4 });
+            .insert_resource(Msaa::Sample4);
     }
 }

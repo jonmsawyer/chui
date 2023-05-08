@@ -25,12 +25,10 @@ fn check_assets_ready(
     server: Res<AssetServer>,
     collection: Res<SpriteCollection>,
     atlases: Res<Assets<TextureAtlas>>,
-    mut app_state: ResMut<State<GameState>>,
+    mut app_state: ResMut<NextState<GameState>>,
 ) {
     if let LoadState::Loaded = collection.get_collection_load_state(&server, &atlases) {
-        app_state
-            .set(GameState::Next)
-            .expect("We don't run in this state so changing to it won't fail");
+        app_state.set(GameState::Next);
     }
 }
 
@@ -39,13 +37,7 @@ pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            // Load our assets during the AssetLoading state
-            SystemSet::on_enter(GameState::AssetLoading).with_system(init_collection),
-        )
-        .add_system_set(
-            // Load our assets during the AssetLoading state
-            SystemSet::on_update(GameState::AssetLoading).with_system(check_assets_ready),
-        );
+        app.add_system(init_collection.in_schedule(OnEnter(GameState::AssetLoading)))
+            .add_system(check_assets_ready.in_set(OnUpdate(GameState::AssetLoading)));
     }
 }

@@ -16,7 +16,7 @@ publish = false
 
 [dependencies]
 colored = "2"
-bevy_egui = "0.19"
+bevy_egui = "0.20"
 #bevy-inspector-egui = "0.12"
 # Wait til bevy_editor_pls is in crates.io
 #bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls" }
@@ -26,7 +26,7 @@ rand = { version = "0.8.5", features = ["small_rng"] }
 
 # See https://bevy-cheatbook.github.io/setup/bevy-config.html
 [dependencies.bevy]
-version = "0.9"
+version = "0.10"
 # Disable the default features if there are any that you do not want
 default-features = false
 features = [

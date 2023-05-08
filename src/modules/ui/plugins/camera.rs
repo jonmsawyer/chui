@@ -3,6 +3,7 @@
 //! Used by permission from Travis Veazey <https://github.com/Kromey>
 
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 
 use super::super::components::MainCamera;
 use super::super::resources::UiResource;
@@ -33,7 +34,7 @@ fn fire_pan_camera(mut pan_evt: EventWriter<CameraPanned>, ui_state: Res<UiResou
 /// System to pan our camera
 fn pan_camera(
     buttons: Res<Input<MouseButton>>,
-    windows: Res<Windows>,
+    windows: Query<&Window, With<PrimaryWindow>>,
     mut ui_state: ResMut<UiResource>,
     mut query: Query<(&mut OrthographicProjection, &mut Transform), With<MainCamera>>,
     mut last_pos: Local<Option<Vec2>>,
@@ -49,9 +50,9 @@ fn pan_camera(
         return;
     }
 
-    let window = match windows.get_primary() {
-        Some(window) => window,
-        None => return, // Couldn't get the primary window, maybe the game is closing
+    let window = match windows.get_single() {
+        Ok(window) => window,
+        _ => return, // Couldn't get the primary window, maybe the game is closing
     };
 
     // Use cursor position instead of MouseMotion to get acceleration movement
@@ -82,8 +83,7 @@ pub struct CameraControllerPlugin;
 impl Plugin for CameraControllerPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CameraPanned>()
-            .add_startup_system(setup_camera)
-            .add_startup_system(fire_pan_camera)
-            .add_system_set(SystemSet::on_update(GameState::Next).with_system(pan_camera));
+            .add_startup_systems((setup_camera, fire_pan_camera))
+            .add_system(pan_camera.in_set(OnUpdate(GameState::Next)));
     }
 }

@@ -121,7 +121,7 @@ fn init_coordinates(
                     },
                 )
                 // Set the alignment of the Text
-                .with_text_alignment(TextAlignment::TOP_CENTER)
+                .with_text_alignment(TextAlignment::Center)
                 // Set the style of the TextBundle itself.
                 .with_style(Style {
                     align_self: AlignSelf::FlexStart,
@@ -164,7 +164,7 @@ fn init_coordinates(
                     },
                 )
                 // Set the alignment of the Text
-                .with_text_alignment(TextAlignment::TOP_CENTER)
+                .with_text_alignment(TextAlignment::Center)
                 // Set the style of the TextBundle itself.
                 .with_style(Style {
                     align_self: AlignSelf::FlexStart,
@@ -205,10 +205,10 @@ fn update_coordinates(
         let reverse_file_index = (7 - board_coordinate.file_index) as f32 * ui_state.square_pixels;
         let reverse_rank_index = (7 - board_coordinate.rank_index) as f32 * ui_state.square_pixels;
         if !ui_state.show_coords {
-            visibility.is_visible = false;
+            *visibility = Visibility::Hidden;
             continue;
         } else {
-            visibility.is_visible = true;
+            *visibility = Visibility::Inherited;
         }
         if ui_state.draw_for_white {
             x = if last_position == Vec2::ZERO {
@@ -317,17 +317,27 @@ pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_enter(GameState::Next)
-                .with_system(init_board_background)
-                .with_system(init_board)
-                .with_system(init_coordinates),
-        )
-        .add_system_set(
-            SystemSet::on_update(GameState::Next)
-                .with_system(resize_board_background)
-                .with_system(resize_board)
-                .with_system(update_coordinates),
-        );
+        // app.add_system_set(
+        //     SystemSet::on_enter(GameState::Next)
+        //         .with_system(init_board_background)
+        //         .with_system(init_board)
+        //         .with_system(init_coordinates),
+        // )
+        // .add_system_set(
+        //     SystemSet::on_update(GameState::Next)
+        //         .with_system(resize_board_background)
+        //         .with_system(resize_board)
+        //         .with_system(update_coordinates),
+        // );
+        app.add_systems((
+            init_board_background,
+            init_board,
+            init_coordinates
+        ).in_schedule(OnEnter(GameState::Next)))
+        .add_systems((
+            resize_board_background,
+            resize_board,
+            update_coordinates
+        ).in_set(OnUpdate(GameState::Next)));
     }
 }

@@ -1,7 +1,7 @@
 //! Top Menu module.
 
 use bevy::prelude::{EventWriter, ResMut};
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 
 use crate::modules::ui::events::ResizeBoardEvent;
 use crate::modules::ui::resources::UiResource;
@@ -49,7 +49,7 @@ pub use super::layout_jobs;
 
 /// Generate the top menu using egui.
 pub fn top_menu(
-    egui_ctx: &mut ResMut<EguiContext>,
+    egui_ctx: &mut EguiContexts,
     ui_state: &mut ResMut<UiResource>,
     resize_board_event: &mut EventWriter<ResizeBoardEvent>,
 ) {

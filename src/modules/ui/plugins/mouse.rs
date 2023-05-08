@@ -4,6 +4,7 @@ use bevy::input::mouse::MouseButtonInput;
 use bevy::input::ButtonState;
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
+use bevy::window::PrimaryWindow;
 //use bevy::render::camera::RenderTarget;
 
 use rand::rngs::SmallRng;
@@ -38,7 +39,7 @@ fn init_mouse_cursor(mut commands: Commands) {
                 translation: Vec3::new(0., 0., 1.0),
                 ..Default::default()
             },
-            visibility: Visibility { is_visible: false },
+            visibility: Visibility::Hidden,
             ..Default::default()
         })
         .insert(MouseCursor);
@@ -62,7 +63,7 @@ fn init_from_square_cursor(mut commands: Commands) {
                 translation: Vec3::new(0., 0., 1.0),
                 ..Default::default()
             },
-            visibility: Visibility { is_visible: false },
+            visibility: Visibility::Hidden,
             ..Default::default()
         })
         .insert(FromSquareCursor);
@@ -86,7 +87,7 @@ fn init_to_square_cursor(mut commands: Commands) {
                 translation: Vec3::new(0., 0., 1.0),
                 ..Default::default()
             },
-            visibility: Visibility { is_visible: false },
+            visibility: Visibility::Hidden,
             ..Default::default()
         })
         .insert(ToSquareCursor);
@@ -96,15 +97,15 @@ fn init_to_square_cursor(mut commands: Commands) {
 fn update_mouse_cursor(
     mut mouse_query: Query<(&mut Visibility, &mut Transform), With<MouseCursor>>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    windows: Res<Windows>,
+    window_query: Query<&Window, With<PrimaryWindow>>,
     mut ui_state: ResMut<UiResource>,
 ) {
-    let window = match windows.get_primary() {
-        Some(win) => win,
-        None => return,
+    let window = match window_query.get_single() {
+        Ok(win) => win,
+        _ => return,
     };
     let mouse_coords = get_mouse_coords(window);
-    let world_coords = get_world_coords(camera_query, windows);
+    let world_coords = get_world_coords(camera_query, window_query);
     let (mut visibility, mut transform) = mouse_query.single_mut();
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
     let x = (world_coords[0] / ui_state.square_pixels).floor() * ui_state.square_pixels;
@@ -121,13 +122,17 @@ fn update_mouse_cursor(
         || y >= max
         || (world_coords[0] == 0. && world_coords[1] == 0.)
     {
-        visibility.is_visible = false;
+        *visibility = Visibility::Hidden;
         return;
     }
 
     transform.translation = Vec3::new(x, y, 0.2);
     transform.scale = Vec3::new(scale, scale, 0.);
-    visibility.is_visible = ui_state.show_mouse_cursor;
+    if ui_state.show_mouse_cursor {
+        *visibility = Visibility::Inherited;
+    } else {
+        *visibility = Visibility::Hidden;
+    }
 }
 
 /// ECS System. Run on each frame. Update the on-board From Square and To Square
@@ -135,7 +140,7 @@ fn update_mouse_cursor(
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn update_mouse_click(
     mut ui_state: ResMut<UiResource>,
-    windows: Res<Windows>,
+    windows: Query<&Window, With<PrimaryWindow>>,
     mut mouse_input: EventReader<MouseButtonInput>,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut from_square_query: Query<(&mut Transform, &mut Visibility), With<FromSquareCursor>>,
@@ -263,16 +268,14 @@ pub struct MousePlugin;
 
 impl Plugin for MousePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_enter(GameState::Next)
-                .with_system(init_mouse_cursor)
-                .with_system(init_from_square_cursor)
-                .with_system(init_to_square_cursor),
-        )
-        .add_system_set(
-            SystemSet::on_update(GameState::Next)
-                .with_system(update_mouse_cursor)
-                .with_system(update_mouse_click),
-        );
+        app.add_systems((
+            init_mouse_cursor,
+            init_from_square_cursor,
+            init_to_square_cursor
+        ).in_schedule(OnEnter(GameState::Next)))
+        .add_systems((
+            update_mouse_cursor,
+            update_mouse_click
+        ).in_set(OnUpdate(GameState::Next)));
     }
 }
