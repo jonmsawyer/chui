@@ -198,7 +198,6 @@ pub fn update_mouse_click(
                 );
 
                 match engine
-                    .0
                     .parser
                     .generate_move_from_board_coordinates(&engine, from_index, to_index)
                 {

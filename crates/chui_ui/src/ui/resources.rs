@@ -10,7 +10,7 @@ pub use chui_core;
 
 /// Resource to engage the core Engine
 #[derive(Resource, Debug)]
-pub struct Engine(pub chui_core::Engine);
+pub struct Engine(chui_core::Engine);
 
 impl Deref for Engine {
     type Target = chui_core::Engine;

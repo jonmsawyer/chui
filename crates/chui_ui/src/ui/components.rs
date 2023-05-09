@@ -8,7 +8,13 @@ pub use chui_core;
 
 /// Component to attach to the rendering of the pieces.
 #[derive(Component)]
-pub struct Piece(pub chui_core::Piece);
+pub struct Piece(chui_core::Piece);
+
+impl Piece {
+    pub fn new(piece: chui_core::Piece) -> Piece {
+        Piece(piece)
+    }
+}
 
 impl Deref for Piece {
     type Target = chui_core::Piece;

@@ -21,7 +21,6 @@ fn init_pieces(
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
 
     engine
-        .0
         .board
         .get_board()
         .iter()
@@ -29,7 +28,7 @@ fn init_pieces(
         .for_each(|(_, rank)| {
             rank.iter().enumerate().for_each(|(_, piece)| {
                 if let Some(piece) = piece {
-                    let piece = Piece(*piece);
+                    let piece = Piece::new(*piece);
                     let (x, y) = piece.get_coords();
                     let x = (x as f32 + START_X_COORD) * ui_state.square_pixels;
                     let y = (y as f32 - START_Y_COORD) * ui_state.square_pixels;
