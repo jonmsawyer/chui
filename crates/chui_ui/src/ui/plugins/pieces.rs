@@ -30,7 +30,7 @@ fn init_pieces(
             rank.iter().enumerate().for_each(|(_, piece)| {
                 if let Some(piece) = piece {
                     let piece = Piece(*piece);
-                    let (x, y) = piece.0.get_coords();
+                    let (x, y) = piece.get_coords();
                     let x = (x as f32 + START_X_COORD) * ui_state.square_pixels;
                     let y = (y as f32 - START_Y_COORD) * ui_state.square_pixels;
                     commands
@@ -46,7 +46,7 @@ fn init_pieces(
                             )),
                             //sprite: TextureAtlasSprite::new(piece.get_sprite_index()),
                             sprite: TextureAtlasSprite {
-                                index: piece.0.get_sprite_index(),
+                                index: piece.get_sprite_index(),
                                 anchor: Anchor::BottomLeft,
                                 ..Default::default()
                             },
@@ -72,7 +72,7 @@ fn resize_pieces(
         match ui_state.draw_for_white {
             true => {
                 query.for_each_mut(|(piece, mut transform)| {
-                    let (x, y) = piece.0.get_coords();
+                    let (x, y) = piece.get_coords();
                     let x = (x as f32 + START_X_COORD) * ui_state.square_pixels;
                     let y = (y as f32 - START_Y_COORD) * ui_state.square_pixels;
 
@@ -87,7 +87,7 @@ fn resize_pieces(
 
             false => {
                 query.for_each_mut(|(piece, mut transform)| {
-                    let (x, y) = piece.0.get_coords();
+                    let (x, y) = piece.get_coords();
                     let x = ((7 - x) as f32 + START_X_COORD) * ui_state.square_pixels;
                     let y = ((7 - y) as f32 - START_Y_COORD) * ui_state.square_pixels;
 

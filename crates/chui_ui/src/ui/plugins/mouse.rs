@@ -200,15 +200,15 @@ pub fn update_mouse_click(
                 match engine
                     .0
                     .parser
-                    .generate_move_from_board_coordinates(&engine.0, from_index, to_index)
+                    .generate_move_from_board_coordinates(&engine, from_index, to_index)
                 {
                     Ok(result) => {
                         ui_state.move_representation = result;
                         let mut chess_move = Move::new();
                         chess_move.from_index = (from_index.0 as u8, from_index.1 as u8);
                         chess_move.to_index = (to_index.0 as u8, to_index.1 as u8);
-                        let from_piece = engine.0.board.get_piece(from_index.0, from_index.1);
-                        let to_piece = engine.0.board.get_piece(to_index.0, to_index.1);
+                        let from_piece = engine.board.get_piece(from_index.0, from_index.1);
+                        let to_piece = engine.board.get_piece(to_index.0, to_index.1);
                         chess_move.piece = from_piece;
 
                         if from_piece.is_none() {
@@ -229,14 +229,14 @@ pub fn update_mouse_click(
                             };
                         }
 
-                        match engine.0.board.apply_move(&Some(chess_move)) {
+                        match engine.board.apply_move(&Some(chess_move)) {
                             Ok(_) => (),
                             Err(_) => return,
                         }
 
                         piece_query.for_each_mut(|(mut piece, mut transform)| {
-                            if piece.0.get_coords() == from_index {
-                                piece.0.set_coords(to_index.0, to_index.1);
+                            if piece.get_coords() == from_index {
+                                piece.set_coords(to_index.0, to_index.1);
                                 let world_coords =
                                     compute_world_coords(to_index, ui_state.square_pixels);
                                 transform.translation.x = world_coords.x;

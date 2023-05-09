@@ -1,6 +1,7 @@
 //! Main resources module
 
 use std::fmt;
+use std::ops::{Deref, DerefMut};
 
 use bevy::prelude::*;
 
@@ -10,6 +11,20 @@ pub use chui_core;
 /// Resource to engage the core Engine
 #[derive(Resource, Debug)]
 pub struct Engine(pub chui_core::Engine);
+
+impl Deref for Engine {
+    type Target = chui_core::Engine;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Engine {
+    fn deref_mut(&mut self) -> &mut chui_core::Engine {
+        &mut self.0
+    }
+}
 
 impl Default for Engine {
     fn default() -> Engine {

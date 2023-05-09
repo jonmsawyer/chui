@@ -1,5 +1,7 @@
 //! Components module
 
+use std::ops::{Deref, DerefMut};
+
 use bevy::prelude::*;
 
 pub use chui_core;
@@ -7,6 +9,20 @@ pub use chui_core;
 /// Component to attach to the rendering of the pieces.
 #[derive(Component)]
 pub struct Piece(pub chui_core::Piece);
+
+impl Deref for Piece {
+    type Target = chui_core::Piece;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Piece {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 /// Component to attach to the camera we're controlling.
 ///
