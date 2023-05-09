@@ -43,5 +43,5 @@
     clippy::wildcard_imports
 )]
 
-pub use chui_core::{Engine, Player};
+pub use chui_core::{Color, Engine, ParserEngine, Player};
 pub use chui_ui::Ui;

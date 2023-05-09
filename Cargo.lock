@@ -1010,10 +1010,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "chui_core"
+name = "chui-console"
+version = "0.1.0"
+dependencies = [
+ "chui_core",
+ "colored",
+]
+
+[[package]]
+name = "chui-ui"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "chui_ui",
+]
+
+[[package]]
+name = "chui_core"
+version = "0.1.0"
+dependencies = [
  "colored",
 ]
 

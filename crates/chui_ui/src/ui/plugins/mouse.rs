@@ -10,7 +10,7 @@ use bevy::window::PrimaryWindow;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
-use super::super::components::{FromSquareCursor, MainCamera, MouseCursor, ToSquareCursor};
+use super::super::components::{FromSquareCursor, MainCamera, MouseCursor, Piece, ToSquareCursor};
 use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
 use super::super::resources::{Engine, UiResource};
 use super::super::states::GameState;
@@ -19,7 +19,7 @@ use super::super::utils::{
     hide_from_and_to_square, transform_from_square, transform_to_square,
 };
 use crate::ui::utils::compute_world_coords;
-use chui_core::{Move, MoveType, Piece, PieceKind};
+use chui_core::{Move, MoveType, PieceKind};
 
 /// ECS System. Run once. Initialize the on-board mouse cursor.
 fn init_mouse_cursor(mut commands: Commands) {
@@ -235,8 +235,8 @@ pub fn update_mouse_click(
                         }
 
                         piece_query.for_each_mut(|(mut piece, mut transform)| {
-                            if piece.get_coords() == from_index {
-                                piece.set_coords(to_index.0, to_index.1);
+                            if piece.0.get_coords() == from_index {
+                                piece.0.set_coords(to_index.0, to_index.1);
                                 let world_coords =
                                     compute_world_coords(to_index, ui_state.square_pixels);
                                 transform.translation.x = world_coords.x;

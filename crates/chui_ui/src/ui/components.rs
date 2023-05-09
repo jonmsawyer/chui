@@ -2,8 +2,11 @@
 
 use bevy::prelude::*;
 
+pub use chui_core;
+
 /// Component to attach to the rendering of the pieces.
-pub use chui_core::Piece;
+#[derive(Component)]
+pub struct Piece(pub chui_core::Piece);
 
 /// Component to attach to the camera we're controlling.
 ///

@@ -1,5 +1,5 @@
 [package]
-name = "chui_core"
+name = "chui-console"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 colored.workspace = true
-#bevy.workspace = true
+chui_core.workspace = true

@@ -5,8 +5,6 @@ use std::fmt;
 
 use colored::{ColoredString, Colorize};
 
-use bevy::prelude::Component;
-
 use super::{Board, Move};
 use crate::{ChuiError, ChuiResult};
 
@@ -70,7 +68,7 @@ pub enum PieceKind {
 /// println!("{}: {:?}", white_pawn.get_text(), white_pawn);
 /// println!("{}: {:?}", black_queen.get_text(), black_queen);
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Component)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Piece {
     /// The kind of piece.
     piece: PieceKind,
