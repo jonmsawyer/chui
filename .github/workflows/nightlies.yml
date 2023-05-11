@@ -1,0 +1,124 @@
+name: Nightly Builds
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: '17 5 * * *' # 5:17 AM UTC every day
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Install dependencies
+      run: sudo apt-get install -y libwayland-dev libxkbcommon-dev
+      if: ${{ matrix.os  == 'ubuntu-latest' }}
+
+    - name: Install toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Setup Mold
+      uses: rui314/setup-mold@v1
+      if: ${{ matrix.os  == 'ubuntu-latest' }}
+
+    - name: Build
+      run: cargo build --release --verbose --bin arc71
+
+    - name: Get build version
+      id: version
+      run: echo "version=`git describe`" > $GITHUB_OUTPUT
+      if: ${{ matrix.os  == 'ubuntu-latest' }}
+
+#     - uses: actions/upload-artifact@v3
+#       with:
+#         name: build
+#         path: |
+#           target/release/arc71
+#           target/release/arc71.exe
+#         retention-days: 3
+
+#   publish:
+#     name: Publish to Itch
+#     runs-on: ubuntu-latest
+#     needs:
+#     - build
+
+#     steps:
+#     - uses: actions/checkout@v3
+
+#     - uses: actions/download-artifact@v3
+#       with:
+#         name: build
+
+#     - name: Prepare Windows build
+#       run: |
+#         mkdir -p build/win-nightly
+#         cp -r assets build/win-nightly/
+#         cp arc71.exe build/win-nightly/
+
+#     - name: Publish Windows build
+#       id: pubwin
+#       continue-on-error: true
+#       uses: KikimoraGames/itch-publish@v0.0.3
+#       with:
+#         butlerApiKey: ${{ secrets.BUTLER_API_KEY }}
+#         gameData: build/win-nightly
+#         itchUsername: Kromey
+#         itchGameId: arc-71
+#         buildChannel: win-nightly
+#         buildNumber: ${{ needs.build.outputs.version }}
+
+#     - name: Prepare Linux build
+#       run: |
+#         chmod +x arc71
+#         mkdir -p build/linux-nightly
+#         cp -r assets build/linux-nightly/
+#         cp arc71 build/linux-nightly/
+
+#     - name: Publish Linux build
+#       id: pubnix
+#       continue-on-error: true
+#       uses: KikimoraGames/itch-publish@v0.0.3
+#       with:
+#         butlerApiKey: ${{ secrets.BUTLER_API_KEY }}
+#         gameData: build/linux-nightly
+#         itchUsername: Kromey
+#         itchGameId: arc-71
+#         buildChannel: linux-nightly
+#         buildNumber: ${{ needs.build.outputs.version }}
+
+#     - name: Announce to Discord
+#       if: steps.pubwin.outcome == 'success' || steps.pubnix.outcome == 'success'
+#       run: |
+#         echo '{"content":"New nightly build ${{ needs.build.outputs.version }} now available!\nhttps://kromey.itch.io/arc-71"}'
+#         curl -X POST ${{ secrets.DISCORD_ANNOUNCE_WEBHOOK }} -H 'Content-Type: application/json' -d '{"content":"New nightly build ${{ needs.build.outputs.version }} now available!\nhttps://kromey.itch.io/arc-71"}'
+
+#     - name: Remove build artifacts
+#       uses: geekyeggo/delete-artifact@v2
+#       with:
+#           name: build
