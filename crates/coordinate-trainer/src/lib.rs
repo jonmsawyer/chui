@@ -116,7 +116,7 @@ impl CoordinateTrainer {
                 // Train the user in the given session type.
                 CommandType::Numeric | CommandType::Alpha | CommandType::Both => self.train(),
                 // Train the user in the colors of squares.
-                CommandType::Color => self.train_colors(),
+                CommandType::Color => self.train_color(),
                 // Could not process further input.
                 CommandType::Input => {}
                 // Quit the application. Don't print scores, don't collect $200.
@@ -142,7 +142,7 @@ impl CoordinateTrainer {
         let training_header = match self.command_type {
             CommandType::Numeric => " = Train the Numeric Coordinate Type =".to_string(),
             CommandType::Alpha => " = Train the Alpha Coordinate Type =".to_string(),
-            CommandType::Both => " = Train Both Coordinate Types =".to_string(),
+            CommandType::Both => " = Train the Alphanumeric Coordinate Types =".to_string(),
             _ => " ??? Unknown Training Session ???".to_string(),
         };
 
@@ -150,7 +150,7 @@ impl CoordinateTrainer {
         println!("");
 
         loop {
-            self.generate_problem();
+            self.generate_problem_coord();
             self.get_input();
             // We do not store the command type when calling `self.process_command()` because
             // we don't want to change the state of the application right before checking
@@ -159,7 +159,7 @@ impl CoordinateTrainer {
                 CommandType::Numeric
                 | CommandType::Alpha
                 | CommandType::Both
-                | CommandType::Input => self.solve_answer(),
+                | CommandType::Input => self.solve_answer_coord(),
                 CommandType::Help => self.print_help(),
                 CommandType::Quit => {
                     self.quit();
@@ -171,7 +171,7 @@ impl CoordinateTrainer {
     }
 
     /// Train board coordinate colors.
-    pub fn train_colors(&mut self) {
+    pub fn train_color(&mut self) {
         self.session_timer = SystemTime::now();
 
         let training_header = match self.command_type {
@@ -266,7 +266,7 @@ impl CoordinateTrainer {
     }
 
     /// Print the output correlating to a correct answer.
-    fn print_correct(&self) {
+    fn print_correct_coord(&self) {
         println!(
             " +++ Correct! ({} correct, {} incorrect)",
             self.vec_correct.len(),
@@ -275,7 +275,7 @@ impl CoordinateTrainer {
     }
 
     /// Print the output correlating to an incorrect answer.
-    fn print_incorrect(&self) {
+    fn print_incorrect_coord(&self) {
         println!(
             " --- Incorrect! Answer is '{}' or '{}'. ({} correct, {} incorrect)",
             INT_FILES[self.answer - 1],
@@ -283,6 +283,14 @@ impl CoordinateTrainer {
             self.vec_correct.len(),
             self.vec_incorrect.len()
         )
+    }
+
+    /// Print the output correlating to a correct answer.
+    ///
+    /// This method is currently uncessecary due to `self.print_correct_coord()` being
+    /// called.
+    fn print_correct_color(&self) {
+        self.print_correct_coord();
     }
 
     /// Print the output correlating to an incorrect answer.
@@ -304,10 +312,11 @@ impl CoordinateTrainer {
     /// Print the output correlating to a comprehensive score sheet.
     pub fn print_scores(&self) {
         let session = match self.command_type {
-            CommandType::Numeric => "Numerical Coordinate Type".to_string(),
+            CommandType::Numeric => "Numeric Coordinate Type".to_string(),
             CommandType::Alpha => "Alpha Coordinate Type".to_string(),
-            CommandType::Both => "Alphanumerical Coordinate Types".to_string(),
-            _ => "Unknown Coordinate Type".to_string(),
+            CommandType::Both => "Alphanumeric Coordinate Types".to_string(),
+            CommandType::Color => "Coordinate Square Color Type".to_string(),
+            _ => "Unknown Type".to_string(),
         };
 
         let header = format!("For the {}, your stats are:", session);
@@ -463,7 +472,7 @@ impl CoordinateTrainer {
     /// the expression unless this check passes.
     ///
     /// Note: we want to orient `self.lhs` to be greater than or equal to `self.rhs`.
-    fn generate_problem(&mut self) {
+    fn generate_problem_coord(&mut self) {
         let mut rng = rand::thread_rng();
 
         loop {
@@ -519,7 +528,7 @@ impl CoordinateTrainer {
     ///
     /// Note: `self.lhs` and `self.rhs` have values between 1..=8 and `self.lhs` is guaranteed
     /// to be greater than or equal to `self.rhs` when the operation is subtraction.
-    fn evaluate_answer(&mut self) {
+    fn evaluate_answer_coord(&mut self) {
         if self.operation {
             self.answer = self.lhs + self.rhs;
         } else {
@@ -555,16 +564,16 @@ impl CoordinateTrainer {
     /// Solve the answer based on the user's input. If user's input matches the internal
     /// representation of the answer (literally just `1..=8`), then they get a correct answer
     /// and their answer is saved. If not, an incorrect answer is recorded.
-    fn solve_answer(&mut self) {
-        self.evaluate_answer();
+    fn solve_answer_coord(&mut self) {
+        self.evaluate_answer_coord();
 
         let mut is_evaluated = false;
 
         if let Ok(answer) = self.input.parse::<usize>() {
             if self.answer == answer {
-                self.add_correct();
+                self.add_correct_coord();
             } else {
-                self.add_incorrect();
+                self.add_incorrect_coord();
             }
 
             is_evaluated = true;
@@ -572,9 +581,9 @@ impl CoordinateTrainer {
             for (idx, alpha) in ALPHA_FILES.iter().enumerate() {
                 if self.input.eq(alpha) {
                     if self.answer == INT_FILES[idx] {
-                        self.add_correct();
+                        self.add_correct_coord();
                     } else {
-                        self.add_incorrect();
+                        self.add_incorrect_coord();
                     }
 
                     is_evaluated = true;
@@ -583,7 +592,7 @@ impl CoordinateTrainer {
         }
 
         if !is_evaluated {
-            self.add_incorrect();
+            self.add_incorrect_coord();
         }
 
         println!("");
@@ -684,11 +693,15 @@ impl CoordinateTrainer {
 
     /// Return a String representing the Algebraic coordinate chosen.
     fn get_algebraic_coordinate(&self) -> String {
-        format!(
-            "{}{}",
-            ALPHA_FILES[self.color_coordinate.0 - 1],
-            ALPHA_RANKS[self.color_coordinate.1 - 1]
-        )
+        if self.color_coordinate.0 != 0 && self.color_coordinate.1 != 0 {
+            format!(
+                "{}{}",
+                ALPHA_FILES[self.color_coordinate.0 - 1],
+                ALPHA_RANKS[self.color_coordinate.1 - 1]
+            )
+        } else {
+            "(0, 0)".to_string()
+        }
     }
 
     /// Clear out the saved, rendered, expression.
@@ -706,26 +719,26 @@ impl CoordinateTrainer {
 
     /// Render the last saved expression and copy the user input for entry into the vector
     /// of correct answers.
-    fn add_correct(&mut self) {
+    fn add_correct_coord(&mut self) {
         let element = (
             self.get_expression(),
             self.input.clone(),
             self.input_duration.clone(),
         );
         self.vec_correct.push(element);
-        self.print_correct();
+        self.print_correct_coord();
     }
 
     /// Render the last saved expression and copy the user input for entry into the vector
     /// of incorrect answers.
-    fn add_incorrect(&mut self) {
+    fn add_incorrect_coord(&mut self) {
         let element = (
             self.get_expression(),
             self.input.clone(),
             self.input_duration.clone(),
         );
         self.vec_incorrect.push(element);
-        self.print_incorrect();
+        self.print_incorrect_coord();
     }
 
     /// Render the last saved expression and copy the user input for entry into the vector
@@ -745,7 +758,7 @@ impl CoordinateTrainer {
             self.input_duration.clone(),
         );
         self.vec_correct.push(element);
-        self.print_correct();
+        self.print_correct_color();
     }
 
     /// Render the last saved expression and copy the user input for entry into the vector
