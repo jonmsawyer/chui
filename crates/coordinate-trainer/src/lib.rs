@@ -25,6 +25,8 @@ enum CommandType {
     Alpha,
     /// Train both using alpha and numeric coordinates.
     Both,
+    /// Train the colors of the coordinate squares.
+    Color,
     /// Quit the training session or quit the application.
     Quit,
     /// Process available input.
@@ -62,6 +64,10 @@ pub struct CoordinateTrainer {
     session_timer: SystemTime,
     /// A Duration to hold the elapsed time since the problem was displayed and input was received.
     input_duration: Duration,
+    /// Color coordinate
+    color_coordinate: (usize, usize),
+    /// The answer to the color problem.
+    answer_color: bool,
 }
 
 impl Default for CoordinateTrainer {
@@ -80,6 +86,8 @@ impl Default for CoordinateTrainer {
             saved_operation: String::new(),
             session_timer: SystemTime::now(),
             input_duration: Duration::ZERO,
+            color_coordinate: (0, 0),
+            answer_color: false,
         }
     }
 }
@@ -107,6 +115,8 @@ impl CoordinateTrainer {
                 CommandType::Help => self.print_help(),
                 // Train the user in the given session type.
                 CommandType::Numeric | CommandType::Alpha | CommandType::Both => self.train(),
+                // Train the user in the colors of squares.
+                CommandType::Color => self.train_colors(),
                 // Could not process further input.
                 CommandType::Input => {}
                 // Quit the application. Don't print scores, don't collect $200.
@@ -155,6 +165,37 @@ impl CoordinateTrainer {
                     self.quit();
                     break;
                 }
+                _ => continue,
+            }
+        }
+    }
+
+    /// Train board coordinate colors.
+    pub fn train_colors(&mut self) {
+        self.session_timer = SystemTime::now();
+
+        let training_header = match self.command_type {
+            CommandType::Color => " = Train the Coordinate Square Color Type =".to_string(),
+            _ => " ??? Unknown Training Session ???".to_string(),
+        };
+
+        println!("{}", training_header);
+        println!("");
+
+        loop {
+            self.generate_problem_color();
+            self.get_input();
+            // We do not store the command type when calling `self.process_command()` because
+            // we don't want to change the state of the application right before checking
+            // user input.
+            match self.process_command(false) {
+                CommandType::Color | CommandType::Input => self.solve_answer_color(),
+                CommandType::Help => self.print_help(),
+                CommandType::Quit => {
+                    self.quit();
+                    break;
+                }
+                _ => continue,
             }
         }
     }
@@ -177,6 +218,12 @@ impl CoordinateTrainer {
             "*both".to_string()
         } else {
             "both".to_string()
+        };
+
+        let color = if self.command_type == CommandType::Color {
+            "*color".to_string()
+        } else {
+            "color".to_string()
         };
 
         let help = if self.command_type == CommandType::Help {
@@ -205,6 +252,10 @@ impl CoordinateTrainer {
             "{:24}Start an Alphanumeric Coordinates training session.",
             both
         );
+        println!(
+            "{:24}Start a Coordinate Square Color training session.",
+            color
+        );
         println!("{:24}This help message.", help);
         println!("{:24}Quit this training session.", "q, quit, or exit");
         println!("");
@@ -225,6 +276,24 @@ impl CoordinateTrainer {
             " --- Incorrect! Answer is '{}' or '{}'. ({} correct, {} incorrect)",
             INT_FILES[self.answer - 1],
             ALPHA_FILES[self.answer - 1],
+            self.vec_correct.len(),
+            self.vec_incorrect.len()
+        )
+    }
+
+    /// Print the output correlating to an incorrect answer.
+    fn print_incorrect_color(&self) {
+        let color = if self.input.eq("2") {
+            "Light".to_string()
+        } else if self.input.eq("1") {
+            "Dark".to_string()
+        } else {
+            self.input.clone()
+        };
+
+        println!(
+            " --- Incorrect! Answer is '{}'. ({} correct, {} incorrect)",
+            color,
             self.vec_correct.len(),
             self.vec_incorrect.len()
         )
@@ -318,6 +387,12 @@ impl CoordinateTrainer {
             CommandType::Numeric | CommandType::Alpha | CommandType::Both => {
                 println!(" === What is {}?", self.get_expression());
             }
+            CommandType::Color => {
+                println!(
+                    " === What is {}? '1' for Light, '2' for Dark",
+                    self.get_algebraic_coordinate()
+                )
+            }
             CommandType::Quit => {
                 println!(" vvv Quitting training session...");
             }
@@ -361,6 +436,8 @@ impl CoordinateTrainer {
             CommandType::Alpha
         } else if self.input.eq("both") {
             CommandType::Both
+        } else if self.input.eq("color") {
+            CommandType::Color
         } else if self.input.eq("q") || self.input.eq("quit") || self.input.eq("exit") {
             CommandType::Quit
         } else {
@@ -428,6 +505,13 @@ impl CoordinateTrainer {
         }
     }
 
+    /// Generate the color coordinate.
+    fn generate_problem_color(&mut self) {
+        let mut rng = rand::thread_rng();
+
+        self.color_coordinate = (rng.gen_range(1..9), rng.gen_range(1..9));
+    }
+
     /// Evaluate the answer based on the operation. Note that by this point the `lhs` and `rhs`
     /// positional arguments are oriented correctly. We don't want to calculate negative numbers.
     ///
@@ -438,6 +522,31 @@ impl CoordinateTrainer {
             self.answer = self.lhs + self.rhs;
         } else {
             self.answer = self.lhs - self.rhs;
+        }
+    }
+
+    /// Evaluate the answer based on the operation.
+    fn evaluate_answer_color(&mut self) {
+        let (file, rank) = self.color_coordinate;
+
+        if file % 2 == 0 {
+            // Even file.
+            if rank % 2 == 0 {
+                // Even rank. Dark color.
+                self.answer_color = true;
+            } else {
+                // Odd rank. Light color.
+                self.answer_color = false;
+            }
+        } else {
+            // Odd file.
+            if rank % 2 == 0 {
+                // Even rank. Light color.
+                self.answer_color = false;
+            } else {
+                // Odd rank. Dark color.
+                self.answer_color = true;
+            }
         }
     }
 
@@ -473,12 +582,32 @@ impl CoordinateTrainer {
 
         if !is_evaluated {
             self.add_incorrect();
-            self.print_incorrect();
         }
 
         println!("");
 
         self.clear_saved_expression();
+    }
+
+    /// Solve the answer based on the user's input.
+    fn solve_answer_color(&mut self) {
+        self.evaluate_answer_color();
+
+        if let Ok(answer) = self.input.parse::<usize>() {
+            if self.answer_color == false && answer == 1 {
+                self.add_correct_color();
+            } else if self.answer_color == true && answer == 2 {
+                self.add_correct_color();
+            } else {
+                self.add_incorrect_color();
+            }
+        } else {
+            self.add_incorrect_color();
+        }
+
+        println!("");
+
+        self.clear_saved_color_coordinate();
     }
 
     /// Return a String representing the left-hand-side of the equation.
@@ -551,11 +680,26 @@ impl CoordinateTrainer {
         )
     }
 
+    /// Return a String representing the Algebraic coordinate chosen.
+    fn get_algebraic_coordinate(&self) -> String {
+        format!(
+            "{}{}",
+            ALPHA_FILES[self.color_coordinate.0 - 1],
+            ALPHA_RANKS[self.color_coordinate.1 - 1]
+        )
+    }
+
     /// Clear out the saved, rendered, expression.
     fn clear_saved_expression(&mut self) {
         self.saved_lhs.clear();
         self.saved_operation.clear();
         self.saved_rhs.clear();
+    }
+
+    /// Clear out the saved, rendered, expression.
+    fn clear_saved_color_coordinate(&mut self) {
+        self.color_coordinate = (0, 0);
+        self.answer_color = false;
     }
 
     /// Render the last saved expression and copy the user input for entry into the vector
@@ -580,5 +724,45 @@ impl CoordinateTrainer {
         );
         self.vec_incorrect.push(element);
         self.print_incorrect();
+    }
+
+    /// Render the last saved expression and copy the user input for entry into the vector
+    /// of correct answers.
+    fn add_correct_color(&mut self) {
+        let color = if self.input.eq("1") {
+            "Light".to_string()
+        } else if self.input.eq("2") {
+            "Dark".to_string()
+        } else {
+            self.input.clone()
+        };
+
+        let element = (
+            self.get_algebraic_coordinate(),
+            color,
+            self.input_duration.clone(),
+        );
+        self.vec_correct.push(element);
+        self.print_correct();
+    }
+
+    /// Render the last saved expression and copy the user input for entry into the vector
+    /// of incorrect answers.
+    fn add_incorrect_color(&mut self) {
+        let color = if self.input.eq("1") {
+            "Light".to_string()
+        } else if self.input.eq("2") {
+            "Dark".to_string()
+        } else {
+            self.input.clone()
+        };
+
+        let element = (
+            self.get_algebraic_coordinate(),
+            color,
+            self.input_duration.clone(),
+        );
+        self.vec_incorrect.push(element);
+        self.print_incorrect_color();
     }
 }
