@@ -238,7 +238,11 @@ impl CoordinateTrainer {
             "----------------"
         );
         match self.command_type {
-            CommandType::Numeric | CommandType::Alpha | CommandType::Both | CommandType::Input => {
+            CommandType::Numeric
+            | CommandType::Alpha
+            | CommandType::Both
+            | CommandType::Color
+            | CommandType::Input => {
                 println!("{:24}Your answer to the generated problem.", "ANSWER");
             }
             _ => {}
@@ -283,12 +287,10 @@ impl CoordinateTrainer {
 
     /// Print the output correlating to an incorrect answer.
     fn print_incorrect_color(&self) {
-        let color = if self.input.eq("2") {
-            "Light".to_string()
-        } else if self.input.eq("1") {
+        let color = if self.answer_color {
             "Dark".to_string()
         } else {
-            self.input.clone()
+            "Light".to_string()
         };
 
         println!(
