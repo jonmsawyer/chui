@@ -604,14 +604,14 @@ impl CoordinateTrainer {
     fn solve_answer_color(&mut self) {
         self.evaluate_answer_color();
 
-        if let Ok(answer) = self.input.parse::<usize>() {
-            if self.answer_color == false && answer == 1 {
-                self.add_correct_color();
-            } else if self.answer_color == true && answer == 2 {
-                self.add_correct_color();
-            } else {
-                self.add_incorrect_color();
-            }
+        if self.answer_color == false
+            && (self.input.eq("1") || self.input.to_ascii_lowercase().eq("light"))
+        {
+            self.add_correct_color();
+        } else if self.answer_color == true
+            && (self.input.eq("2") || self.input.to_ascii_lowercase().eq("dark"))
+        {
+            self.add_correct_color();
         } else {
             self.add_incorrect_color();
         }
@@ -744,9 +744,9 @@ impl CoordinateTrainer {
     /// Render the last saved expression and copy the user input for entry into the vector
     /// of correct answers.
     fn add_correct_color(&mut self) {
-        let color = if self.input.eq("1") {
+        let color = if self.input.eq("1") || self.input.to_ascii_lowercase().eq("light") {
             "Light".to_string()
-        } else if self.input.eq("2") {
+        } else if self.input.eq("2") || self.input.to_ascii_lowercase().eq("dark") {
             "Dark".to_string()
         } else {
             self.input.clone()
@@ -764,9 +764,9 @@ impl CoordinateTrainer {
     /// Render the last saved expression and copy the user input for entry into the vector
     /// of incorrect answers.
     fn add_incorrect_color(&mut self) {
-        let color = if self.input.eq("1") {
+        let color = if self.input.eq("1") || self.input.to_ascii_lowercase().eq("light") {
             "Light".to_string()
-        } else if self.input.eq("2") {
+        } else if self.input.eq("2") || self.input.to_ascii_lowercase().eq("dark") {
             "Dark".to_string()
         } else {
             self.input.clone()
