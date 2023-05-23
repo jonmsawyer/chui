@@ -377,7 +377,7 @@ impl Engine {
                             self.draw_condition = None;
                         } else if the_move.eq("1/2-1/2") || the_move.eq("½-½") {
                             self.win_condition = None;
-                            self.draw_condition = None; // ?
+                            self.draw_condition = None; // TODO: ?
                         }
 
                         match self.parse(the_move, self.to_move).as_ref() {

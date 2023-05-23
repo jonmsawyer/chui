@@ -31,8 +31,7 @@ impl fmt::Display for Color {
     }
 }
 
-/// Piece kind. One of `King`, `Queen`, `Rook`, `Knight`,
-/// `Bishop`, `Knight`, `Pawn`.
+/// Piece kind. One of `King`, `Queen`, `Rook`, `Knight`, `Bishop`, `Knight`, `Pawn`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PieceKind {
     /// The King.

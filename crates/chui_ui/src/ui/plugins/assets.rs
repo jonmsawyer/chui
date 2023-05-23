@@ -22,12 +22,14 @@ fn init_collection(
 
 /// System to check that our asset collection is ready
 fn check_assets_ready(
-    server: Res<AssetServer>,
-    collection: Res<SpriteCollection>,
-    atlases: Res<Assets<TextureAtlas>>,
+    asset_server: Res<AssetServer>,
+    sprite_collection: Res<SpriteCollection>,
+    texture_atlases: Res<Assets<TextureAtlas>>,
     mut app_state: ResMut<NextState<GameState>>,
 ) {
-    if let LoadState::Loaded = collection.get_collection_load_state(&server, &atlases) {
+    if let LoadState::Loaded =
+        sprite_collection.get_collection_load_state(&asset_server, &texture_atlases)
+    {
         app_state.set(GameState::Next);
     }
 }
