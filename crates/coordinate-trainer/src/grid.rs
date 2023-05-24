@@ -5,17 +5,20 @@ use std::time::{Duration, SystemTime};
 
 use rand::Rng;
 
-use super::CommandType;
+use super::{trait_defs::*, CommandType};
 use super::{ALPHA_FILES, ALPHA_RANKS};
 
-#[derive(Debug)]
+#[derive(Debug, Trainer)]
+#[trainer(base = true)]
 pub struct GridTrainer {
+    /// The verbose name of the trainer.
     name_verbose: String,
-    // names_verbose: Vec<String>,
-    /// A vector of 2-tuples, containing Strings, representing (<expression>, <input>).
+    /// The Vector containing a list of verbose names for submodules in this trainer.
+    names_verbose: Vec<String>,
+    /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the correct answers in the order they were given.
     vec_correct: Vec<(String, String, Duration)>,
-    /// A vector of 2-tuples, containing Strings, representing (<expression>, <input>).
+    /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the incorrect answers in the order they were given.
     vec_incorrect: Vec<(String, String, Duration)>,
     /// The state of the application as a type of command.
@@ -34,62 +37,23 @@ pub struct GridTrainer {
 
 impl Default for GridTrainer {
     fn default() -> Self {
-        let name = "Grid Coordinates".to_string();
-
         GridTrainer {
-            name_verbose: name.clone(),
-            // names_verbose: vec![name],
-            vec_correct: Vec::<(String, String, Duration)>::new(),
-            vec_incorrect: Vec::<(String, String, Duration)>::new(),
-            command_type: CommandType::Help,
-            input: String::new(),
+            name_verbose: "GridTrainer".to_string(),
             session_timer: SystemTime::now(),
-            input_duration: Duration::ZERO,
-            color_coordinate: (0, 0),
-            answer_color: false,
+
+            names_verbose: Default::default(),
+            vec_correct: Default::default(),
+            vec_incorrect: Default::default(),
+            command_type: Default::default(),
+            input: Default::default(),
+            input_duration: Default::default(),
+            color_coordinate: Default::default(),
+            answer_color: Default::default(),
         }
     }
 }
 
 impl GridTrainer {
-    /// Create a new `ColorTrainer` object.
-    pub fn new() -> Self {
-        GridTrainer {
-            ..Default::default()
-        }
-    }
-
-    /// Train board coordinate colors.
-    pub fn train(&mut self, command_type: CommandType) {
-        self.command_type = command_type;
-        self.session_timer = SystemTime::now();
-
-        println!(" = Train Yourself in {} =", self.get_name_verbose());
-        println!("");
-
-        loop {
-            self.generate_problem();
-            self.get_input();
-            // We do not store the command type when calling `self.process_command()` because
-            // we don't want to change the state of the application right before checking
-            // user input.
-            match self.process_command(false) {
-                CommandType::Input => self.solve_answer(),
-                CommandType::Help => self.print_help(),
-                CommandType::Quit => {
-                    self.quit();
-                    break;
-                }
-                _ => continue,
-            }
-        }
-    }
-
-    /// Get the verbose name of the session.
-    fn get_name_verbose(&self) -> String {
-        self.name_verbose.clone()
-    }
-
     // Print the help message when the CommandType is Help.
     fn print_help(&self) {
         println!("+=======================================+");
@@ -120,24 +84,6 @@ impl GridTrainer {
             "  q, quit, or exit"
         );
         println!("");
-    }
-
-    /// Return a String representing the `self.get_help()` `?` and `help` text.
-    fn get_help_msg_string(&self) -> String {
-        if self.command_type == CommandType::Help {
-            "* ?, or help".to_string()
-        } else {
-            "  ?, or help".to_string()
-        }
-    }
-
-    /// Print the output correlating to a correct answer.
-    fn print_correct(&self) {
-        println!(
-            " +++ Correct! ({} correct, {} incorrect)",
-            self.vec_correct.len(),
-            self.vec_incorrect.len()
-        );
     }
 
     /// Print the output correlating to an incorrect answer.
@@ -216,16 +162,6 @@ impl GridTrainer {
         println!("");
     }
 
-    /// Print the final scores and reset the Coordinate Trainer to the default run state.
-    ///
-    /// Note: This doesn't actually quit the application.
-    ///
-    /// TODO: Maybe it should?
-    fn quit(&mut self) {
-        self.print_scores();
-        *self = GridTrainer::new();
-    }
-
     /// Get user input from `stdin` and store it in `self.input`.
     fn get_input(&mut self) {
         let input_timer = SystemTime::now();
@@ -267,27 +203,6 @@ impl GridTrainer {
         self.input = input.trim().to_string();
 
         println!("");
-    }
-
-    /// Given user input on `self.input`, process the command that follows that input. If
-    /// `set` is true, set `self.command_type` as the processed command, otherwise just
-    /// return that variant.
-    ///
-    /// Note: `CommandType` is Copy and Clone.
-    fn process_command(&mut self, set: bool) -> CommandType {
-        let command_type = if self.input.eq("?") || self.input.eq("help") {
-            CommandType::Help
-        } else if self.input.eq("q") || self.input.eq("quit") || self.input.eq("exit") {
-            CommandType::Quit
-        } else {
-            CommandType::Input
-        };
-
-        if set {
-            self.command_type = command_type;
-        }
-
-        command_type
     }
 
     /// Generate the color coordinate.

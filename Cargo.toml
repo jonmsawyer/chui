@@ -23,6 +23,7 @@ default-members = ["crates/chui-ui"]
 [workspace.dependencies]
 chui_core = { path = "crates/chui_core" }
 chui_ui = { path = "crates/chui_ui" }
+chui_macros = { path = "crates/chui_macros" }
 colored = "2"
 bevy_egui = "0.20"
 #bevy-inspector-egui = "0.12"
@@ -67,3 +68,4 @@ incremental = true
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
+incremental = true

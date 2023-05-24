@@ -3,23 +3,20 @@
 use std::io::{self, Write};
 use std::time::{Duration, SystemTime};
 
+mod constants;
+use constants::{ALPHA_FILES, ALPHA_RANKS, INT_FILES, VERSION};
+
+pub mod trait_defs;
+use trait_defs::Trainer;
+
 mod color;
 use color::ColorTrainer;
 
 mod coord;
-use coord::CoordTrainer;
+use coord::AlphaNumericTrainer;
 
 mod grid;
 use grid::GridTrainer;
-
-/// An array of chessboard files as usize format 8 elements long.
-const INT_FILES: [usize; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
-/// An array of chessboard files as &str format 8 elements long, representing alpha.
-const ALPHA_FILES: [&str; 8] = ["a", "b", "c", "d", "e", "f", "g", "h"];
-/// An array of chessboard files as &str format 8 elements long, representing numeric.
-const ALPHA_RANKS: [&str; 8] = ["1", "2", "3", "4", "5", "6", "7", "8"];
-/// Compile in the version of this crate.
-const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub enum CommandType {
@@ -42,12 +39,17 @@ pub enum CommandType {
     Input,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Trainer)]
+#[trainer(base = true)]
 pub struct CoordinateTrainer {
-    /// A vector of 2-tuples, containing Strings, representing (<expression>, <input>).
+    /// Verbose name.
+    name_verbose: String,
+    /// Vec of Strings of internal names dependeing on context.
+    names_verbose: Vec<String>,
+    /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the correct answers in the order they were given.
     vec_correct: Vec<(String, String, Duration)>,
-    /// A vector of 2-tuples, containing Strings, representing (<expression>, <input>).
+    /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the incorrect answers in the order they were given.
     vec_incorrect: Vec<(String, String, Duration)>,
     /// The state of the application as a type of command.
@@ -59,7 +61,7 @@ pub struct CoordinateTrainer {
     /// A Duration to hold the elapsed time since the problem was displayed and input was received.
     input_duration: Duration,
     /// Coordinate Trainer
-    coord_trainer: CoordTrainer,
+    coord_trainer: AlphaNumericTrainer,
     /// Color Trainer
     color_trainer: ColorTrainer,
     /// Grid Trainer
@@ -69,32 +71,28 @@ pub struct CoordinateTrainer {
 impl Default for CoordinateTrainer {
     fn default() -> Self {
         CoordinateTrainer {
-            vec_correct: Vec::<(String, String, Duration)>::new(),
-            vec_incorrect: Vec::<(String, String, Duration)>::new(),
-            command_type: CommandType::Help,
-            input: String::new(),
+            name_verbose: "CoordinateTrainer".to_string(),
+            names_verbose: Default::default(),
             session_timer: SystemTime::now(),
-            input_duration: Duration::ZERO,
-            coord_trainer: CoordTrainer::new(),
+            coord_trainer: AlphaNumericTrainer::new(),
             color_trainer: ColorTrainer::new(),
             grid_trainer: GridTrainer::new(),
+
+            vec_correct: Default::default(),
+            vec_incorrect: Default::default(),
+            command_type: Default::default(),
+            input: Default::default(),
+            input_duration: Default::default(),
         }
     }
 }
 
 impl CoordinateTrainer {
-    /// Create a new CoordinateTrainer object.
-    pub fn new() -> Self {
-        CoordinateTrainer {
-            ..Default::default()
-        }
-    }
-
     /// Run the Coordinate Trainer application. Runs inside of two main loops. The outer loop
     /// controls the outer game loop logic, the inner loop, .e.g, when `self.train()` is called,
     /// runs the game mode logic.
     pub fn run(&mut self) -> Result<(), String> {
-        println!(r#"Chui: Coordinate Trainer v{}"#, VERSION);
+        println!(r#" = Chui: Coordinate Trainer v{} ="#, VERSION);
         println!("");
 
         loop {
@@ -123,7 +121,7 @@ impl CoordinateTrainer {
         Ok(())
     }
 
-    // Print the help message when the CommandType is Help.
+    // Print the help message when the `CommandType` is Help.
     fn print_help(&self) {
         println!("+===============================+");
         println!("| Chui: Coordinate Trainer Help |");
@@ -172,6 +170,7 @@ impl CoordinateTrainer {
             "{:24}---------------------------------------------------",
             "------------------"
         );
+
         match self.command_type {
             CommandType::Numeric
             | CommandType::Alpha
@@ -183,22 +182,34 @@ impl CoordinateTrainer {
             }
             _ => {}
         }
+
         println!(
-            "{:24}Start a Numeric Coordinates training session.",
-            numeric
-        );
-        println!("{:24}Start an Alpha Coordinates training session.", alpha);
-        println!(
-            "{:24}Start an Alphanumeric Coordinates training session.",
-            both
+            "{:24}Start a {} training session.",
+            numeric,
+            self.coord_trainer.get_names_verbose(0, false)
         );
         println!(
-            "{:24}Start a Coordinate Square Color training session.",
-            color
+            "{:24}Start an {} training session.",
+            alpha,
+            self.coord_trainer.get_names_verbose(1, false)
         );
-        println!("{:24}Start a Grid Coordinate training session.", grid);
+        println!(
+            "{:24}Start an {} training session.",
+            both,
+            self.coord_trainer.get_names_verbose(2, false)
+        );
+        println!(
+            "{:24}Start a {} training session.",
+            color,
+            self.color_trainer.get_name_verbose()
+        );
+        println!(
+            "{:24}Start a {} training session.",
+            grid,
+            self.grid_trainer.get_name_verbose()
+        );
         println!("{:24}This help message.", help);
-        println!("{:24}Quit this training session.", "  q, quit, or exit");
+        println!("{:24}Exit out of this application.", "  q, quit, or exit");
         println!("");
     }
 

@@ -10,7 +10,7 @@ use super::resources::UiResource;
 /// Transform the from square cursor to the indicated mouse coordinates.
 pub fn transform_from_square(
     ui_state: &mut UiResource,
-    mut transform: &mut Transform,
+    transform: &mut Transform,
     visibility: &mut Visibility,
 ) {
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
@@ -33,7 +33,7 @@ pub fn transform_from_square(
 /// Transform the to square cursor to to the indicated mouse coordinates.
 pub fn transform_to_square(
     ui_state: &mut UiResource,
-    mut transform: &mut Transform,
+    transform: &mut Transform,
     visibility: &mut Visibility,
 ) {
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
@@ -70,7 +70,7 @@ pub fn compute_world_coords(coord: (usize, usize), ui_state_square_pixels: f32) 
 
 /// Compute the chessboard coordinates (zero-indexed) from mouse click coordinates.
 pub fn compute_board_coords(
-    mut ui_state: &mut UiResource,
+    ui_state: &mut UiResource,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) -> bool {

@@ -1,21 +1,25 @@
 //! Chui: Coordinate Trainer
 
+use std::fmt::Debug;
 use std::io::{self, Write};
 use std::time::{Duration, SystemTime};
 
 use rand::Rng;
 
-use super::CommandType;
+use super::{trait_defs::*, CommandType};
 use super::{ALPHA_FILES, ALPHA_RANKS, INT_FILES};
 
-#[derive(Debug)]
-pub struct CoordTrainer {
+#[derive(Debug, Trainer)]
+#[trainer(base = true)]
+pub struct AlphaNumericTrainer {
+    /// Verbose name.
     name_verbose: String,
+    /// Vec of Strings of internal names dependeing on context.
     names_verbose: Vec<String>,
-    /// A vector of 2-tuples, containing Strings, representing (<expression>, <input>).
+    /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the correct answers in the order they were given.
     vec_correct: Vec<(String, String, Duration)>,
-    /// A vector of 2-tuples, containing Strings, representing (<expression>, <input>).
+    /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the incorrect answers in the order they were given.
     vec_incorrect: Vec<(String, String, Duration)>,
     /// The state of the application as a type of command.
@@ -43,76 +47,36 @@ pub struct CoordTrainer {
     input_duration: Duration,
 }
 
-impl Default for CoordTrainer {
+impl Default for AlphaNumericTrainer {
     fn default() -> Self {
-        let name = "Alphanumeric Coordinates".to_string();
-
-        CoordTrainer {
-            name_verbose: name.clone(),
+        AlphaNumericTrainer {
+            name_verbose: "AlphaNumeric Coordinates".to_string(),
             names_verbose: vec![
                 "Numeric Coordinates".to_string(),
                 "Alpha Coordinates".to_string(),
-                name,
+                "AlphaNumeric Coordinates".to_string(),
             ],
-            vec_correct: Vec::<(String, String, Duration)>::new(),
-            vec_incorrect: Vec::<(String, String, Duration)>::new(),
-            command_type: CommandType::Help,
-            input: String::new(),
-            answer: 0,
-            lhs: 0,
-            rhs: 0,
-            operation: false,
-            saved_lhs: String::new(),
-            saved_rhs: String::new(),
-            saved_operation: String::new(),
             session_timer: SystemTime::now(),
-            input_duration: Duration::ZERO,
+            // Default
+            vec_correct: Default::default(),
+            vec_incorrect: Default::default(),
+            command_type: Default::default(),
+            input: Default::default(),
+            answer: Default::default(),
+            lhs: Default::default(),
+            rhs: Default::default(),
+            operation: Default::default(),
+            saved_lhs: Default::default(),
+            saved_rhs: Default::default(),
+            saved_operation: Default::default(),
+            input_duration: Default::default(),
         }
     }
 }
 
-impl CoordTrainer {
-    /// Create a new CoordinateTrainer object.
-    pub fn new() -> Self {
-        CoordTrainer {
-            ..Default::default()
-        }
-    }
-
-    /// Run the main training simulator. It doesn't matter if we're only training Numeric,
-    /// Alpha, or Both, we use this loop for all 3 session types.
-    ///
-    /// Loop until the user quits the session. Until quit, this loop generates a problem,
-    /// a user input is expected, and the answer checked for correctness. When the user
-    /// quits, print a score sheet and go back to the main state of the application
-    /// (`CommandType::Help`).
-    pub fn train(&mut self, command_type: CommandType) {
-        self.command_type = command_type;
-        self.session_timer = SystemTime::now();
-
-        println!(" = Train Yourself in {} =", self.get_name_verbose());
-        println!("");
-
-        loop {
-            self.generate_problem();
-            self.get_input();
-            // We do not store the command type when calling `self.process_command()` because
-            // we don't want to change the state of the application right before checking
-            // user input.
-            match self.process_command(false) {
-                CommandType::Input => self.solve_answer(),
-                CommandType::Help => self.print_help(),
-                CommandType::Quit => {
-                    self.quit();
-                    break;
-                }
-                _ => continue,
-            }
-        }
-    }
-
+impl AlphaNumericTrainer {
     /// Get the verbose name of the session based on the command type.
-    fn get_name_verbose(&self) -> String {
+    pub fn get_name_verbose(&self) -> String {
         match self.command_type {
             CommandType::Numeric => self.names_verbose[0].clone(),
             CommandType::Alpha => self.names_verbose[1].clone(),
@@ -120,6 +84,7 @@ impl CoordTrainer {
             _ => " ??? Unknown Training Session ???".to_string(),
         }
     }
+
     // Print the help message when the CommandType is Help.
     fn print_help(&self) {
         println!("+=======================================+");
@@ -192,15 +157,6 @@ impl CoordTrainer {
         } else {
             "  ?, or help".to_string()
         }
-    }
-
-    /// Print the output correlating to a correct answer.
-    fn print_correct(&self) {
-        println!(
-            " +++ Correct! ({} correct, {} incorrect)",
-            self.vec_correct.len(),
-            self.vec_incorrect.len()
-        );
     }
 
     /// Print the output correlating to an incorrect answer.
@@ -281,16 +237,6 @@ impl CoordTrainer {
         println!("");
     }
 
-    /// Print the final scores and reset the Coordinate Trainer to the default run state.
-    ///
-    /// Note: This doesn't actually quit the application.
-    ///
-    /// TODO: Maybe it should?
-    fn quit(&mut self) {
-        self.print_scores();
-        *self = CoordTrainer::new();
-    }
-
     /// Get user input from `stdin` and store it in `self.input`.
     fn get_input(&mut self) {
         let input_timer = SystemTime::now();
@@ -329,27 +275,6 @@ impl CoordTrainer {
         self.input = input.trim().to_string();
 
         println!("");
-    }
-
-    /// Given user input on `self.input`, process the command that follows that input. If
-    /// `set` is true, set `self.command_type` as the processed command, otherwise just
-    /// return that variant.
-    ///
-    /// Note: `CommandType` is Copy and Clone.
-    fn process_command(&mut self, set: bool) -> CommandType {
-        let command_type = if self.input.eq("?") || self.input.eq("help") {
-            CommandType::Help
-        } else if self.input.eq("q") || self.input.eq("quit") || self.input.eq("exit") {
-            CommandType::Quit
-        } else {
-            CommandType::Input
-        };
-
-        if set {
-            self.command_type = command_type;
-        }
-
-        command_type
     }
 
     /// Generate the problem. Don't let any answers fall outside of the range 1..=8 for any
