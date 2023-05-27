@@ -17,4 +17,3 @@ publish = false
 
 [dependencies]
 chui_core.workspace = true
-colored.workspace = true

@@ -407,6 +407,7 @@ impl<'a> MoveGenerator<'a> {
     ///     )
     /// );
     /// ```
+
     pub const fn move_is_valid_promotion(
         file_a_idx: usize,
         rank_a_idx: usize,
@@ -426,6 +427,8 @@ impl<'a> MoveGenerator<'a> {
 
         // Ending file cannot be more than one apart from
         // starting file.
+        //
+        // TODO: Double check this.
         if !(file_a_idx + 1 == file_b_idx && file_a_idx < 7)
             && !(file_a_idx - 1 == file_b_idx && file_a_idx > 0)
             && file_a_idx != file_b_idx

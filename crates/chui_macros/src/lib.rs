@@ -1,4 +1,6 @@
 //! Chui Macros
+//!
+//! Thanks to this guide: https://github.com/imbolc/rust-derive-macro-guide (2023-05-24)
 
 use darling::FromDeriveInput;
 use proc_macro::{self, TokenStream};

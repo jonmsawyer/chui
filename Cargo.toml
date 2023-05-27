@@ -24,37 +24,6 @@ default-members = ["crates/chui-ui"]
 chui_core = { path = "crates/chui_core" }
 chui_ui = { path = "crates/chui_ui" }
 chui_macros = { path = "crates/chui_macros" }
-colored = "2"
-bevy_egui = "0.20"
-#bevy-inspector-egui = "0.12"
-# Wait til bevy_editor_pls is in crates.io
-#bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls" }
-#bevy_asset_loader = { version = "0.13", features = ["2d"] }
-#leafwing-input-manager = "0.6.1"
-rand = { version = "0.8", features = ["small_rng"] }
-
-# See https://bevy-cheatbook.github.io/setup/bevy-config.html
-[workspace.dependencies.bevy]
-version = "0.10"
-# Disable the default features if there are any that you do not want
-default-features = false
-features = [
-  # Bevy functionality:
-  "bevy_asset",         # Assets management
-  "bevy_winit",         # Window management
-  "x11",                # Linux: Support X11 windowing system
-  "wayland",              # Linux: Support Wayland windowing system
-
-  # Rendering
-  "bevy_render",        # Rendering framework core
-  "bevy_core_pipeline", # Common rendering abstractions
-  "bevy_sprite",        # 2D (sprites) rendering
-  "bevy_ui",            # Bevy UI
-  "bevy_text",          # Bevy Text
-
-  # File formats:
-  "png",
-]
 
 [dependencies]
 chui_core.workspace = true

@@ -17,4 +17,4 @@ publish = false
 
 [dependencies]
 chui_macros.workspace = true
-rand.workspace = true
+rand = { version = "0.8", features = ["small_rng"] }

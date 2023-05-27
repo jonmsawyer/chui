@@ -1,4 +1,9 @@
-use std::fmt;
+//! Chui: Chess UI
+
+#![warn(missing_docs)]
+#![deny(broken_intra_doc_links)]
+
+use std::{error::Error, fmt};
 
 mod modules;
 pub use modules::{
@@ -89,6 +94,8 @@ impl fmt::Display for ChuiError {
         }
     }
 }
+
+impl Error for ChuiError {}
 
 /// The main result type that is returned in this application, rather than the
 /// generic Ok().

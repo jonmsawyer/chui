@@ -1014,14 +1014,12 @@ name = "chui-console"
 version = "0.1.0"
 dependencies = [
  "chui_core",
- "colored",
 ]
 
 [[package]]
 name = "chui-ui"
 version = "0.1.0"
 dependencies = [
- "bevy",
  "chui_ui",
 ]
 
@@ -1030,6 +1028,7 @@ name = "chui_core"
 version = "0.1.0"
 dependencies = [
  "colored",
+ "nonmax",
 ]
 
 [[package]]
@@ -2015,6 +2014,12 @@ dependencies = [
  "memchr",
  "minimal-lexical",
 ]
+
+[[package]]
+name = "nonmax"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99756f5493e135528f0cd660ac67b4c3a542bb65a3565efe92bb2c2317eb3669"
 
 [[package]]
 name = "ntapi"
