@@ -1,6 +1,6 @@
 //! Chui: Coordinate Trainer
 
-use coordinate_trainer::CoordinateTrainer;
+use chui_trainer::CoordinateTrainer;
 
 fn main() {
     let mut ct = CoordinateTrainer::default();

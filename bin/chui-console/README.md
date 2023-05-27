@@ -1,9 +1,9 @@
-# Chui: Chess UI
+# Chui: Chess UI Console
 
 Chui is a Chess UI and console application written in Rust and Bevy.
 
-## Run UI Application
+## Run Console Application
 
 ```
-$ cargo run
+$ cargo run -p chui-console
 ```

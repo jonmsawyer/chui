@@ -8,14 +8,20 @@ Chui is a Chess UI and console application written in Rust and Bevy.
 $ cargo run -p chui-console
 ```
 
-## Run Coordinate Trainer Application
-
-```
-$ cargo run -p coordinate-trainer
-```
-
 ## Run UI Application
 
 ```
 $ cargo run
+```
+
+or
+
+```
+$ cargo run -p chui-ui
+```
+
+## Run Coordinate Trainer Application
+
+```
+$ cargo run -p coordinate-trainer
 ```

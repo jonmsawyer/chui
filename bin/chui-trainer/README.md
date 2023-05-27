@@ -1,4 +1,4 @@
-# Chui: Chess UI
+# Chui: Chess UI Coordinate Trainer (Console)
 
 Chui is a Chess UI and console application written in Rust and Bevy.
 

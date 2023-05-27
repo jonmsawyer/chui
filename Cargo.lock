@@ -1017,6 +1017,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "chui-trainer"
+version = "0.1.0"
+dependencies = [
+ "chui_macros",
+ "rand",
+]
+
+[[package]]
 name = "chui-ui"
 version = "0.1.0"
 dependencies = [
@@ -1129,14 +1137,6 @@ name = "const_panic"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6051f239ecec86fde3410901ab7860d458d160371533842974fc61f96d15879b"
-
-[[package]]
-name = "coordinate-trainer"
-version = "0.1.0"
-dependencies = [
- "chui_macros",
- "rand",
-]
 
 [[package]]
 name = "core-foundation"

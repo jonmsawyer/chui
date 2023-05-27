@@ -1,14 +1,14 @@
 [package]
-name = "chui_macros"
+name = "chui-console"
 version = "0.1.0"
 edition = "2021"
 authors = ["Jonathan Sawyer <jonmsawyer@gmail.com>"]
 rust-version = "1.69.0"
 categories = ["command-line-utilities", "games", "chess", "training"]
-description = "A macros library for use within Chui."
+description = "A command line application that allows you play chess with a friend or online."
 readme = "README.md"
-homepage = "https://chui.io/"
-repository = "https://github.com/jonmsawyer/chui/tree/main/crates/chui_macros"
+homepage = "https://chui.games/"
+repository = "https://github.com/jonmsawyer/chui/tree/main/crates/chui-console"
 license = "MIT OR Apache-2.0"
 keywords = ["chess", "chess trainer", "chui", "chess ui", "chess user interface", "chess command line"]
 publish = false
@@ -16,10 +16,4 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-darling = "0.20"
-proc-macro2 = "1.0"
-quote = "1.0"
-syn = { version = "2.0", features = ["full"] }
-
-[lib]
-proc-macro = true
+chui_core.workspace = true

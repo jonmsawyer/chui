@@ -7,7 +7,7 @@ rust-version = "1.69.0"
 categories = ["command-line-utilities", "games", "parser-implementations", "parsing"]
 description = "A chess UI or command line application that allows you to play against a human, a computer, or online."
 readme = "README.md"
-homepage = "https://chui.io/"
+homepage = "https://chui.games/"
 repository = "https://github.com/jonmsawyer/chui/"
 license = "MIT OR Apache-2.0"
 keywords = ["chess", "chess engine", "bevy", "chui", "chess ui", "chess user interface", "chess command line"]
@@ -16,14 +16,14 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["crates/*"]
+members = ["lib/*", "bin/*"]
 resolver = "2"
-default-members = ["crates/chui-ui"]
+default-members = ["bin/chui-ui"]
 
 [workspace.dependencies]
-chui_core = { path = "crates/chui_core" }
-chui_ui = { path = "crates/chui_ui" }
-chui_macros = { path = "crates/chui_macros" }
+chui_core = { path = "lib/chui_core" }
+chui_ui = { path = "lib/chui_ui" }
+chui_macros = { path = "lib/chui_macros" }
 
 [dependencies]
 chui_core.workspace = true
