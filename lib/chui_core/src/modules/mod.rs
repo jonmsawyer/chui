@@ -1,5 +1,8 @@
 //! Modules for Chui.
 
+pub mod coord;
+pub use coord::{Coord, NonMaxU8};
+
 pub mod piece;
 pub use piece::{Color, Piece, PieceKind};
 

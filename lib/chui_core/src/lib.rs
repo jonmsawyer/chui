@@ -7,6 +7,7 @@ use std::{error::Error, fmt};
 
 mod modules;
 pub use modules::{
+    coord::{Coord, NonMaxU8},
     parser::{self, ParserEngine},
     piece::{Color, Piece, PieceKind},
     Board, ChessVariant, Command, CommandContext, CommandKind, Engine, Fen, Move, MoveGenerator,
