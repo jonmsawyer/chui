@@ -5,5 +5,5 @@
 //! also gives us the ability to easily create other binaries that run parts of it
 //! here.
 
-pub use chui_core::{Color, Engine, ParserEngine, Player};
+pub use chui_core::{Color, Coord, Engine, NonMaxU8, ParserEngine, Piece, Player};
 pub use chui_ui::Ui;
