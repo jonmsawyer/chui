@@ -6,7 +6,7 @@ use std::time::{Duration, SystemTime};
 use rand::Rng;
 
 use super::{trait_defs::*, CommandType};
-use super::{ALPHA_FILES, ALPHA_RANKS};
+use super::{STR_FILES, STR_RANKS};
 
 #[derive(Debug, Trainer)]
 #[trainer(base = true)]
@@ -268,8 +268,8 @@ impl GridTrainer {
         if self.color_coordinate.0 != 0 && self.color_coordinate.1 != 0 {
             format!(
                 "{}{}",
-                ALPHA_FILES[self.color_coordinate.0 - 1],
-                ALPHA_RANKS[self.color_coordinate.1 - 1]
+                STR_FILES[self.color_coordinate.0 - 1],
+                STR_RANKS[self.color_coordinate.1 - 1]
             )
         } else {
             "(0, 0)".to_string()

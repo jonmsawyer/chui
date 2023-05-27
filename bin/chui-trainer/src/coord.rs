@@ -7,7 +7,7 @@ use std::time::{Duration, SystemTime};
 use rand::Rng;
 
 use super::{trait_defs::*, CommandType};
-use super::{ALPHA_FILES, ALPHA_RANKS, INT_FILES};
+use super::{STR_FILES, STR_FILES, STR_RANKS};
 
 #[derive(Debug, Trainer)]
 #[trainer(base = true)]
@@ -163,8 +163,8 @@ impl AlphaNumericTrainer {
     fn print_incorrect(&self) {
         println!(
             " --- Incorrect! Answer is '{}' or '{}'. ({} correct, {} incorrect)",
-            INT_FILES[self.answer - 1],
-            ALPHA_FILES[self.answer - 1],
+            STR_FILES[self.answer - 1],
+            STR_FILES[self.answer - 1],
             self.vec_correct.len(),
             self.vec_incorrect.len()
         )
@@ -363,9 +363,9 @@ impl AlphaNumericTrainer {
 
             is_evaluated = true;
         } else {
-            for (idx, alpha) in ALPHA_FILES.iter().enumerate() {
+            for (idx, alpha) in STR_FILES.iter().enumerate() {
                 if self.input.eq(alpha) {
-                    if self.answer == INT_FILES[idx] {
+                    if self.answer == STR_FILES[idx] {
                         self.add_correct();
                     } else {
                         self.add_incorrect();
@@ -394,12 +394,12 @@ impl AlphaNumericTrainer {
     /// numeric of alpha display of the expression.
     fn get_lhs(&self) -> String {
         match self.command_type {
-            CommandType::Alpha => ALPHA_FILES[self.lhs - 1].to_string(),
+            CommandType::Alpha => STR_FILES[self.lhs - 1].to_string(),
             CommandType::Both => {
                 if rand::random() {
-                    ALPHA_FILES[self.lhs - 1].to_string()
+                    STR_FILES[self.lhs - 1].to_string()
                 } else {
-                    ALPHA_RANKS[self.lhs - 1].to_string()
+                    STR_RANKS[self.lhs - 1].to_string()
                 }
             }
             _ => format!("{}", self.lhs),
@@ -417,12 +417,12 @@ impl AlphaNumericTrainer {
     /// numeric of alpha display of the expression.
     fn get_rhs(&self) -> String {
         match self.command_type {
-            CommandType::Alpha => ALPHA_FILES[self.rhs - 1].to_string(),
+            CommandType::Alpha => STR_FILES[self.rhs - 1].to_string(),
             CommandType::Both => {
                 if rand::random() {
-                    ALPHA_FILES[self.rhs - 1].to_string()
+                    STR_FILES[self.rhs - 1].to_string()
                 } else {
-                    ALPHA_RANKS[self.rhs - 1].to_string()
+                    STR_RANKS[self.rhs - 1].to_string()
                 }
             }
             _ => format!("{}", self.rhs),

@@ -18,3 +18,4 @@ publish = false
 [dependencies]
 colored = "2"
 nonmax = "0.5"
+num-traits = "0.2"
