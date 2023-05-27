@@ -1,5 +1,8 @@
 //! Modules for Chui.
 
+pub mod constants;
+pub use constants::*;
+
 pub mod coord;
 pub use coord::{Coord, NonMaxU8};
 

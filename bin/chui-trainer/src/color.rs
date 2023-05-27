@@ -6,7 +6,8 @@ use std::time::{Duration, SystemTime};
 use rand::Rng;
 
 use super::{trait_defs::*, CommandType};
-use super::{ALPHA_FILES, ALPHA_RANKS};
+
+use chui_core::{ALPHA_FILES, ALPHA_RANKS};
 
 #[derive(Debug, Trainer)]
 #[trainer(base = true)]

@@ -3,8 +3,7 @@
 use std::io::{self, Write};
 use std::time::{Duration, SystemTime};
 
-mod constants;
-use constants::{ALPHA_FILES, ALPHA_RANKS, INT_FILES, VERSION};
+use chui_core::{ALPHA_FILES, ALPHA_RANKS, INT_FILES, VERSION};
 
 pub mod trait_defs;
 use trait_defs::Trainer;

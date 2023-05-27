@@ -1,4 +1,4 @@
-//! Chui Coordinate Trainer Constants.
+//! Chui Constants
 
 /// An array of chessboard files as usize format 8 elements long.
 pub const INT_FILES: [usize; 8] = [1, 2, 3, 4, 5, 6, 7, 8];

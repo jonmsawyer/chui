@@ -7,11 +7,12 @@ use std::{error::Error, fmt};
 
 mod modules;
 pub use modules::{
+    constants::*,
     coord::{Coord, NonMaxU8},
     parser::{self, ParserEngine},
     piece::{Color, Piece, PieceKind},
     Board, ChessVariant, Command, CommandContext, CommandKind, Engine, Fen, Move, MoveGenerator,
-    MoveType, Player,
+    MoveType, Player
 };
 
 /// The main error that is returned for this application, rather than generic Err().

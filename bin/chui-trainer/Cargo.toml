@@ -16,5 +16,6 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chui_core.workspace = true
 chui_macros.workspace = true
 rand = { version = "0.8", features = ["small_rng"] }
