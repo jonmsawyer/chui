@@ -1036,9 +1036,9 @@ dependencies = [
 name = "chui_core"
 version = "0.1.0"
 dependencies = [
+ "chui_macros",
  "colored",
  "nonmax",
- "num-traits",
 ]
 
 [[package]]

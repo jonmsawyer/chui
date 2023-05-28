@@ -2,6 +2,8 @@
 //!
 //! Thanks to this guide: https://github.com/imbolc/rust-derive-macro-guide (2023-05-24)
 
+// use std::str::FromStr;
+
 use darling::FromDeriveInput;
 use proc_macro::{self, TokenStream};
 use quote::quote;
@@ -14,7 +16,7 @@ struct Opts {
 }
 
 #[proc_macro_derive(Trainer, attributes(trainer))]
-pub fn derive(input: TokenStream) -> TokenStream {
+pub fn derive_trainer(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input);
     let opts = Opts::from_derive_input(&input).expect("Wrong options");
     let DeriveInput { ident, .. } = input;
@@ -157,5 +159,74 @@ pub fn derive(input: TokenStream) -> TokenStream {
             #base
         }
     };
+    output.into()
+}
+
+#[proc_macro_derive(Coordinate)]
+pub fn derive_coordinate(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input);
+    let DeriveInput { ident, .. } = input;
+
+    let primitive_types = [
+        quote! { u8 },
+        quote! { u16 },
+        quote! { u32 },
+        quote! { u64 },
+        quote! { u128 },
+        quote! { usize },
+        quote! { i8 },
+        quote! { i16 },
+        quote! { i32 },
+        quote! { i64 },
+        quote! { i128 },
+        quote! { isize },
+    ];
+
+    let mut output = quote! {};
+
+    for t in primitive_types.iter() {
+        for u in primitive_types.iter() {
+            output = quote! {
+                #output
+
+                impl TryFrom<(#t, #u)> for #ident {
+                    type Error = CoordError;
+
+                    fn try_from(coord: (#t, #u)) -> CoordResult<Coord> {
+                        if let Ok(file) = u8::try_from(coord.0) {
+                            if let Ok(rank) = u8::try_from(coord.1) {
+                                if let Ok(file) = NonMaxU8::try_from(file) {
+                                    if let Ok(rank) = NonMaxU8::try_from(rank) {
+                                        Ok(Coord { file, rank })
+                                    } else {
+                                        Err(CoordError::InvalidRank(format!(
+                                            "{} is an invalid rank",
+                                            rank
+                                        )))
+                                    }
+                                } else {
+                                    Err(CoordError::InvalidFile(format!(
+                                        "{} is an invalid file",
+                                        file
+                                    )))
+                                }
+                            } else {
+                                Err(CoordError::InvalidTypeConversion(format!(
+                                    "{} could not be converted to a valid u8 type",
+                                    coord.1
+                                )))
+                            }
+                        } else {
+                            Err(CoordError::InvalidTypeConversion(format!(
+                                "{} could not be converted to a valid u8 type",
+                                coord.0
+                            )))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     output.into()
 }
