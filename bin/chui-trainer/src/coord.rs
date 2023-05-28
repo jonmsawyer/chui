@@ -7,7 +7,7 @@ use std::time::{Duration, SystemTime};
 use rand::Rng;
 
 use super::{trait_defs::*, CommandType};
-use super::{STR_FILES, STR_FILES, STR_RANKS};
+use super::{INT_FILES, STR_FILES, STR_RANKS};
 
 #[derive(Debug, Trainer)]
 #[trainer(base = true)]
@@ -365,7 +365,7 @@ impl AlphaNumericTrainer {
         } else {
             for (idx, alpha) in STR_FILES.iter().enumerate() {
                 if self.input.eq(alpha) {
-                    if self.answer == STR_FILES[idx] {
+                    if self.answer == INT_FILES[idx] as usize {
                         self.add_correct();
                     } else {
                         self.add_incorrect();
