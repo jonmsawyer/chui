@@ -30,8 +30,8 @@ fn init_pieces(
                 if let Some(piece) = piece {
                     let piece = Piece::new(*piece);
                     let coord = piece.get_coord();
-                    let x = (coord.get_rank() as f32 + START_X_COORD) * ui_state.square_pixels;
-                    let y = (coord.get_file() as f32 - START_Y_COORD) * ui_state.square_pixels;
+                    let x = (coord.get_file() as f32 + START_X_COORD) * ui_state.square_pixels;
+                    let y = (coord.get_rank() as f32 - START_Y_COORD) * ui_state.square_pixels;
                     commands
                         .spawn(SpriteSheetBundle {
                             transform: Transform {
@@ -72,8 +72,8 @@ fn resize_pieces(
             true => {
                 query.for_each_mut(|(piece, mut transform)| {
                     let coord = piece.get_coord();
-                    let x = (coord.get_rank() as f32 + START_X_COORD) * ui_state.square_pixels;
-                    let y = (coord.get_file() as f32 - START_Y_COORD) * ui_state.square_pixels;
+                    let x = (coord.get_file() as f32 + START_X_COORD) * ui_state.square_pixels;
+                    let y = (coord.get_rank() as f32 - START_Y_COORD) * ui_state.square_pixels;
 
                     transform.translation = Vec3::new(x, y, 0.5);
                     transform.scale = Vec3::new(
@@ -88,9 +88,9 @@ fn resize_pieces(
                 query.for_each_mut(|(piece, mut transform)| {
                     let coord = piece.get_coord();
                     let x =
-                        ((7 - coord.get_rank()) as f32 + START_X_COORD) * ui_state.square_pixels;
+                        ((7 - coord.get_file()) as f32 + START_X_COORD) * ui_state.square_pixels;
                     let y =
-                        ((7 - coord.get_file()) as f32 - START_Y_COORD) * ui_state.square_pixels;
+                        ((7 - coord.get_rank()) as f32 - START_Y_COORD) * ui_state.square_pixels;
 
                     transform.translation = Vec3::new(x, y, 0.5);
                     transform.scale = Vec3::new(
