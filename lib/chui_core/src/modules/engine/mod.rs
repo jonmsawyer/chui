@@ -1,16 +1,17 @@
 //! Provides the `Engine` struct. `Engine` drives the game itself.
 
+use std::collections::HashMap;
 use std::fmt;
 use std::io;
 
-use super::board::{Board, ChessVariant};
-use super::chess_move::Move;
-use super::piece::{Color, Piece};
-use super::player::Player;
+use crate::parser::{self, Parser, ParserEngine};
+use crate::Coord;
+use crate::Move;
+use crate::Player;
+use crate::{Board, ChessVariant};
 use crate::{ChuiError, ChuiResult};
-//use super::MoveGenerator;
-use super::parser::{self, Parser, ParserEngine};
-use super::{Command, CommandContext, CommandKind};
+use crate::{Color, Piece};
+use crate::{Command, CommandContext, CommandKind};
 //use super::Fen;
 
 mod commands;
@@ -39,15 +40,32 @@ pub enum DrawCondition {
     Stalemate,
 
     /// The board's position has repeated itself three times.
-    ThriceRepitition,
+    ///
+    /// According to FIDE rules, just because a position has repeated itself three times,
+    /// doesn't mean the game is automatically a draw. A player must flag this condition after
+    /// the position has repeated itself for the third time.
+    ///
+    /// Also note this has nothing to do with move order. This is a repetition of position, not
+    /// moves.
+    ThirdRepitition,
+
+    /// The board's position has repeated itself five times.
+    ///
+    /// According to FIDE rules, a game is automatically drawn after the position has repeated
+    /// itself five times. A player is not needed to flag this condition.
+    FifthRepetition,
 
     /// 50 moves have been made with no piece capture or pawn move.
     FiftyMoveRule,
 
-    /// Both players have insufficient material to check mate.
+    /// Both players have insufficient material to check mate. Do note that it is still possible
+    /// to checkmate an opponent King with just a bishop or a knight provided that the opponent
+    /// has a blocking piece to make this possible.
     InsufficientMaterial,
 
-    /// Both players agree to that there will be perpetual check.
+    /// Both players agree to that there will be perpetual check. This draw condition is
+    /// technically not needed because a perpectual check will often result in a position
+    /// repetition or vai the Fifty Move Rule.
     PerpetualCheck,
 }
 
@@ -99,6 +117,10 @@ pub struct Engine {
     /// The `Color` to move.
     pub to_move: Color,
 
+    /// A hashmap of FEN positions with their position count. Used to count position repetitions
+    /// via the Third Repetition and Fifth Repetition draw condition.
+    pub position_record: HashMap<String, u8>,
+
     /// Can white castle on the king side?
     pub white_can_castle_kingside: bool,
 
@@ -133,12 +155,12 @@ pub struct Engine {
     /// When a pawn is moved, the en passant target square is
     /// noted, even if there's no en passant move possible. This
     /// comes from the FEN layout of the game.
-    pub enpassant_target_square: (char, usize),
+    pub enpassant_target_square: Option<Coord>,
 
     /// When a pawn is moved, the en passant target square is
     /// noted, only if there's an en passant move possible. This
     /// comes from the X-FEN layout of the game.
-    pub true_enpassant_target_square: (char, usize),
+    pub true_enpassant_target_square: Option<Coord>,
 
     /// The `MoveGenerator` object representing the move list
     /// of all possible supported chess notations. Useful for
@@ -184,11 +206,11 @@ impl fmt::Display for Engine {
 
 impl Engine {
     /// Return a new instance of `Ok<Engine>` given a white
-    /// `Player` and a black `Player`.
+    /// [`Player`] and a black [`Player`].
     ///
     /// # Errors
     ///
-    /// * Returns a `ChuiError` when the engine was initialized with incompatible
+    /// * Returns a [`ChuiError`] when the engine was initialized with incompatible
     ///   sides.
     pub fn new(
         player_1: Player,
@@ -213,6 +235,7 @@ impl Engine {
             board: Board::new(ChessVariant::StandardChess),
             captured_pieces: Vec::<Piece>::new(),
             to_move: Color::White,
+            position_record: HashMap::new(),
             white_can_castle_kingside: true,
             white_can_castle_queenside: true,
             black_can_castle_kingside: true,
@@ -223,8 +246,8 @@ impl Engine {
             half_move_counter: 0,
             half_move_clock: 0,
             move_counter: 1,
-            enpassant_target_square: ('-', 9),
-            true_enpassant_target_square: ('-', 9),
+            enpassant_target_square: None,
+            true_enpassant_target_square: None,
             //move_generator: MoveGenerator::generate_move_list(),
             parser: parser::new(parser_engine),
             move_list: Vec::<Move>::new(),
@@ -527,10 +550,13 @@ impl Engine {
         for i in row_vec.iter() {
             output = format!("{}║ {} │", output, numeric_coords[*i as usize]);
             for j in col_vec.iter() {
-                output = self.board.get_piece(*j as usize, *i as usize).map_or_else(
-                    || format!("{} ·", output),
-                    |piece| format!("{} {}", output, piece),
-                );
+                output = self
+                    .board
+                    .get_piece(Coord::try_from((*j, *i)).unwrap())
+                    .map_or_else(
+                        || format!("{} ·", output),
+                        |piece| format!("{} {}", output, piece),
+                    );
             }
             output = format!("{} │ {} ║\n", output.trim(), numeric_coords[*i as usize]);
         }

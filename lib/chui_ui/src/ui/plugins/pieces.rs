@@ -29,9 +29,9 @@ fn init_pieces(
             rank.iter().enumerate().for_each(|(_, piece)| {
                 if let Some(piece) = piece {
                     let piece = Piece::new(*piece);
-                    let (x, y) = piece.get_coords();
-                    let x = (x as f32 + START_X_COORD) * ui_state.square_pixels;
-                    let y = (y as f32 - START_Y_COORD) * ui_state.square_pixels;
+                    let coord = piece.get_coord();
+                    let x = (coord.get_rank() as f32 + START_X_COORD) * ui_state.square_pixels;
+                    let y = (coord.get_file() as f32 - START_Y_COORD) * ui_state.square_pixels;
                     commands
                         .spawn(SpriteSheetBundle {
                             transform: Transform {
@@ -71,9 +71,9 @@ fn resize_pieces(
         match ui_state.draw_for_white {
             true => {
                 query.for_each_mut(|(piece, mut transform)| {
-                    let (x, y) = piece.get_coords();
-                    let x = (x as f32 + START_X_COORD) * ui_state.square_pixels;
-                    let y = (y as f32 - START_Y_COORD) * ui_state.square_pixels;
+                    let coord = piece.get_coord();
+                    let x = (coord.get_rank() as f32 + START_X_COORD) * ui_state.square_pixels;
+                    let y = (coord.get_file() as f32 - START_Y_COORD) * ui_state.square_pixels;
 
                     transform.translation = Vec3::new(x, y, 0.5);
                     transform.scale = Vec3::new(
@@ -86,9 +86,11 @@ fn resize_pieces(
 
             false => {
                 query.for_each_mut(|(piece, mut transform)| {
-                    let (x, y) = piece.get_coords();
-                    let x = ((7 - x) as f32 + START_X_COORD) * ui_state.square_pixels;
-                    let y = ((7 - y) as f32 - START_Y_COORD) * ui_state.square_pixels;
+                    let coord = piece.get_coord();
+                    let x =
+                        ((7 - coord.get_rank()) as f32 + START_X_COORD) * ui_state.square_pixels;
+                    let y =
+                        ((7 - coord.get_file()) as f32 - START_Y_COORD) * ui_state.square_pixels;
 
                     transform.translation = Vec3::new(x, y, 0.5);
                     transform.scale = Vec3::new(

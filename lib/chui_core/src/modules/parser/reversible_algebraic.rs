@@ -30,13 +30,13 @@ impl Parser for ReversibleAlgebraicParser {
         format!("Examples for {}", self.name())
     }
 
-    /// Return a String representing the move from board coordinates to this
+    /// Return a String representing the move from board Coordinates to this
     /// parser's notation.
-    fn generate_move_from_board_coordinates(
+    fn generate_move_from_board_Coordinates(
         &self,
         engine: &Engine,
-        from_index: (usize, usize),
-        _to_index: (usize, usize),
+        from_index: Coord,
+        _to_index: Coord,
     ) -> ChuiResult<String> {
         let board = &(engine.board.get_board());
 

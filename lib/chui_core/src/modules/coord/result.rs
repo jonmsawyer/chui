@@ -32,3 +32,7 @@ impl fmt::Display for CoordError {
 }
 
 impl Error for CoordError {}
+
+/// The main result type that is returned in this module, rather than the generic
+/// `Result<T, E>` type.
+pub type CoordResult<T> = std::result::Result<T, CoordError>;

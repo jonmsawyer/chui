@@ -97,8 +97,8 @@ pub fn debug_panel(
 //             Some(win) => win,
 //             None => return
 //         };
-//         let cursor = get_mouse_coords(window);
-//         let coords = get_world_coords(query, windows);
+//         let cursor = get_mouse_Coords(window);
+//         let Coords = get_world_Coords(query, windows);
 
 //         fps.add(time.delta_seconds());
 
@@ -107,7 +107,7 @@ pub fn debug_panel(
 //                 .show(egui_context.ctx_mut(), |ui| {
 //                     ui.label(format!("FPS: {:.2}", fps.average));
 //                     ui.label(format!("Mouse Screen Coords: {}, {}", cursor[0] as i32, cursor[1] as i32));
-//                     ui.label(format!("Mouse World Coords: {}, {}", coords[0] as i32, coords[1] as i32));
+//                     ui.label(format!("Mouse World Coords: {}, {}", Coords[0] as i32, Coords[1] as i32));
 //                     ui.vertical_centered_justified(|options_ui| {
 //                         options_ui.toggle_value(&mut ui_state.show_mouse_cursor, "Show Mouse Cursor");
 //                     });

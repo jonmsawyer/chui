@@ -350,7 +350,7 @@ impl<'a> MoveGenerator<'a> {
         file_b_idx: usize,
         rank_b_idx: usize,
     ) -> bool {
-        // We cast to `isize` for negative coordinate checking.
+        // We cast to `isize` for negative Coordinate checking.
         let file_a_idx = file_a_idx as isize;
         let file_b_idx = file_b_idx as isize;
         let rank_a_idx = rank_a_idx as isize;

@@ -49,7 +49,7 @@ pub enum ChuiError {
     /// never see this error.
     TokenNotSatisfied(String),
 
-    /// When generating a move string from board coordinates, the coordinates
+    /// When generating a move string from board Coordinates, the Coordinates
     /// must be within a valid range (0-7).
     IndexOutOfRange(String),
 

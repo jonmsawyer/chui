@@ -3,11 +3,13 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
+use crate::Coord;
+
 use super::components::MainCamera;
 use super::constants::{FILES, RANKS, SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
 use super::resources::UiResource;
 
-/// Transform the from square cursor to the indicated mouse coordinates.
+/// Transform the from square cursor to the indicated mouse Coordinates.
 pub fn transform_from_square(
     ui_state: &mut UiResource,
     transform: &mut Transform,
@@ -30,7 +32,7 @@ pub fn transform_from_square(
     *visibility = Visibility::Inherited;
 }
 
-/// Transform the to square cursor to to the indicated mouse coordinates.
+/// Transform the to square cursor to to the indicated mouse Coordinates.
 pub fn transform_to_square(
     ui_state: &mut UiResource,
     transform: &mut Transform,
@@ -59,16 +61,16 @@ pub fn hide_from_and_to_square(from_visibility: &mut Visibility, to_visibility: 
     *to_visibility = Visibility::Hidden;
 }
 
-/// Compute the world coords from the chessboard coordinates (zero-indexed).
-pub fn compute_world_coords(coord: (usize, usize), ui_state_square_pixels: f32) -> Vec2 {
-    let x = coord.0 as f32;
-    let y = coord.1 as f32;
+/// Compute the world Coords from the chessboard Coordinates (zero-indexed).
+pub fn compute_world_coords(coord: Coord, ui_state_square_pixels: f32) -> Vec2 {
+    let x = coord.get_file() as f32;
+    let y = coord.get_rank() as f32;
     let world_coords_x = (x - START_Y_COORD) * ui_state_square_pixels;
     let world_coords_y = (y - START_Y_COORD) * ui_state_square_pixels;
     Vec2::new(world_coords_x, world_coords_y)
 }
 
-/// Compute the chessboard coordinates (zero-indexed) from mouse click coordinates.
+/// Compute the chessboard Coordinates (zero-indexed) from mouse click Coordinates.
 pub fn compute_board_coords(
     ui_state: &mut UiResource,
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
@@ -95,7 +97,7 @@ pub fn compute_board_coords(
     true
 }
 
-/// Compute the scale, start x, and start y coordinates based on the UI's square pixels.
+/// Compute the scale, start x, and start y Coordinates based on the UI's square pixels.
 pub fn compute_coords(square_pixels: f32) -> (f32, f32, f32) {
     let scale = square_pixels / SPRITE_WIDTH; // 0.28125 by default
     let start_x = START_X_COORD * square_pixels; // -288.0 by default
@@ -132,12 +134,12 @@ pub fn update_square_pixels(mut ui_state: ResMut<UiResource>) -> ResMut<UiResour
     ui_state
 }
 
-/// Get the screen coordinates of the mouse cursor.
+/// Get the screen Coordinates of the mouse cursor.
 pub fn get_mouse_coords(window: &Window) -> Vec2 {
     window.cursor_position().map_or(Vec2::ZERO, |cursor| cursor)
 }
 
-/// Get the world coordinates of the mouse cursor.
+/// Get the world Coordinates of the mouse cursor.
 pub fn get_world_coords(
     camera_query: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     window_query: Query<&Window, With<PrimaryWindow>>,
@@ -155,13 +157,13 @@ pub fn get_world_coords(
         // get the size of the window
         let window_size = Vec2::new(window.width(), window.height());
 
-        // convert screen position [0..resolution] to ndc [-1..1] (gpu coordinates)
+        // convert screen position [0..resolution] to ndc [-1..1] (gpu Coordinates)
         let ndc = (screen_pos / window_size) * 2.0 - Vec2::ONE;
 
         // matrix for undoing the projection and camera transform
         let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
 
-        // use it to convert ndc to world-space coordinates
+        // use it to convert ndc to world-space Coordinates
         let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0));
 
         // reduce it to a 2D value

@@ -35,24 +35,16 @@ pub fn get_fen_castle(engine: &Engine) -> String {
 
 /// Get the FEN en passant square.
 pub fn get_fen_en_passant(engine: &Engine) -> String {
-    let (file, rank) = engine.enpassant_target_square;
-
-    if file == '-' || rank == 9 {
-        "-".to_string()
+    if let Some(coord) = engine.enpassant_target_square {
+        coord.to_string()
     } else {
-        format!("{}{}", file, rank)
+        "-".to_string()
     }
 }
 
 /// Get the X-FEN en passant square.
 pub fn get_x_fen_en_passant(engine: &Engine) -> String {
-    let (file, rank) = engine.true_enpassant_target_square;
-
-    if file == '-' || rank == 9 {
-        "-".to_string()
-    } else {
-        format!("{}{}", file, rank)
-    }
+    get_fen_en_passant(engine)
 }
 
 /// Get the FEN half-move clock.

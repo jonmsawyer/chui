@@ -192,9 +192,9 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                 impl TryFrom<(#t, #u)> for #ident {
                     type Error = CoordError;
 
-                    fn try_from(coord: (#t, #u)) -> CoordResult<Coord> {
-                        if let Ok(file) = u8::try_from(coord.0) {
-                            if let Ok(rank) = u8::try_from(coord.1) {
+                    fn try_from(Coord: (#t, #u)) -> CoordResult<Coord> {
+                        if let Ok(file) = u8::try_from(Coord.0) {
+                            if let Ok(rank) = u8::try_from(Coord.1) {
                                 if let Ok(file) = NonMaxU8::try_from(file) {
                                     if let Ok(rank) = NonMaxU8::try_from(rank) {
                                         Ok(Coord { file, rank })
@@ -213,13 +213,13 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                             } else {
                                 Err(CoordError::InvalidTypeConversion(format!(
                                     "{} could not be converted to a valid u8 type",
-                                    coord.1
+                                    Coord.1
                                 )))
                             }
                         } else {
                             Err(CoordError::InvalidTypeConversion(format!(
                                 "{} could not be converted to a valid u8 type",
-                                coord.0
+                                Coord.0
                             )))
                         }
                     }

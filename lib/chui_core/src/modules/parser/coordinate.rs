@@ -4,11 +4,11 @@
 
 //use std::fmt;
 
-use super::super::{Color, Engine, Move};
-use super::Parser;
-use crate::{ChuiError, ChuiResult};
+use crate::{ChuiError, ChuiResult, Color, Coord, Engine, Move};
 
-/// A parser that will parse coordinate chess notation.
+use super::Parser;
+
+/// A parser that will parse Coordinate chess notation.
 /// Example moves: `E2-E4`, `e7-e5`, `G1-F3`, `B8-c6`, `f1-b5`, etc.
 #[derive(Debug, Copy, Clone)]
 pub struct CoordinateParser;
@@ -30,22 +30,22 @@ impl Parser for CoordinateParser {
         format!("Examples for {}", self.name())
     }
 
-    /// Return a String representing the move from board coordinates to this
+    /// Return a String representing the move from board Coordinates to this
     /// parser's notation.
-    fn generate_move_from_board_coordinates(
+    fn generate_move_from_board_Coordinates(
         &self,
         engine: &Engine,
-        from_index: (usize, usize),
-        _to_index: (usize, usize),
+        coord: Coord,
     ) -> ChuiResult<String> {
         let board = &(engine.board.get_board());
 
-        let piece = match board[from_index.0][from_index.1] {
+        let piece = match board[coord.get_rank()][coord.get_file()] {
             Some(piece) => piece,
             None => {
                 return Err(ChuiError::InvalidMove(format!(
                     "Invalid move. No piece at ({}, {})",
-                    from_index.0, from_index.1
+                    coord.get_rank(),
+                    coord.get_file()
                 )))
             }
         };

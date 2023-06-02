@@ -83,25 +83,25 @@ pub struct UiResource {
     /// True if we render the mouse chessboard cursor.
     pub show_mouse_cursor: bool,
 
-    /// A vec containing the screen coordinates of the mouse cursor.
+    /// A vec containing the screen Coordinates of the mouse cursor.
     pub mouse_cursor_screen_coords: Vec2,
 
-    /// A vec containing the world coordinates of the mouse cursor.
+    /// A vec containing the world Coordinates of the mouse cursor.
     pub mouse_cursor_world_coords: Vec2,
 
-    /// A vec containing the world coordinates of a mouse click.
+    /// A vec containing the world Coordinates of a mouse click.
     pub mouse_click_board_coords: Vec2,
 
-    /// A tuple containing the Algebraic coordinates of a mouse click.
+    /// A tuple containing the Algebraic Coordinates of a mouse click.
     pub mouse_click_algebraic_coords: (char, usize),
 
-    /// A vec containing the world coordinates of the From Square mouse click.
+    /// A vec containing the world Coordinates of the From Square mouse click.
     pub mouse_click_from_square: Vec2,
 
     /// True if the From Square was mouse clicked.
     pub mouse_click_from_square_clicked: bool,
 
-    /// A vec containing the world coordinates of the To Square mouse click.
+    /// A vec containing the world Coordinates of the To Square mouse click.
     pub mouse_click_to_square: Vec2,
 
     /// True if the To Square was mouse clicked.
@@ -113,7 +113,7 @@ pub struct UiResource {
     /// Camera last position.
     pub camera_last_position: Vec3,
 
-    /// Show board coordinates?
+    /// Show board Coordinates?
     pub show_coords: bool,
 }
 

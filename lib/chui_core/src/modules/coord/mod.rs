@@ -1,19 +1,15 @@
 //! Chui Core's Coordinate base type.
 
+use std::fmt;
 use std::str::FromStr;
-use std::string::ToString;
 
 pub use nonmax::NonMaxU8;
 
 use crate::traits::Coordinate;
 use crate::STR_FILES;
 
-mod error;
-pub use error::CoordError;
-
-/// The main result type that is returned in this module, rather than the generic
-/// `Result<T, E>` type.
-pub type CoordResult<T> = std::result::Result<T, CoordError>;
+mod result;
+pub use result::{CoordError, CoordResult};
 
 /// Main [`Coord`] struct used to represent chess piece and board position. We use non-max
 /// u8 values because indicies are 0-indexed and values of 8 are invalid for an iterable
@@ -25,20 +21,35 @@ pub struct Coord {
 }
 
 impl Coord {
-    /// Create a new [`Coord`] from a file and a rank parameter.
+    /// Create a new [`Coord`] from a file and a rank parameter. File and rank parameters must
+    /// evaluate to the u8 type and be less than 8 in value.
     pub fn new(file: u8, rank: u8) -> CoordResult<Coord> {
         if let Ok(file) = NonMaxU8::try_from(file) {
             if let Ok(rank) = NonMaxU8::try_from(rank) {
+                if file.get() > 7 {
+                    return Err(CoordError::InvalidFile(format!(
+                        "{} is an invalid file index",
+                        file
+                    )));
+                }
+
+                if rank.get() > 7 {
+                    return Err(CoordError::InvalidRank(format!(
+                        "{} is an invalid rank index",
+                        rank
+                    )));
+                }
+
                 Ok(Coord { file, rank })
             } else {
                 Err(CoordError::InvalidRank(format!(
-                    "{} is an invalid rank",
+                    "{} is an invalid rank index",
                     rank
                 )))
             }
         } else {
             Err(CoordError::InvalidFile(format!(
-                "{} is an invalid file",
+                "{} is an invalid file index",
                 file
             )))
         }
@@ -62,11 +73,18 @@ impl Coord {
     /// Set the value of [`Coord`]'s file.
     pub fn set_file(&mut self, value: u8) -> CoordResult<u8> {
         if let Ok(file) = NonMaxU8::try_from(value) {
+            if file.get() > 7 {
+                return Err(CoordError::InvalidFile(format!(
+                    "{} is an invalid file index",
+                    file
+                )));
+            }
+
             self.file = file;
             Ok(self.file.get())
         } else {
             Err(CoordError::InvalidFile(format!(
-                "{} is an invalid file",
+                "{} is an invalid file index",
                 value
             )))
         }
@@ -75,11 +93,18 @@ impl Coord {
     /// Set the value of [`Coord`]'s rank.
     pub fn set_rank(&mut self, value: u8) -> CoordResult<u8> {
         if let Ok(rank) = NonMaxU8::try_from(value) {
+            if rank.get() > 7 {
+                return Err(CoordError::InvalidRank(format!(
+                    "{} is an invalid rank index",
+                    rank
+                )));
+            }
+
             self.rank = rank;
             Ok(self.rank.get())
         } else {
             Err(CoordError::InvalidFile(format!(
-                "{} is an invalid rank",
+                "{} is an invalid rank index",
                 value
             )))
         }
@@ -112,10 +137,11 @@ impl Coord {
     }
 }
 
-impl ToString for Coord {
-    fn to_string(&self) -> String {
+/// Formats the position for white.
+impl fmt::Display for Coord {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (file, rank) = (self.file.get() as usize, self.rank.get());
-        format!("{}{}", STR_FILES[file], rank + 1)
+        write!(f, "{}{}", STR_FILES[file], rank + 1)
     }
 }
 

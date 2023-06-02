@@ -6,17 +6,16 @@
 
 use std::fmt;
 
-use super::{Color, Engine, Move};
-use crate::{ChuiError, ChuiResult};
+use crate::{ChuiError, ChuiResult, Color, Coord, Engine, Move};
 
+// pub mod coordinate;
 pub mod algebraic;
-pub mod concise_reversible;
-pub mod coordinate;
-pub mod descriptive;
-pub mod iccf;
-pub mod long_algebraic;
-pub mod reversible_algebraic;
-pub mod smith;
+// pub mod concise_reversible;
+// pub mod descriptive;
+// pub mod iccf;
+// pub mod long_algebraic;
+// pub mod reversible_algebraic;
+// pub mod smith;
 
 /// Implement this trait to define the `parse()` method on a parser.
 /// Any struct implementing this trait should parse a chess move
@@ -69,16 +68,16 @@ pub trait Parser: Send + Sync {
     /// Example inputs.
     fn eg(&self) -> String;
 
-    /// Generate move from board coordinates into this parser's notation.
+    /// Generate move from board Coordinates into this parser's notation.
     ///
     /// # Errors
     ///
-    /// * Errors when the parser cannot generate a move from the board coordinates.
+    /// * Errors when the parser cannot generate a move from the board Coordinates.
     fn generate_move_from_board_coordinates(
         &self,
         engine: &Engine,
-        from_index: (usize, usize),
-        to_index: (usize, usize),
+        from_coord: Coord,
+        to_coord: Coord,
     ) -> ChuiResult<String>;
 
     /// Trim the whitespace from `the_move` and check to see that
@@ -186,41 +185,40 @@ pub enum ParserEngine {
     /// parses moves in algebraic notation.
     /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
     Algebraic,
+    // /// This engine variant helps to return a `ConciseReversibleParser`,
+    // /// which parses moves in concise reversible notation.
+    // /// Example moves: `e24`, `e75`, `Ng1f3`, `Nb8c6`, `Bb5:Nc6`, etc.
+    // ConciseReversible,
 
-    /// This engine variant helps to return a `ConciseReversibleParser`,
-    /// which parses moves in concise reversible notation.
-    /// Example moves: `e24`, `e75`, `Ng1f3`, `Nb8c6`, `Bb5:Nc6`, etc.
-    ConciseReversible,
+    // /// This engine variant helps to return a `CoordinateParser`,
+    // /// which parses moves in Coordinate notation.
+    // /// Example moves: `E2-E4`, `e7-e5`, `G1-F3`, `B8-c6`, `f1-b5`, etc.
+    // Coordinate,
 
-    /// This engine variant helps to return a `CoordinateParser`,
-    /// which parses moves in coordinate notation.
-    /// Example moves: `E2-E4`, `e7-e5`, `G1-F3`, `B8-c6`, `f1-b5`, etc.
-    Coordinate,
+    // /// This engine variant helps to return a `DescriptiveParser`,
+    // /// which parses moves in English descriptive notation.
+    // /// Example moves: `P-K4`, `NxN`, `QxRch`, `Q-KR4 mate`, `O-O`, etc.
+    // Descriptive,
 
-    /// This engine variant helps to return a `DescriptiveParser`,
-    /// which parses moves in English descriptive notation.
-    /// Example moves: `P-K4`, `NxN`, `QxRch`, `Q-KR4 mate`, `O-O`, etc.
-    Descriptive,
+    // /// This engine variant helps to return a `ICCFParser`,
+    // /// which parses moves in ICCF notation.
+    // /// Example moves: `5254`, `5755`, `7163`, `2836`, `6125`, etc.
+    // ICCF,
 
-    /// This engine variant helps to return a `ICCFParser`,
-    /// which parses moves in ICCF notation.
-    /// Example moves: `5254`, `5755`, `7163`, `2836`, `6125`, etc.
-    ICCF,
+    // /// This engine variant helps to return a `LongAlgebraicParser`,
+    // /// which parses moves in long algebraic notation.
+    // /// Example moves: `e2e4`, `e7e5`, `d2d3`, `Bf8b4+`, `Bb5xc6`, etc.
+    // LongAlgebraic,
 
-    /// This engine variant helps to return a `LongAlgebraicParser`,
-    /// which parses moves in long algebraic notation.
-    /// Example moves: `e2e4`, `e7e5`, `d2d3`, `Bf8b4+`, `Bb5xc6`, etc.
-    LongAlgebraic,
+    // /// This engine variant helps to return a `ReversibleAlgebraicParser`,
+    // /// which parses moves in reversible algebraic notation.
+    // /// Example moves: `e2-e4`, `e7-e5`, `Bb5xNc6`, `Bf8-b4#`, etc.
+    // ReversibleAlgebraic,
 
-    /// This engine variant helps to return a `ReversibleAlgebraicParser`,
-    /// which parses moves in reversible algebraic notation.
-    /// Example moves: `e2-e4`, `e7-e5`, `Bb5xNc6`, `Bf8-b4#`, etc.
-    ReversibleAlgebraic,
-
-    /// This engine variant helps to return a `SmithParser`,
-    /// which parses moves in Smith notation.
-    /// Example moves: `e1g1c`, `b4c3n`, `b5c6n`, `d7c6b`, `e2e4`, etc.
-    Smith,
+    // /// This engine variant helps to return a `SmithParser`,
+    // /// which parses moves in Smith notation.
+    // /// Example moves: `e1g1c`, `b4c3n`, `b5c6n`, `d7c6b`, `e2e4`, etc.
+    // Smith,
 }
 
 /// Given a variant of `ParserEngine`, this function returns a
@@ -254,19 +252,18 @@ pub enum ParserEngine {
 pub fn new(parser: ParserEngine) -> Box<dyn Parser + Send + Sync> {
     match parser {
         ParserEngine::Algebraic => algebraic::AlgebraicParser::new(),
+        // ParserEngine::ConciseReversible => concise_reversible::ConciseReversibleParser::new(),
 
-        ParserEngine::ConciseReversible => concise_reversible::ConciseReversibleParser::new(),
+        // ParserEngine::Coordinate => Coordinate::CoordinateParser::new(),
 
-        ParserEngine::Coordinate => coordinate::CoordinateParser::new(),
+        // ParserEngine::Descriptive => descriptive::DescriptiveParser::new(),
 
-        ParserEngine::Descriptive => descriptive::DescriptiveParser::new(),
+        // ParserEngine::ICCF => iccf::ICCFParser::new(),
 
-        ParserEngine::ICCF => iccf::ICCFParser::new(),
+        // ParserEngine::LongAlgebraic => long_algebraic::LongAlgebraicParser::new(),
 
-        ParserEngine::LongAlgebraic => long_algebraic::LongAlgebraicParser::new(),
+        // ParserEngine::ReversibleAlgebraic => reversible_algebraic::ReversibleAlgebraicParser::new(),
 
-        ParserEngine::ReversibleAlgebraic => reversible_algebraic::ReversibleAlgebraicParser::new(),
-
-        ParserEngine::Smith => smith::SmithParser::new(),
+        // ParserEngine::Smith => smith::SmithParser::new(),
     }
 }

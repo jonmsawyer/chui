@@ -24,55 +24,54 @@ pub fn switch_parser(engine: &mut Engine, command: &Command) {
                 break;
             }
 
-            Some(CommandKind::SwitchToConciseReversibleParser) => {
-                let parser_engine = ParserEngine::ConciseReversible;
-                println!("Switching parser to {:?}.", parser_engine);
-                engine.set_parser(parser_engine);
-                break;
-            }
+            // Some(CommandKind::SwitchToConciseReversibleParser) => {
+            //     let parser_engine = ParserEngine::ConciseReversible;
+            //     println!("Switching parser to {:?}.", parser_engine);
+            //     engine.set_parser(parser_engine);
+            //     break;
+            // }
 
-            Some(CommandKind::SwitchToCoordinateParser) => {
-                let parser_engine = ParserEngine::Coordinate;
-                println!("Switching parser to {:?}.", parser_engine);
-                engine.set_parser(parser_engine);
-                break;
-            }
+            // Some(CommandKind::SwitchToCoordinateParser) => {
+            //     let parser_engine = ParserEngine::Coordinate;
+            //     println!("Switching parser to {:?}.", parser_engine);
+            //     engine.set_parser(parser_engine);
+            //     break;
+            // }
 
-            Some(CommandKind::SwitchToDescriptiveParser) => {
-                let parser_engine = ParserEngine::Descriptive;
-                println!("Switching parser to {:?}.", parser_engine);
-                engine.set_parser(parser_engine);
-                break;
-            }
+            // Some(CommandKind::SwitchToDescriptiveParser) => {
+            //     let parser_engine = ParserEngine::Descriptive;
+            //     println!("Switching parser to {:?}.", parser_engine);
+            //     engine.set_parser(parser_engine);
+            //     break;
+            // }
 
-            Some(CommandKind::SwitchToICCFParser) => {
-                let parser_engine = ParserEngine::ICCF;
-                println!("Switching parser to {:?}.", parser_engine);
-                engine.set_parser(parser_engine);
-                break;
-            }
+            // Some(CommandKind::SwitchToICCFParser) => {
+            //     let parser_engine = ParserEngine::ICCF;
+            //     println!("Switching parser to {:?}.", parser_engine);
+            //     engine.set_parser(parser_engine);
+            //     break;
+            // }
 
-            Some(CommandKind::SwitchToLongAlgebraicParser) => {
-                let parser_engine = ParserEngine::LongAlgebraic;
-                println!("Switching parser to {:?}.", parser_engine);
-                engine.set_parser(parser_engine);
-                break;
-            }
+            // Some(CommandKind::SwitchToLongAlgebraicParser) => {
+            //     let parser_engine = ParserEngine::LongAlgebraic;
+            //     println!("Switching parser to {:?}.", parser_engine);
+            //     engine.set_parser(parser_engine);
+            //     break;
+            // }
 
-            Some(CommandKind::SwitchToReversibleAlgebraicParser) => {
-                let parser_engine = ParserEngine::ReversibleAlgebraic;
-                println!("Switching parser to {:?}.", parser_engine);
-                engine.set_parser(parser_engine);
-                break;
-            }
+            // Some(CommandKind::SwitchToReversibleAlgebraicParser) => {
+            //     let parser_engine = ParserEngine::ReversibleAlgebraic;
+            //     println!("Switching parser to {:?}.", parser_engine);
+            //     engine.set_parser(parser_engine);
+            //     break;
+            // }
 
-            Some(CommandKind::SwitchToSmithParser) => {
-                let parser_engine = ParserEngine::Smith;
-                println!("Switching parser to {:?}.", parser_engine);
-                engine.set_parser(parser_engine);
-                break;
-            }
-
+            // Some(CommandKind::SwitchToSmithParser) => {
+            //     let parser_engine = ParserEngine::Smith;
+            //     println!("Switching parser to {:?}.", parser_engine);
+            //     engine.set_parser(parser_engine);
+            //     break;
+            // }
             Some(CommandKind::Help) => {
                 continue;
             }

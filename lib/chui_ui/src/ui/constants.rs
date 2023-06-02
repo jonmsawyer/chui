@@ -1,9 +1,9 @@
 //! Constants module.
 
-/// The left four squares of the chessboard, in world coordinates.
+/// The left four squares of the chessboard, in world Coordinates.
 pub const START_X_COORD: f32 = -4.0;
 
-/// The top four squares of the chessboard, in world coordinates.
+/// The top four squares of the chessboard, in world Coordinates.
 pub const START_Y_COORD: f32 = 4.0;
 
 /// The size of the sprite in x*y dimentions (square).

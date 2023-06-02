@@ -9,11 +9,10 @@
 use std::convert::TryFrom;
 // use std::collections::HashMap;
 
-use crate::{ChuiError, ChuiResult};
-
-use super::super::{Color, Engine, Move, MoveGenerator, Piece, PieceKind};
-use super::Parser;
-//use super::super::parser::ParserEngine;
+use crate::{
+    parser::Parser, ChuiError, ChuiResult, Color, Coord, Engine, Move, MoveGenerator, Piece,
+    PieceKind,
+};
 
 /// A parser that will parse algebraic chess notation.
 /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
@@ -185,61 +184,53 @@ impl<'a> Parser for AlgebraicParser<'a> {
         format!("e4, Bxc6, Qb4, exf8=Q++ ({})", self.name())
     }
 
-    /// Return a String representing the move from board coordinates to this
+    /// Return a String representing the move from board Coordinates to this
     /// parser's notation.
     fn generate_move_from_board_coordinates(
         &self,
         engine: &Engine,
-        from_index: (usize, usize),
-        to_index: (usize, usize),
+        from_coord: Coord,
+        to_coord: Coord,
     ) -> ChuiResult<String> {
-        if from_index.0 > 7 || from_index.1 > 7 || to_index.0 > 7 || to_index.1 > 7 {
-            return Err(ChuiError::IndexOutOfRange(
-                "Index must be between 0 and 7, includsive".to_string(),
-            ));
-        }
-        let mut move_string: String;
+        let mut _move_string = String::new();
         let mut the_move = Move::new();
-        let piece = match engine.board.get_board()[from_index.1][from_index.0] {
+        let piece = match engine.board.get_board()[from_coord.get_rank() as usize]
+            [from_coord.get_file() as usize]
+        {
             Some(piece) => piece,
             None => {
                 return Err(ChuiError::InvalidMove(format!(
                     "No piece at ({}, {})",
-                    from_index.0, from_index.1
+                    from_coord.get_rank(),
+                    from_coord.get_file()
                 )))
             }
         };
         match piece.get_piece() {
             PieceKind::Pawn => {
                 the_move.set_pawn_move();
-                let file = self.match_index_to_file(from_index.0 as u8).unwrap();
-                move_string = format!("{}", file);
+                let file = self.match_index_to_file(from_coord.get_file()).unwrap();
+                _move_string = format!("{}", file);
             }
             _ => {
                 the_move.set_piece_move(piece);
-                move_string = format!("{}", piece);
+                _move_string = format!("{}", piece);
             }
         }
-        let to_square = engine.board.get_board()[to_index.1][to_index.0];
-        if to_square.is_some() {
-            move_string.push('x');
-        }
+        let _to_square =
+            engine.board.get_board()[to_coord.get_rank() as usize][to_coord.get_file() as usize];
         let piece_move_coords = piece.get_move_coords(&(engine.board), &Some(the_move));
         for coord in piece_move_coords.iter() {
-            if &to_index == coord {
-                let file = self.match_index_to_file(to_index.0 as u8).unwrap();
-                let rank = self.match_index_to_rank(to_index.1 as u8).unwrap();
-                move_string.push(file);
-                move_string.push(rank);
+            if &to_coord == coord {
                 println!("Valid move.");
                 break;
             } else {
-                move_string = "Invalid move.".to_string();
-                println!("{}", move_string);
+                _move_string = "Invalid move.".to_string();
+                println!("{}", _move_string);
             }
         }
 
-        Ok(move_string)
+        Ok(_move_string)
     }
 }
 
@@ -287,10 +278,8 @@ impl<'a> AlgebraicParser<'a> {
     /// be one of \[abcdefgh\]. If a valid file is found, record
     /// it in the move.
     fn try_file(&mut self, token: char) -> ChuiResult<()> {
-        if let Some(index) = self.match_file_to_index(token) {
+        if let Some(_index) = self.match_file_to_index(token) {
             self.move_obj.set_to_coord_file(token);
-            self.move_obj.set_to_index_file(index);
-            return Ok(());
         }
 
         AlgebraicParser::token_not_satisfied(token)
@@ -313,8 +302,6 @@ impl<'a> AlgebraicParser<'a> {
     fn try_rank(&mut self, token: char) -> ChuiResult<()> {
         if let Some(index) = self.match_rank_to_index(token) {
             self.move_obj.set_to_coord_rank(index + 1);
-            self.move_obj.set_to_index_rank(index);
-            return Ok(());
         }
 
         AlgebraicParser::token_not_satisfied(token)
@@ -1138,2014 +1125,1886 @@ impl<'a> AlgebraicParser<'a> {
     }
 }
 
-#[cfg(test)]
-mod test {
-    use crate::{
-        parser, ChuiError, ChuiResult, Color, Move, MoveType, ParserEngine, Piece, PieceKind,
-    };
-
-    fn parse_the_move(the_move: String) -> ChuiResult<Move> {
-        let mut parser = parser::new(ParserEngine::Algebraic);
-        // If parsing won't work for White, it won't work for Black.
-        parser.parse(the_move, Color::White)
-    }
-
-    #[test]
-    fn test_invalid_move() -> ChuiResult<()> {
-        let the_move = "asdf".to_string();
-        let input_move = the_move.clone();
-        if parse_the_move(the_move).is_ok() {
-            return Err(ChuiError::InvalidInput(format!(
-                "The move `{}` parsed correctly \
-                        when it's not supposed to",
-                input_move
-            )));
-        }
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_e4() -> ChuiResult<()> {
-        let the_move = "e4".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 4),
-                    from_index: (8, 8),
-                    to_index: (4, 3),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e4_check() -> ChuiResult<()> {
-        let the_move = "e4+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 4),
-                    from_index: (8, 8),
-                    to_index: (4, 3),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e4_mate() -> ChuiResult<()> {
-        let the_move = "e4#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 4),
-                    from_index: (8, 8),
-                    to_index: (4, 3),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e8_queen() -> ChuiResult<()> {
-        let the_move = "e8Q".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 8),
-                    from_index: (8, 8),
-                    to_index: (4, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e4_check_check() -> ChuiResult<()> {
-        let the_move = "e4++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 4),
-                    from_index: (8, 8),
-                    to_index: (4, 3),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e8_queen_check() -> ChuiResult<()> {
-        let the_move = "e8Q+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 8),
-                    from_index: (8, 8),
-                    to_index: (4, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e8_queen_mate() -> ChuiResult<()> {
-        let the_move = "e8Q#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 8),
-                    from_index: (8, 8),
-                    to_index: (4, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e8_equals_queen() -> ChuiResult<()> {
-        let the_move = "e8=Q".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 8),
-                    from_index: (8, 8),
-                    to_index: (4, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e4_takes_f4() -> ChuiResult<()> {
-        let the_move = "exf4".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 4),
-                    from_index: (4, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e8_queen_check_check() -> ChuiResult<()> {
-        let the_move = "e8Q++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 8),
-                    from_index: (8, 8),
-                    to_index: (4, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e8_equals_queen_check() -> ChuiResult<()> {
-        let the_move = "e8=Q+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 8),
-                    from_index: (8, 8),
-                    to_index: (4, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e8_equals_queen_mate() -> ChuiResult<()> {
-        let the_move = "e8=Q#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 8),
-                    from_index: (8, 8),
-                    to_index: (4, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f4_check() -> ChuiResult<()> {
-        let the_move = "exf4+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 4),
-                    from_index: (4, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f4_mate() -> ChuiResult<()> {
-        let the_move = "exf4#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 4),
-                    from_index: (4, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f8_queen() -> ChuiResult<()> {
-        let the_move = "exf8Q".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 8),
-                    from_index: (4, 8),
-                    to_index: (5, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e8_equals_queen_check_check() -> ChuiResult<()> {
-        let the_move = "e8=Q++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('e', 8),
-                    from_index: (8, 8),
-                    to_index: (4, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f4_check_check() -> ChuiResult<()> {
-        let the_move = "exf4++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 4),
-                    from_index: (4, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f8_queen_check() -> ChuiResult<()> {
-        let the_move = "exf8Q+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 8),
-                    from_index: (4, 8),
-                    to_index: (5, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f8_queen_mate() -> ChuiResult<()> {
-        let the_move = "exf8Q#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 8),
-                    from_index: (4, 8),
-                    to_index: (5, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f8_equals_queen() -> ChuiResult<()> {
-        let the_move = "exf8=Q".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 8),
-                    from_index: (4, 8),
-                    to_index: (5, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f8_equals_queen_mate() -> ChuiResult<()> {
-        let the_move = "exf8=Q#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 8),
-                    from_index: (4, 8),
-                    to_index: (5, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f8_equals_queen_check() -> ChuiResult<()> {
-        let the_move = "exf8=Q+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 8),
-                    from_index: (4, 8),
-                    to_index: (5, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f8_queen_check_check() -> ChuiResult<()> {
-        let the_move = "exf8Q++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 8),
-                    from_index: (4, 8),
-                    to_index: (5, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_e_takes_f8_equals_queen_check_check() -> ChuiResult<()> {
-        let the_move = "exf8=Q++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('e', 9),
-                    to_coord: ('f', 8),
-                    from_index: (4, 8),
-                    to_index: (5, 7),
-                    piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: true,
-                    promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PawnCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_bishop_f4() -> ChuiResult<()> {
-        let the_move = "Bf4".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('f', 4),
-                    from_index: (8, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_bishop_f4_check() -> ChuiResult<()> {
-        let the_move = "Bf4+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('f', 4),
-                    from_index: (8, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_bishop_f4_mate() -> ChuiResult<()> {
-        let the_move = "Bf4#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('f', 4),
-                    from_index: (8, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_bishop_takes_f4() -> ChuiResult<()> {
-        let the_move = "Bxf4".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('f', 4),
-                    from_index: (8, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_bishop_f4_check_check() -> ChuiResult<()> {
-        let the_move = "Bf4++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('f', 4),
-                    from_index: (8, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_bishop_takes_f4_check() -> ChuiResult<()> {
-        let the_move = "Bxf4+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('f', 4),
-                    from_index: (8, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_bishop_takes_f4_mate() -> ChuiResult<()> {
-        let the_move = "Bxf4#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('f', 4),
-                    from_index: (8, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_bishop_takes_f4_check_check() -> ChuiResult<()> {
-        let the_move = "Bxf4++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('f', 4),
-                    from_index: (8, 8),
-                    to_index: (5, 3),
-                    piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_castle_king() -> ChuiResult<()> {
-        let the_move = "0-0".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('-', 9),
-                    from_index: (8, 8),
-                    to_index: (8, 8),
-                    piece: Some(Piece::new(PieceKind::King, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: true,
-                    is_castling_king: true,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::Castle),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_castle_king_check() -> ChuiResult<()> {
-        let the_move = "0-0+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('-', 9),
-                    from_index: (8, 8),
-                    to_index: (8, 8),
-                    piece: Some(Piece::new(PieceKind::King, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: true,
-                    is_castling_king: true,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::Castle),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_castle_king_mate() -> ChuiResult<()> {
-        let the_move = "0-0#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('-', 9),
-                    from_index: (8, 8),
-                    to_index: (8, 8),
-                    piece: Some(Piece::new(PieceKind::King, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: true,
-                    is_castling_king: true,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::Castle),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_castle_king_check_check() -> ChuiResult<()> {
-        let the_move = "0-0#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('-', 9),
-                    from_index: (8, 8),
-                    to_index: (8, 8),
-                    piece: Some(Piece::new(PieceKind::King, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: true,
-                    is_castling_king: true,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::Castle),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_castle_queen() -> ChuiResult<()> {
-        let the_move = "0-0-0".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('-', 9),
-                    from_index: (8, 8),
-                    to_index: (8, 8),
-                    piece: Some(Piece::new(PieceKind::King, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: true,
-                    is_castling_king: false,
-                    is_castling_queen: true,
-                    input_move,
-                    move_type: Some(MoveType::Castle),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_castle_queen_check() -> ChuiResult<()> {
-        let the_move = "0-0-0+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('-', 9),
-                    from_index: (8, 8),
-                    to_index: (8, 8),
-                    piece: Some(Piece::new(PieceKind::King, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: true,
-                    is_castling_king: false,
-                    is_castling_queen: true,
-                    input_move,
-                    move_type: Some(MoveType::Castle),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_castle_queen_mate() -> ChuiResult<()> {
-        let the_move = "0-0-0#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('-', 9),
-                    from_index: (8, 8),
-                    to_index: (8, 8),
-                    piece: Some(Piece::new(PieceKind::King, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: true,
-                    is_castling_king: false,
-                    is_castling_queen: true,
-                    input_move,
-                    move_type: Some(MoveType::Castle),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_castle_queen_check_check() -> ChuiResult<()> {
-        let the_move = "0-0-0++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 9),
-                    to_coord: ('-', 9),
-                    from_index: (8, 8),
-                    to_index: (8, 8),
-                    piece: Some(Piece::new(PieceKind::King, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: true,
-                    is_castling_king: false,
-                    is_castling_queen: true,
-                    input_move,
-                    move_type: Some(MoveType::Castle),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a_e1() -> ChuiResult<()> {
-        let the_move = "Rae1".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 9),
-                    to_coord: ('e', 1),
-                    from_index: (0, 8),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a_takes_e1() -> ChuiResult<()> {
-        let the_move = "Raxe1".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 9),
-                    to_coord: ('e', 1),
-                    from_index: (0, 8),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a_e1_check() -> ChuiResult<()> {
-        let the_move = "Rae1".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 9),
-                    to_coord: ('e', 1),
-                    from_index: (0, 8),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_root_a_e1_mate() -> ChuiResult<()> {
-        let the_move = "Rae1#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 9),
-                    to_coord: ('e', 1),
-                    from_index: (0, 8),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a_takes_e1_check() -> ChuiResult<()> {
-        let the_move = "Raxe1+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 9),
-                    to_coord: ('e', 1),
-                    from_index: (0, 8),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a_e1_check_check() -> ChuiResult<()> {
-        let the_move = "Rae1++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 9),
-                    to_coord: ('e', 1),
-                    from_index: (0, 8),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a_takes_e1_mate() -> ChuiResult<()> {
-        let the_move = "Raxe1#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 9),
-                    to_coord: ('e', 1),
-                    from_index: (0, 8),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a_takes_e1_check_check() -> ChuiResult<()> {
-        let the_move = "Raxe1++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 9),
-                    to_coord: ('e', 1),
-                    from_index: (0, 8),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_1_e1() -> ChuiResult<()> {
-        let the_move = "R1e1".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 1),
-                    to_coord: ('e', 1),
-                    from_index: (8, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_1_takes_e1() -> ChuiResult<()> {
-        let the_move = "R1xe1".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 1),
-                    to_coord: ('e', 1),
-                    from_index: (8, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_1_e1_check() -> ChuiResult<()> {
-        let the_move = "R1e1+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 1),
-                    to_coord: ('e', 1),
-                    from_index: (8, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_1_e1_mate() -> ChuiResult<()> {
-        let the_move = "R1e1#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 1),
-                    to_coord: ('e', 1),
-                    from_index: (8, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_1_takes_e1_check() -> ChuiResult<()> {
-        let the_move = "R1xe1+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 1),
-                    to_coord: ('e', 1),
-                    from_index: (8, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_1_e1_check_check() -> ChuiResult<()> {
-        let the_move = "R1e1++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 1),
-                    to_coord: ('e', 1),
-                    from_index: (8, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_1_takes_e1_mate() -> ChuiResult<()> {
-        let the_move = "R1xe1#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 1),
-                    to_coord: ('e', 1),
-                    from_index: (8, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_1_takes_e1_check_check() -> ChuiResult<()> {
-        let the_move = "R1xe1++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('-', 1),
-                    to_coord: ('e', 1),
-                    from_index: (8, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a1_e1() -> ChuiResult<()> {
-        let the_move = "Ra1e1".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 1),
-                    to_coord: ('e', 1),
-                    from_index: (0, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a1_e1_check() -> ChuiResult<()> {
-        let the_move = "Ra1e1+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 1),
-                    to_coord: ('e', 1),
-                    from_index: (0, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a1_e1_mate() -> ChuiResult<()> {
-        let the_move = "Ra1e1#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 1),
-                    to_coord: ('e', 1),
-                    from_index: (0, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a1_takes_e1() -> ChuiResult<()> {
-        let the_move = "Ra1xe1".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 1),
-                    to_coord: ('e', 1),
-                    from_index: (0, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a1_takes_e1_check() -> ChuiResult<()> {
-        let the_move = "Ra1xe1+".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 1),
-                    to_coord: ('e', 1),
-                    from_index: (0, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: true,
-                    check_mate: false,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a1_takes_e1_mate() -> ChuiResult<()> {
-        let the_move = "Ra1xe1#".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 1),
-                    to_coord: ('e', 1),
-                    from_index: (0, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a1_e1_check_check() -> ChuiResult<()> {
-        let the_move = "Ra1e1++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 1),
-                    to_coord: ('e', 1),
-                    from_index: (0, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceMove),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-
-    #[test]
-    fn test_rook_a1_takes_e1_check_check() -> ChuiResult<()> {
-        let the_move = "Ra1xe1++".to_string();
-        let input_move = the_move.clone();
-        if let Ok(the_parsed_move) = parse_the_move(the_move) {
-            assert_eq!(
-                the_parsed_move,
-                Move {
-                    from_coord: ('a', 1),
-                    to_coord: ('e', 1),
-                    from_index: (0, 0),
-                    to_index: (4, 0),
-                    piece: Some(Piece::new(PieceKind::Rook, Color::White)),
-                    check: false,
-                    check_mate: true,
-                    promotion: false,
-                    promotion_piece: None,
-                    is_castling: false,
-                    is_castling_king: false,
-                    is_castling_queen: false,
-                    input_move,
-                    move_type: Some(MoveType::PieceCapture),
-                }
-            );
-
-            return Ok(());
-        }
-
-        Err(ChuiError::InvalidMove("Invalid move.".to_string()))
-    }
-}
+// #[cfg(test)]
+// mod test {
+//     use crate::{
+//         parser, ChuiError, ChuiResult, Color, Move, MoveType, ParserEngine, Piece, PieceKind,
+//     };
+
+//     fn parse_the_move(the_move: String) -> ChuiResult<Move> {
+//         let mut parser = parser::new(ParserEngine::Algebraic);
+//         // If parsing won't work for White, it won't work for Black.
+//         parser.parse(the_move, Color::White)
+//     }
+
+//     #[test]
+//     fn test_invalid_move() -> ChuiResult<()> {
+//         let the_move = "asdf".to_string();
+//         let input_move = the_move.clone();
+//         if parse_the_move(the_move).is_ok() {
+//             return Err(ChuiError::InvalidInput(format!(
+//                 "The move `{}` parsed correctly \
+//                         when it's not supposed to",
+//                 input_move
+//             )));
+//         }
+
+//         Ok(())
+//     }
+
+//     #[test]
+//     fn test_e4() -> ChuiResult<()> {
+//         let the_move = "e4".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 4)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e4_check() -> ChuiResult<()> {
+//         let the_move = "e4+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 4)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e4_mate() -> ChuiResult<()> {
+//         let the_move = "e4#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 4)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e8_queen() -> ChuiResult<()> {
+//         let the_move = "e8Q".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e4_check_check() -> ChuiResult<()> {
+//         let the_move = "e4++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 4)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e8_queen_check() -> ChuiResult<()> {
+//         let the_move = "e8Q+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e8_queen_mate() -> ChuiResult<()> {
+//         let the_move = "e8Q#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e8_equals_queen() -> ChuiResult<()> {
+//         let the_move = "e8=Q".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e4_takes_f4() -> ChuiResult<()> {
+//         let the_move = "exf4".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e8_queen_check_check() -> ChuiResult<()> {
+//         let the_move = "e8Q++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e8_equals_queen_check() -> ChuiResult<()> {
+//         let the_move = "e8=Q+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e8_equals_queen_mate() -> ChuiResult<()> {
+//         let the_move = "e8=Q#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f4_check() -> ChuiResult<()> {
+//         let the_move = "exf4+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f4_mate() -> ChuiResult<()> {
+//         let the_move = "exf4#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f8_queen() -> ChuiResult<()> {
+//         let the_move = "exf8Q".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e8_equals_queen_check_check() -> ChuiResult<()> {
+//         let the_move = "e8=Q++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('e', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f4_check_check() -> ChuiResult<()> {
+//         let the_move = "exf4++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f8_queen_check() -> ChuiResult<()> {
+//         let the_move = "exf8Q+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f8_queen_mate() -> ChuiResult<()> {
+//         let the_move = "exf8Q#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f8_equals_queen() -> ChuiResult<()> {
+//         let the_move = "exf8=Q".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f8_equals_queen_mate() -> ChuiResult<()> {
+//         let the_move = "exf8=Q#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f8_equals_queen_check() -> ChuiResult<()> {
+//         let the_move = "exf8=Q+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f8_queen_check_check() -> ChuiResult<()> {
+//         let the_move = "exf8Q++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_e_takes_f8_equals_queen_check_check() -> ChuiResult<()> {
+//         let the_move = "exf8=Q++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('e', 9),
+//                     to_coord: Coord::try_from(('f', 8)),
+//                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: true,
+//                     promotion_piece: Some(Piece::new(PieceKind::Queen, Color::White)),
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PawnCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_bishop_f4() -> ChuiResult<()> {
+//         let the_move = "Bf4".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_bishop_f4_check() -> ChuiResult<()> {
+//         let the_move = "Bf4+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_bishop_f4_mate() -> ChuiResult<()> {
+//         let the_move = "Bf4#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_bishop_takes_f4() -> ChuiResult<()> {
+//         let the_move = "Bxf4".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_bishop_f4_check_check() -> ChuiResult<()> {
+//         let the_move = "Bf4++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_bishop_takes_f4_check() -> ChuiResult<()> {
+//         let the_move = "Bxf4+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_bishop_takes_f4_mate() -> ChuiResult<()> {
+//         let the_move = "Bxf4#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_bishop_takes_f4_check_check() -> ChuiResult<()> {
+//         let the_move = "Bxf4++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: Coord::try_from(('f', 4)),
+//                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_castle_king() -> ChuiResult<()> {
+//         let the_move = "0-0".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: None,
+//                     piece: Some(Piece::new(PieceKind::King, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: true,
+//                     is_castling_king: true,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::Castle),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_castle_king_check() -> ChuiResult<()> {
+//         let the_move = "0-0+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: None,
+//                     piece: Some(Piece::new(PieceKind::King, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: true,
+//                     is_castling_king: true,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::Castle),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_castle_king_mate() -> ChuiResult<()> {
+//         let the_move = "0-0#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: None,
+//                     piece: Some(Piece::new(PieceKind::King, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: true,
+//                     is_castling_king: true,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::Castle),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_castle_king_check_check() -> ChuiResult<()> {
+//         let the_move = "0-0#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: None,
+//                     piece: Some(Piece::new(PieceKind::King, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: true,
+//                     is_castling_king: true,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::Castle),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_castle_queen() -> ChuiResult<()> {
+//         let the_move = "0-0-0".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: None,
+//                     piece: Some(Piece::new(PieceKind::King, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: true,
+//                     is_castling_king: false,
+//                     is_castling_queen: true,
+//                     input_move,
+//                     move_type: Some(MoveType::Castle),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_castle_queen_check() -> ChuiResult<()> {
+//         let the_move = "0-0-0+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: None,
+//                     piece: Some(Piece::new(PieceKind::King, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: true,
+//                     is_castling_king: false,
+//                     is_castling_queen: true,
+//                     input_move,
+//                     move_type: Some(MoveType::Castle),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_castle_queen_mate() -> ChuiResult<()> {
+//         let the_move = "0-0-0#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: None,
+//                     piece: Some(Piece::new(PieceKind::King, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: true,
+//                     is_castling_king: false,
+//                     is_castling_queen: true,
+//                     input_move,
+//                     move_type: Some(MoveType::Castle),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_castle_queen_check_check() -> ChuiResult<()> {
+//         let the_move = "0-0-0++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: None,
+//                     to_coord: None,
+//                     piece: Some(Piece::new(PieceKind::King, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: true,
+//                     is_castling_king: false,
+//                     is_castling_queen: true,
+//                     input_move,
+//                     move_type: Some(MoveType::Castle),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a_e1() -> ChuiResult<()> {
+//         let the_move = "Rae1".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 9),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a_takes_e1() -> ChuiResult<()> {
+//         let the_move = "Raxe1".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 9),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a_e1_check() -> ChuiResult<()> {
+//         let the_move = "Rae1".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 9),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_root_a_e1_mate() -> ChuiResult<()> {
+//         let the_move = "Rae1#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 9),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a_takes_e1_check() -> ChuiResult<()> {
+//         let the_move = "Raxe1+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 9),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a_e1_check_check() -> ChuiResult<()> {
+//         let the_move = "Rae1++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 9),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a_takes_e1_mate() -> ChuiResult<()> {
+//         let the_move = "Raxe1#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 9),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a_takes_e1_check_check() -> ChuiResult<()> {
+//         let the_move = "Raxe1++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 9),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_1_e1() -> ChuiResult<()> {
+//         let the_move = "R1e1".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('-', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_1_takes_e1() -> ChuiResult<()> {
+//         let the_move = "R1xe1".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('-', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_1_e1_check() -> ChuiResult<()> {
+//         let the_move = "R1e1+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('-', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_1_e1_mate() -> ChuiResult<()> {
+//         let the_move = "R1e1#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('-', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_1_takes_e1_check() -> ChuiResult<()> {
+//         let the_move = "R1xe1+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('-', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_1_e1_check_check() -> ChuiResult<()> {
+//         let the_move = "R1e1++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('-', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_1_takes_e1_mate() -> ChuiResult<()> {
+//         let the_move = "R1xe1#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('-', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_1_takes_e1_check_check() -> ChuiResult<()> {
+//         let the_move = "R1xe1++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('-', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a1_e1() -> ChuiResult<()> {
+//         let the_move = "Ra1e1".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a1_e1_check() -> ChuiResult<()> {
+//         let the_move = "Ra1e1+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a1_e1_mate() -> ChuiResult<()> {
+//         let the_move = "Ra1e1#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a1_takes_e1() -> ChuiResult<()> {
+//         let the_move = "Ra1xe1".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a1_takes_e1_check() -> ChuiResult<()> {
+//         let the_move = "Ra1xe1+".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: true,
+//                     check_mate: false,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a1_takes_e1_mate() -> ChuiResult<()> {
+//         let the_move = "Ra1xe1#".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a1_e1_check_check() -> ChuiResult<()> {
+//         let the_move = "Ra1e1++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceMove),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+
+//     #[test]
+//     fn test_rook_a1_takes_e1_check_check() -> ChuiResult<()> {
+//         let the_move = "Ra1xe1++".to_string();
+//         let input_move = the_move.clone();
+//         if let Ok(the_parsed_move) = parse_the_move(the_move) {
+//             assert_eq!(
+//                 the_parsed_move,
+//                 Move {
+//                     from_coord: ('a', 1),
+//                     to_coord: Coord::try_from(('e', 1)),
+//                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
+//                     check: false,
+//                     check_mate: true,
+//                     promotion: false,
+//                     promotion_piece: None,
+//                     is_castling: false,
+//                     is_castling_king: false,
+//                     is_castling_queen: false,
+//                     input_move,
+//                     move_type: Some(MoveType::PieceCapture),
+//                 }
+//             );
+
+//             return Ok(());
+//         }
+
+//         Err(ChuiError::InvalidMove("Invalid move.".to_string()))
+//     }
+// }

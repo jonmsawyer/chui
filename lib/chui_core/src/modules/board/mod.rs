@@ -1,13 +1,13 @@
 //! Board module.
 
-use super::{Color, Move, Piece, PieceKind};
-use crate::{ChuiError, ChuiResult};
+// use std::ops::Index;
 
-/// The number of ranks on a standard chessboard.
-const RANKS: usize = 8;
+// use nonmax::NonMaxU8;
 
-/// The number of files on a standard chessboard.
-const FILES: usize = 8;
+use crate::{ChuiError, ChuiResult, Color, Coord, Move, Piece, PieceKind, FILES, RANKS};
+
+pub mod result;
+pub use result::{BoardError, BoardResult};
 
 /// The various chess variants available in Chui.
 #[derive(Debug, Copy, Clone)]
@@ -23,7 +23,7 @@ pub enum ChessVariant {
 #[derive(Debug, Clone, Copy)]
 pub struct Board {
     /// Represents an 8x8 chessboard using nested arrays.
-    board: [[Option<Piece>; FILES]; RANKS],
+    board: [[Option<Piece>; FILES as usize]; RANKS as usize],
 }
 
 impl Board {
@@ -34,35 +34,109 @@ impl Board {
     /// Return a new `Board` given a chess variant.
     pub fn new(variant: ChessVariant) -> Board {
         match variant {
-            ChessVariant::StandardChess => {
-                let mut board = Board {
-                    board: Board::new_standard_chess(),
-                };
-
-                board
-                    .set_coords()
-                    .expect("Failed to set coordinates for board.");
-
-                board
-            }
+            ChessVariant::StandardChess => Board {
+                board: Board::new_standard_chess(),
+            },
         }
     }
 
     /// New standard chess setup.
-    pub const fn new_standard_chess() -> [[Option<Piece>; FILES]; RANKS] {
+    pub fn new_standard_chess() -> [[Option<Piece>; FILES as usize]; RANKS as usize] {
         [
             // rank 1
-            Board::standard_row_of_pieces(Color::White),
+            Board::standard_row_of_pieces(Color::White, 0).unwrap(),
             // rank 2
-            [Some(Piece::new(PieceKind::Pawn, Color::White)); FILES],
-            [None; FILES], // rank 3
-            [None; FILES], // rank 4
-            [None; FILES], // rank 5
-            [None; FILES], // rank 6
+            [
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::White,
+                    Coord::new(0, 1).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::White,
+                    Coord::new(1, 1).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::White,
+                    Coord::new(2, 1).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::White,
+                    Coord::new(3, 1).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::White,
+                    Coord::new(4, 1).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::White,
+                    Coord::new(5, 1).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::White,
+                    Coord::new(6, 1).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::White,
+                    Coord::new(7, 1).unwrap(),
+                )),
+            ],
+            [None; FILES as usize], // rank 3
+            [None; FILES as usize], // rank 4
+            [None; FILES as usize], // rank 5
+            [None; FILES as usize], // rank 6
             // rank 7
-            [Some(Piece::new(PieceKind::Pawn, Color::Black)); FILES],
+            [
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::Black,
+                    Coord::new(0, 6).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::Black,
+                    Coord::new(1, 6).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::Black,
+                    Coord::new(2, 6).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::Black,
+                    Coord::new(3, 6).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::Black,
+                    Coord::new(4, 6).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::Black,
+                    Coord::new(5, 6).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::Black,
+                    Coord::new(6, 6).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Pawn,
+                    Color::Black,
+                    Coord::new(7, 6).unwrap(),
+                )),
+            ],
             // rank 8
-            Board::standard_row_of_pieces(Color::Black),
+            Board::standard_row_of_pieces(Color::Black, 7).unwrap(),
         ]
     }
 
@@ -81,7 +155,7 @@ impl Board {
     ///
     /// * Errors if the piece we're moving is `None`.
     pub fn apply_move(&mut self, current_move: &Option<Move>) -> ChuiResult<()> {
-        if current_move.as_ref().is_none() {
+        if current_move.is_none() {
             return Err(ChuiError::InvalidMove(
                 "No piece to apply move.".to_string(),
             ));
@@ -110,8 +184,8 @@ impl Board {
                 .get_move_coords(self, current_move)
                 .iter()
                 .any(|&coord| {
-                    coord.0 == move_obj.to_index.0 as usize
-                        && coord.1 == move_obj.to_index.1 as usize
+                    coord.get_file() == move_obj.to_coord.unwrap().get_file()
+                        && coord.get_rank() == move_obj.to_coord.unwrap().get_rank()
                 })
             {
                 pieces_can_move.push(*piece);
@@ -120,7 +194,7 @@ impl Board {
 
         // println!("Pieces can move: {:?}", pieces_can_move);
 
-        let (file, rank) = move_obj.to_coord;
+        let (file, rank) = move_obj.to_coord.unwrap().to_u8_index();
 
         if pieces_can_move.is_empty() {
             Err(ChuiError::InvalidMove(format!(
@@ -145,13 +219,13 @@ impl Board {
 
     /// Replace the given piece from one square to another.
     pub fn replace_piece(&mut self, piece_from: &mut Piece, move_obj: &Move) {
-        let (from_file_idx, from_rank_idx) = piece_from.get_coords();
-        let (to_file_idx, to_rank_idx) = move_obj.to_index;
+        let from_coord = piece_from.get_coord();
+        let to_coord = move_obj.to_coord.unwrap();
 
-        piece_from.set_coords(to_file_idx as usize, to_rank_idx as usize);
+        piece_from.set_coord(to_coord);
 
-        self.board[from_rank_idx][from_file_idx] = None;
-        self.board[to_rank_idx as usize][to_file_idx as usize] = Some(*piece_from);
+        self.board[from_coord.get_rank() as usize][from_coord.get_file() as usize] = None;
+        self.board[to_coord.get_rank() as usize][to_coord.get_file() as usize] = Some(*piece_from);
     }
 
     //
@@ -159,18 +233,14 @@ impl Board {
     //
 
     /// Get a refereance to the board.
-    pub const fn get_board(&self) -> &[[Option<Piece>; FILES]; RANKS] {
+    pub const fn get_board(&self) -> &[[Option<Piece>; FILES as usize]; RANKS as usize] {
         &self.board
     }
 
     /// Get the piece in the defined indicies. Remember that
-    /// this is index-based, not coordinate-based.
-    pub const fn get_piece(&self, file_idx: usize, rank_idx: usize) -> Option<Piece> {
-        if file_idx >= FILES || rank_idx >= RANKS {
-            return None;
-        }
-
-        self.board[rank_idx][file_idx]
+    /// this is index-based, not Coordinate-based.
+    pub fn get_piece(&self, coord: Coord) -> Option<Piece> {
+        self.board[coord.get_rank() as usize][coord.get_file() as usize]
     }
 
     /// Get the available `Piece`s for a `Color`.
@@ -202,7 +272,7 @@ impl Board {
     // Setters.
     //
 
-    /// Set the coordinates for all `Piece`s.
+    /// Set the Coordinates for all `Piece`s.
     ///
     /// # Panics
     ///
@@ -211,12 +281,12 @@ impl Board {
     /// # Errors
     ///
     /// * This function does not Error.
-    pub fn set_coords(&mut self) -> ChuiResult<()> {
+    pub fn set_coords(&mut self) -> BoardResult<()> {
         for (rank_idx, rank_arr) in self.board.iter_mut().enumerate() {
             for (file_idx, piece) in rank_arr.iter_mut().enumerate() {
                 if piece.is_some() {
                     let piece = piece.as_mut().expect("Piece cannot be None.");
-                    piece.set_coords(file_idx, rank_idx);
+                    piece.set_coord(Coord::new(file_idx as u8, rank_idx as u8).unwrap());
                 }
             }
         }
@@ -225,201 +295,180 @@ impl Board {
     }
 
     //
-    // Piece move coords.
+    // Piece move Coords.
     //
 
-    /// Get a King's available move coordinates.
-    pub fn get_king_move_coords(
-        &self,
-        file_idx: usize,
-        rank_idx: usize,
-        current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    /// Get a King's available move Coordinates.
+    pub fn get_king_move_coords(&self, coord: Coord, current_move: &Option<Move>) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        coords.extend(self.get_top_left_coords(file_idx, rank_idx, &mut 1, current_move));
-        coords.extend(self.get_top_coords(file_idx, rank_idx, 1, false));
-        coords.extend(self.get_top_right_coords(file_idx, rank_idx, &mut 1, current_move));
-        coords.extend(self.get_right_coords(file_idx, rank_idx, &mut 1, false, current_move));
-        coords.extend(self.get_bottom_right_coords(file_idx, rank_idx, &mut 1, current_move));
-        coords.extend(self.get_bottom_coords(file_idx, rank_idx, 1, false));
-        coords.extend(self.get_bottom_left_coords(file_idx, rank_idx, &mut 1, current_move));
-        coords.extend(self.get_left_coords(file_idx, rank_idx, &mut 1, false, current_move));
+        coords.extend(self.get_top_left_coords(coord, &mut 1, current_move));
+        coords.extend(self.get_top_coords(coord, 1, false));
+        coords.extend(self.get_top_right_coords(coord, &mut 1, current_move));
+        coords.extend(self.get_right_coords(coord, &mut 1, false, current_move));
+        coords.extend(self.get_bottom_right_coords(coord, &mut 1, current_move));
+        coords.extend(self.get_bottom_coords(coord, 1, false));
+        coords.extend(self.get_bottom_left_coords(coord, &mut 1, current_move));
+        coords.extend(self.get_left_coords(coord, &mut 1, false, current_move));
 
         coords
     }
 
-    /// Get a Queen's available move coordinates.
-    pub fn get_queen_move_coords(
-        &self,
-        file_idx: usize,
-        rank_idx: usize,
-        current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    /// Get a Queen's available move Coordinates.
+    pub fn get_queen_move_coords(&self, coord: Coord, current_move: &Option<Move>) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
         let mut max = if FILES <= RANKS { RANKS } else { FILES };
 
-        coords.extend(self.get_top_left_coords(file_idx, rank_idx, &mut max, current_move));
-        coords.extend(self.get_top_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_top_right_coords(file_idx, rank_idx, &mut max, current_move));
-        coords.extend(self.get_right_coords(file_idx, rank_idx, &mut max, false, current_move));
-        coords.extend(self.get_bottom_right_coords(file_idx, rank_idx, &mut max, current_move));
-        coords.extend(self.get_bottom_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_bottom_left_coords(file_idx, rank_idx, &mut max, current_move));
-        coords.extend(self.get_left_coords(file_idx, rank_idx, &mut max, false, current_move));
+        coords.extend(self.get_top_left_coords(coord, &mut max, current_move));
+        coords.extend(self.get_top_coords(coord, max, false));
+        coords.extend(self.get_top_right_coords(coord, &mut max, current_move));
+        coords.extend(self.get_right_coords(coord, &mut max, false, current_move));
+        coords.extend(self.get_bottom_right_coords(coord, &mut max, current_move));
+        coords.extend(self.get_bottom_coords(coord, max, false));
+        coords.extend(self.get_bottom_left_coords(coord, &mut max, current_move));
+        coords.extend(self.get_left_coords(coord, &mut max, false, current_move));
 
         coords
     }
 
-    /// Get a Rook's available move coordinates.
-    pub fn get_rook_move_coords(
-        &self,
-        file_idx: usize,
-        rank_idx: usize,
-        current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    /// Get a Rook's available move Coordinates.
+    pub fn get_rook_move_coords(&self, coord: Coord, current_move: &Option<Move>) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
         let mut max = if FILES <= RANKS { RANKS } else { FILES };
 
-        coords.extend(self.get_top_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_right_coords(file_idx, rank_idx, &mut max, false, current_move));
-        coords.extend(self.get_bottom_coords(file_idx, rank_idx, max, false));
-        coords.extend(self.get_left_coords(file_idx, rank_idx, &mut max, false, current_move));
+        coords.extend(self.get_top_coords(coord, max, false));
+        coords.extend(self.get_right_coords(coord, &mut max, false, current_move));
+        coords.extend(self.get_bottom_coords(coord, max, false));
+        coords.extend(self.get_left_coords(coord, &mut max, false, current_move));
 
         coords
     }
 
-    /// Get a Bishop's available move coordinates.
-    pub fn get_bishop_move_coords(
-        &self,
-        file_idx: usize,
-        rank_idx: usize,
-        current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    /// Get a Bishop's available move Coordinates.
+    pub fn get_bishop_move_coords(&self, coord: Coord, current_move: &Option<Move>) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
         let mut max = if FILES <= RANKS { RANKS } else { FILES };
 
-        coords.extend(self.get_top_left_coords(file_idx, rank_idx, &mut max, current_move));
-        coords.extend(self.get_top_right_coords(file_idx, rank_idx, &mut max, current_move));
-        coords.extend(self.get_bottom_right_coords(file_idx, rank_idx, &mut max, current_move));
-        coords.extend(self.get_bottom_left_coords(file_idx, rank_idx, &mut max, current_move));
+        coords.extend(self.get_top_left_coords(coord, &mut max, current_move));
+        coords.extend(self.get_top_right_coords(coord, &mut max, current_move));
+        coords.extend(self.get_bottom_right_coords(coord, &mut max, current_move));
+        coords.extend(self.get_bottom_left_coords(coord, &mut max, current_move));
 
         coords
     }
 
-    /// Get a Knight's available move coordinates.
-    pub fn get_knight_move_coords(&self, file_idx: usize, rank_idx: usize) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
-        let file_idx = file_idx as isize;
-        let rank_idx = rank_idx as isize;
+    /// Get a Knight's available move Coordinates.
+    pub fn get_knight_move_coords(&self, coord: Coord) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
+        let file_idx = coord.get_file() as isize;
+        let rank_idx = coord.get_rank() as isize;
 
         if file_idx + 1 < FILES as isize
             && rank_idx + 2 < RANKS as isize
             && self
-                .get_piece(file_idx as usize + 1, rank_idx as usize + 2)
+                .get_piece(Coord::new(file_idx as u8 + 1, rank_idx as u8 + 2).unwrap())
                 .is_none()
         {
-            coords.push((file_idx as usize + 1, rank_idx as usize + 2));
+            coords.push(Coord::new(file_idx as u8 + 1, rank_idx as u8 + 2).unwrap());
         }
 
         if file_idx + 1 < FILES as isize
             && rank_idx - 2 >= 0
             && self
-                .get_piece(file_idx as usize + 1, rank_idx as usize - 2)
+                .get_piece(Coord::new(file_idx as u8 + 1, rank_idx as u8 - 2).unwrap())
                 .is_none()
         {
-            coords.push((file_idx as usize + 1, rank_idx as usize - 2));
+            coords.push(Coord::new(file_idx as u8 + 1, rank_idx as u8 - 2).unwrap());
         }
 
         if file_idx > 0
             && rank_idx + 2 < RANKS as isize
             && self
-                .get_piece(file_idx as usize - 1, rank_idx as usize + 2)
+                .get_piece(Coord::new(file_idx as u8 - 1, rank_idx as u8 + 2).unwrap())
                 .is_none()
         {
-            coords.push((file_idx as usize - 1, rank_idx as usize + 2));
+            coords.push(Coord::new(file_idx as u8 - 1, rank_idx as u8 + 2).unwrap());
         }
 
         if file_idx > 0
             && rank_idx - 2 >= 0
             && self
-                .get_piece(file_idx as usize - 1, rank_idx as usize - 2)
+                .get_piece(Coord::new(file_idx as u8 - 1, rank_idx as u8 - 2).unwrap())
                 .is_none()
         {
-            coords.push((file_idx as usize - 1, rank_idx as usize - 2));
+            coords.push(Coord::new(file_idx as u8 - 1, rank_idx as u8 - 2).unwrap());
         }
 
         if file_idx + 2 < FILES as isize
             && rank_idx + 1 < RANKS as isize
             && self
-                .get_piece(file_idx as usize + 2, rank_idx as usize + 1)
+                .get_piece(Coord::new(file_idx as u8 + 2, rank_idx as u8 + 1).unwrap())
                 .is_none()
         {
-            coords.push((file_idx as usize + 2, rank_idx as usize + 1));
+            coords.push(Coord::new(file_idx as u8 + 2, rank_idx as u8 + 1).unwrap());
         }
 
         if file_idx + 2 < FILES as isize
             && rank_idx > 0
             && self
-                .get_piece(file_idx as usize + 2, rank_idx as usize - 1)
+                .get_piece(Coord::new(file_idx as u8 + 2, rank_idx as u8 - 1).unwrap())
                 .is_none()
         {
-            coords.push((file_idx as usize + 2, rank_idx as usize - 1));
+            coords.push(Coord::new(file_idx as u8 + 2, rank_idx as u8 - 1).unwrap());
         }
 
         if file_idx - 2 >= 0
             && rank_idx + 1 < RANKS as isize
             && self
-                .get_piece(file_idx as usize - 2, rank_idx as usize + 1)
+                .get_piece(Coord::new(file_idx as u8 - 2, rank_idx as u8 + 1).unwrap())
                 .is_none()
         {
-            coords.push((file_idx as usize - 2, rank_idx as usize + 1));
+            coords.push(Coord::new(file_idx as u8 - 2, rank_idx as u8 + 1).unwrap());
         }
 
         if file_idx - 2 >= 0
             && rank_idx > 0
             && self
-                .get_piece(file_idx as usize - 2, rank_idx as usize - 1)
+                .get_piece(Coord::new(file_idx as u8 - 2, rank_idx as u8 - 1).unwrap())
                 .is_none()
         {
-            coords.push((file_idx as usize - 2, rank_idx as usize - 1));
+            coords.push(Coord::new(file_idx as u8 - 2, rank_idx as u8 - 1).unwrap());
         }
 
         coords
     }
 
-    /// Get a Pawn's available move coordinates.
-    pub fn get_pawn_move_coords(
-        &self,
-        file_idx: usize,
-        rank_idx: usize,
-        color: Color,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    /// Get a Pawn's available move Coordinates.
+    pub fn get_pawn_move_coords(&self, coord: Coord, color: Color) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
         if let Color::White = color {
-            if rank_idx + 1 < RANKS && self.get_piece(file_idx, rank_idx + 1).is_none() {
-                coords.push((file_idx, rank_idx + 1));
+            let new_coord = Coord::new(coord.get_file(), coord.get_rank() + 1).unwrap();
+            let new_coord2 = Coord::new(coord.get_file(), coord.get_rank() + 2).unwrap();
+            if coord.get_rank() + 1 < RANKS && self.get_piece(new_coord).is_none() {
+                coords.push(new_coord);
             }
 
             // Pawn starting rank for White.
-            if rank_idx == 1
-                && self.get_piece(file_idx, rank_idx + 1).is_none()
-                && self.get_piece(file_idx, rank_idx + 2).is_none()
+            if coord.get_rank() == 1
+                && self.get_piece(new_coord).is_none()
+                && self.get_piece(new_coord2).is_none()
             {
-                coords.push((file_idx, rank_idx + 2));
+                coords.push(new_coord2);
             }
         } else {
-            if rank_idx - 1 > 0 && self.get_piece(file_idx, rank_idx - 1).is_none() {
-                coords.push((file_idx, rank_idx - 1));
+            let new_coord = Coord::new(coord.get_file(), coord.get_rank() - 1).unwrap();
+            let new_coord2 = Coord::new(coord.get_file(), coord.get_rank() - 2).unwrap();
+            if coord.get_rank() - 1 > 0 && self.get_piece(new_coord).is_none() {
+                coords.push(new_coord);
             }
 
             // Pawn starting rank for Black.
-            if rank_idx == 6
-                && self.get_piece(file_idx, rank_idx - 1).is_none()
-                && self.get_piece(file_idx, rank_idx - 2).is_none()
+            if coord.get_rank() == 6
+                && self.get_piece(new_coord).is_none()
+                && self.get_piece(new_coord2).is_none()
             {
-                coords.push((file_idx, rank_idx - 2));
+                coords.push(new_coord2);
             }
         }
 
@@ -427,32 +476,27 @@ impl Board {
     }
 
     //
-    // Position coords.
+    // Position Coords.
     //
 
-    /// Get any coordates North of the indicated indices that a piece can move.
+    /// Get any Coordates North of the indicated indices that a piece can move.
     ///
     /// # Panics
     ///
-    /// * Panics if the piece we're getting coordinates for is None after checking
+    /// * Panics if the piece we're getting Coordinates for is None after checking
     ///   to see if was None previously.
-    pub fn get_top_coords(
-        &self,
-        file_idx: usize,
-        rank_idx: usize,
-        limit: usize,
-        ignore_pieces: bool,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    pub fn get_top_coords(&self, coord: Coord, limit: u8, ignore_pieces: bool) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        let mut limit_counter: usize = 0;
-        let mut rank_idx_counter = rank_idx + 1;
+        let mut limit_counter: u8 = 0;
+        let mut rank_idx_counter = coord.get_rank() + 1;
 
         while rank_idx_counter < RANKS && limit_counter < limit {
-            if ignore_pieces || self.get_piece(file_idx, rank_idx_counter).is_none() {
-                coords.push((file_idx, rank_idx_counter));
+            let new_coord = Coord::new(coord.get_file(), coord.get_rank() + 1).unwrap();
+            if ignore_pieces || self.get_piece(new_coord).is_none() {
+                coords.push(new_coord);
             } else {
-                let move_coords = Piece::get_file_rank_from_coords(&(file_idx, rank_idx_counter));
+                let move_coords = Piece::get_file_rank_from_coords(coord);
                 println!("(Top) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
@@ -464,24 +508,23 @@ impl Board {
         coords
     }
 
-    /// Get any coordates East of the indicated indices that a piece can move.
+    /// Get any Coordates East of the indicated indices that a piece can move.
     ///
     /// # Panics
     ///
-    /// * Panics if the piece we're getting coordinates for is None after checking
+    /// * Panics if the piece we're getting Coordinates for is None after checking
     ///   to see if was None previously.
     pub fn get_right_coords(
         &self,
-        file_idx: usize,
-        rank_idx: usize,
-        limit: &mut usize,
+        coord: Coord,
+        limit: &mut u8,
         ignore_pieces: bool,
         current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    ) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        let mut limit_counter: usize = 0;
-        let mut file_idx_counter = file_idx + 1;
+        let mut limit_counter: u8 = 0;
+        let mut file_idx_counter = coord.get_file() + 1;
 
         if let Some(move_obj) = current_move {
             if let PieceKind::King = move_obj.piece.unwrap().get_piece() {
@@ -490,10 +533,16 @@ impl Board {
         }
 
         while file_idx_counter < FILES && limit_counter < *limit {
-            if ignore_pieces || self.get_piece(file_idx_counter, rank_idx).is_none() {
-                coords.push((file_idx_counter, rank_idx));
+            if ignore_pieces
+                || self
+                    .get_piece(Coord::new(file_idx_counter, coord.get_rank()).unwrap())
+                    .is_none()
+            {
+                coords.push(Coord::new(file_idx_counter, coord.get_rank()).unwrap());
             } else {
-                let move_coords = Piece::get_file_rank_from_coords(&(file_idx_counter, rank_idx));
+                let move_coords = Piece::get_file_rank_from_coords(
+                    Coord::new(file_idx_counter, coord.get_rank()).unwrap(),
+                );
                 println!("(Right) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
@@ -505,34 +554,24 @@ impl Board {
         coords
     }
 
-    /// Get any coordates South of the indicated indices that a piece can move.
+    /// Get any Coordates South of the indicated indices that a piece can move.
     ///
     /// # Panics
     ///
-    /// * Panics if the piece we're getting coordinates for is None after checking
+    /// * Panics if the piece we're getting Coordinates for is None after checking
     ///   to see if was None previously.
-    pub fn get_bottom_coords(
-        &self,
-        file_idx: usize,
-        rank_idx: usize,
-        limit: usize,
-        ignore_pieces: bool,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    pub fn get_bottom_coords(&self, coord: Coord, limit: u8, ignore_pieces: bool) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        let mut limit_counter: usize = 0;
-        let mut rank_idx_counter = rank_idx as isize - 1;
+        let mut limit_counter: u8 = 0;
+        let mut rank_idx_counter = coord.get_rank() as isize - 1;
 
         while rank_idx_counter >= 0 && limit_counter < limit {
-            if ignore_pieces
-                || self
-                    .get_piece(file_idx, rank_idx_counter as usize)
-                    .is_none()
-            {
-                coords.push((file_idx, rank_idx_counter as usize));
+            let new_coord = Coord::new(coord.get_file(), rank_idx_counter as u8).unwrap();
+            if ignore_pieces || self.get_piece(new_coord).is_none() {
+                coords.push(new_coord);
             } else {
-                let move_coords =
-                    Piece::get_file_rank_from_coords(&(file_idx, rank_idx_counter as usize));
+                let move_coords = Piece::get_file_rank_from_coords(coord);
                 println!("(Bottom) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
@@ -544,24 +583,23 @@ impl Board {
         coords
     }
 
-    /// Get any coordates West of the indicated indices that a piece can move.
+    /// Get any Coordates West of the indicated indices that a piece can move.
     ///
     /// # Panics
     ///
-    /// * Panics if the piece we're getting coordinates for is None after checking
+    /// * Panics if the piece we're getting Coordinates for is None after checking
     ///   to see if was None previously.
     pub fn get_left_coords(
         &self,
-        file_idx: usize,
-        rank_idx: usize,
-        limit: &mut usize,
+        coord: Coord,
+        limit: &mut u8,
         ignore_pieces: bool,
         current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+    ) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        let mut limit_counter: usize = 0;
-        let mut file_idx_counter = file_idx as isize - 1;
+        let mut limit_counter: u8 = 0;
+        let mut file_idx_counter = coord.get_file() as isize - 1;
 
         if let Some(move_obj) = current_move {
             if let PieceKind::King = move_obj.get_piece().unwrap().get_piece() {
@@ -570,15 +608,11 @@ impl Board {
         }
 
         while file_idx_counter >= 0 && limit_counter < *limit {
-            if ignore_pieces
-                || self
-                    .get_piece(file_idx_counter as usize, rank_idx)
-                    .is_none()
-            {
-                coords.push((file_idx_counter as usize, rank_idx));
+            let new_coord = Coord::new(file_idx_counter as u8, coord.get_rank()).unwrap();
+            if ignore_pieces || self.get_piece(new_coord).is_none() {
+                coords.push(new_coord);
             } else {
-                let move_coords =
-                    Piece::get_file_rank_from_coords(&(file_idx_counter as usize, rank_idx));
+                let move_coords = Piece::get_file_rank_from_coords(new_coord);
                 println!("(Left) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
@@ -590,63 +624,59 @@ impl Board {
         coords
     }
 
-    /// Get any coordates North West of the indicated indices that a piece can move.
+    /// Get any Coordates North West of the indicated indices that a piece can move.
     pub fn get_top_left_coords(
         &self,
-        file_idx: usize,
-        rank_idx: usize,
-        limit: &mut usize,
+        coord: Coord,
+        limit: &mut u8,
         current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
+    ) -> Vec<Coord> {
         Board::zip_top_left_coords(
             self,
-            self.get_top_coords(file_idx, rank_idx, *limit, true),
-            self.get_left_coords(file_idx, rank_idx, limit, true, current_move),
+            self.get_top_coords(coord, *limit, true),
+            self.get_left_coords(coord, limit, true, current_move),
         )
     }
 
-    /// Get any coordates North East of the indicated indices that a piece can move.
+    /// Get any Coordates North East of the indicated indices that a piece can move.
     pub fn get_top_right_coords(
         &self,
-        file_idx: usize,
-        rank_idx: usize,
-        limit: &mut usize,
+        coord: Coord,
+        limit: &mut u8,
         current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
+    ) -> Vec<Coord> {
         Board::zip_top_right_coords(
             self,
-            self.get_top_coords(file_idx, rank_idx, *limit, true),
-            self.get_right_coords(file_idx, rank_idx, limit, true, current_move),
+            self.get_top_coords(coord, *limit, true),
+            self.get_right_coords(coord, limit, true, current_move),
         )
     }
 
-    /// Get any coordates South East of the indicated indices that a piece can move.
+    /// Get any Coordates South East of the indicated indices that a piece can move.
     pub fn get_bottom_right_coords(
         &self,
-        file_idx: usize,
-        rank_idx: usize,
-        limit: &mut usize,
+        coord: Coord,
+        limit: &mut u8,
         current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
+    ) -> Vec<Coord> {
         Board::zip_bottom_right_coords(
             self,
-            self.get_bottom_coords(file_idx, rank_idx, *limit, true),
-            self.get_right_coords(file_idx, rank_idx, limit, true, current_move),
+            self.get_bottom_coords(coord, *limit, true),
+            self.get_right_coords(coord, limit, true, current_move),
         )
     }
 
-    /// Get any coordates South West of the indicated indices that a piece can move.
+    /// Get any Coordates South West of the indicated indices that a piece can move.
     pub fn get_bottom_left_coords(
         &self,
-        file_idx: usize,
-        rank_idx: usize,
-        limit: &mut usize,
+        coord: Coord,
+        limit: &mut u8,
         current_move: &Option<Move>,
-    ) -> Vec<(usize, usize)> {
+    ) -> Vec<Coord> {
         Board::zip_bottom_left_coords(
             self,
-            self.get_bottom_coords(file_idx, rank_idx, *limit, true),
-            self.get_left_coords(file_idx, rank_idx, limit, true, current_move),
+            self.get_bottom_coords(coord, *limit, true),
+            self.get_left_coords(coord, limit, true, current_move),
         )
     }
 
@@ -656,72 +686,117 @@ impl Board {
 
     /// Produces a row (`[Option<Piece>; FILES]`) of pieces
     /// according their color.
-    pub const fn standard_row_of_pieces(color: Color) -> [Option<Piece>; FILES] {
-        [
-            Some(Piece::new(PieceKind::Rook, color)),
-            Some(Piece::new(PieceKind::Knight, color)),
-            Some(Piece::new(PieceKind::Bishop, color)),
-            Some(Piece::new(PieceKind::Queen, color)),
-            Some(Piece::new(PieceKind::King, color)),
-            Some(Piece::new(PieceKind::Bishop, color)),
-            Some(Piece::new(PieceKind::Knight, color)),
-            Some(Piece::new(PieceKind::Rook, color)),
-        ]
+    pub fn standard_row_of_pieces(
+        color: Color,
+        rank_idx: u8,
+    ) -> BoardResult<[Option<Piece>; FILES as usize]> {
+        if rank_idx <= 7 {
+            Ok([
+                Some(Piece::new(
+                    PieceKind::Rook,
+                    color,
+                    Coord::new(0, rank_idx).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Knight,
+                    color,
+                    Coord::new(1, rank_idx).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Bishop,
+                    color,
+                    Coord::new(2, rank_idx).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Queen,
+                    color,
+                    Coord::new(3, rank_idx).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::King,
+                    color,
+                    Coord::new(4, rank_idx).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Bishop,
+                    color,
+                    Coord::new(5, rank_idx).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Knight,
+                    color,
+                    Coord::new(6, rank_idx).unwrap(),
+                )),
+                Some(Piece::new(
+                    PieceKind::Rook,
+                    color,
+                    Coord::new(7, rank_idx).unwrap(),
+                )),
+            ])
+        } else {
+            Err(BoardError::InvalidRank(format!(
+                "Rank index ({}) is out of range",
+                rank_idx
+            )))
+        }
     }
 
-    /// "Zips" together top coords and left coords.
+    /// "Zips" together top Coords and left Coords.
     pub fn zip_top_left_coords(
         &self,
-        top_coords: Vec<(usize, usize)>,
-        left_coords: Vec<(usize, usize)>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+        top_coords: Vec<Coord>,
+        left_coords: Vec<Coord>,
+    ) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        for ((_, rank), (file, _)) in top_coords.iter().zip(left_coords) {
-            if self.get_piece(file, *rank).is_some() {
-                let move_coords = Piece::get_file_rank_from_coords(&(file, *rank));
+        for (rank_coord, file_coord) in top_coords.iter().zip(left_coords) {
+            let new_coord = Coord::new(file_coord.get_file(), rank_coord.get_rank()).unwrap();
+            if self.get_piece(new_coord).is_some() {
+                let move_coords = Piece::get_file_rank_from_coords(new_coord);
                 println!("(Top Left) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
 
-            coords.push((file, *rank));
+            coords.push(new_coord);
         }
 
         coords
     }
 
-    /// "Zips" together top coords and right coords.
+    /// "Zips" together top Coords and right Coords.
     pub fn zip_top_right_coords(
         &self,
-        top_coords: Vec<(usize, usize)>,
-        right_coords: Vec<(usize, usize)>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+        top_coords: Vec<Coord>,
+        right_coords: Vec<Coord>,
+    ) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        for ((_, rank), (file, _)) in top_coords.iter().zip(right_coords) {
-            if self.get_piece(file, *rank).is_some() {
-                let move_coords = Piece::get_file_rank_from_coords(&(file, *rank));
+        for (rank_coord, file_coord) in top_coords.iter().zip(right_coords) {
+            let new_coord = Coord::new(file_coord.get_file(), rank_coord.get_rank()).unwrap();
+            if self.get_piece(new_coord).is_some() {
+                let move_coords = Piece::get_file_rank_from_coords(new_coord);
                 println!("(Top Right) Breaking on {}{}", move_coords.0, move_coords.1);
                 break;
             }
 
-            coords.push((file, *rank));
+            coords.push(new_coord);
         }
 
         coords
     }
 
-    /// "Zips" together bottom coords and right coords.
+    /// "Zips" together bottom Coords and right Coords.
     pub fn zip_bottom_right_coords(
         &self,
-        bottom_coords: Vec<(usize, usize)>,
-        right_coords: Vec<(usize, usize)>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+        bottom_coords: Vec<Coord>,
+        right_coords: Vec<Coord>,
+    ) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        for ((_, rank), (file, _)) in bottom_coords.iter().zip(right_coords) {
-            if self.get_piece(file, *rank).is_some() {
-                let move_coords = Piece::get_file_rank_from_coords(&(file, *rank));
+        for (rank_coord, file_coord) in bottom_coords.iter().zip(right_coords) {
+            let new_coord = Coord::new(file_coord.get_file(), rank_coord.get_rank()).unwrap();
+            if self.get_piece(new_coord).is_some() {
+                let move_coords = Piece::get_file_rank_from_coords(new_coord);
                 println!(
                     "(Bottom Right) Breaking on {}{}",
                     move_coords.0, move_coords.1
@@ -729,23 +804,24 @@ impl Board {
                 break;
             }
 
-            coords.push((file, *rank));
+            coords.push(new_coord);
         }
 
         coords
     }
 
-    /// "Zips" together bottom coords and left coords.
+    /// "Zips" together bottom Coords and left Coords.
     pub fn zip_bottom_left_coords(
         &self,
-        bottom_coords: Vec<(usize, usize)>,
-        left_coords: Vec<(usize, usize)>,
-    ) -> Vec<(usize, usize)> {
-        let mut coords = Vec::<(usize, usize)>::new();
+        bottom_coords: Vec<Coord>,
+        left_coords: Vec<Coord>,
+    ) -> Vec<Coord> {
+        let mut coords = Vec::<Coord>::new();
 
-        for ((_, rank), (file, _)) in bottom_coords.iter().zip(left_coords) {
-            if self.get_piece(file, *rank).is_some() {
-                let move_coords = Piece::get_file_rank_from_coords(&(file, *rank));
+        for (rank_coord, file_coord) in bottom_coords.iter().zip(left_coords) {
+            let new_coord = Coord::new(file_coord.get_file(), rank_coord.get_rank()).unwrap();
+            if self.get_piece(new_coord).is_some() {
+                let move_coords = Piece::get_file_rank_from_coords(new_coord);
                 println!(
                     "(Bottom Left) Breaking on {}{}",
                     move_coords.0, move_coords.1
@@ -753,7 +829,7 @@ impl Board {
                 break;
             }
 
-            coords.push((file, *rank));
+            coords.push(new_coord);
         }
 
         coords

@@ -62,7 +62,7 @@ pub struct Square {
 #[derive(Component)]
 pub struct BoardBackground;
 
-/// Component representing board coordinates
+/// Component representing board Coordinates
 #[derive(Component)]
 pub struct BoardCoordinate {
     /// File index. -1 to 7.

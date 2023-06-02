@@ -322,7 +322,7 @@ impl Command {
                     command_kind: CommandKind::SwitchToConciseReversibleParser,
                 },
                 CommandPart {
-                    commands: vec!["3".to_string(), "coordinate".to_string()],
+                    commands: vec!["3".to_string(), "Coordinate".to_string()],
                     description: "Coordinate Parser \
                                  (Not Implemented)"
                         .to_string(),

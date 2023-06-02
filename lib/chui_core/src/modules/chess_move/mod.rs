@@ -1,5 +1,5 @@
 //! Provides a struct for `Move` instances. Each move has properties
-//! covering from and to coordinates, the piece being moved, the
+//! covering from and to Coordinates, the piece being moved, the
 //! original move text and interpreted move text. If the move is
 //! invalid, `MoveType::Invalid` will occupy `self.move_type`.
 //!
@@ -7,9 +7,7 @@
 
 use std::fmt;
 
-use crate::{ChuiError, ChuiResult};
-
-use super::{Color, Piece, PieceKind};
+use crate::{ChuiError, ChuiResult, Color, Coord, Piece, PieceKind};
 
 /// Represents the type of move to be performed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -33,17 +31,11 @@ pub enum MoveType {
 /// Represents a chess move.
 #[derive(PartialEq, Eq, Clone)]
 pub struct Move {
-    /// Represents a move's "from" coordinate (e.g., `('a', 1)`).
-    pub from_coord: (char, u8),
+    /// Represents a move's "from" Coordinate (e.g., `('a', 1)`).
+    pub from_coord: Option<Coord>,
 
-    /// Represents a move's "to" coordinate (e.g., `('b' 8)`).
-    pub to_coord: (char, u8),
-
-    /// Represents a move's "from" index (e.g., `(0, 0)` \[a1\]).
-    pub from_index: (u8, u8),
-
-    /// Represents a move's "to" index (e.g., `(1, 7)` \[b8\]).
-    pub to_index: (u8, u8),
+    /// Represents a move's "to" Coordinate (e.g., `('b' 8)`).
+    pub to_coord: Option<Coord>,
 
     /// The chess piece to move.
     pub piece: Option<Piece>,
@@ -82,10 +74,8 @@ impl fmt::Debug for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let output = format!(
             "{{
-    from_coord: {:?},
+    from_Coord: {:?},
     to_coord: {:?},
-    from_index: {:?},
-    to_index: {:?},
     piece: {:?},
     check: {:?},
     check_mate: {:?},
@@ -99,8 +89,6 @@ impl fmt::Debug for Move {
 }}",
             self.from_coord,
             self.to_coord,
-            self.from_index,
-            self.to_index,
             self.piece,
             self.check,
             self.check_mate,
@@ -133,10 +121,8 @@ impl Move {
     /// Return a new default `Move`.
     pub const fn new() -> Move {
         Move {
-            from_coord: ('-', 9),
-            to_coord: ('-', 9),
-            from_index: (8, 8),
-            to_index: (8, 8),
+            from_coord: None,
+            to_coord: None,
             piece: None,
             check: false,
             check_mate: false,
@@ -255,7 +241,11 @@ impl Move {
         self.is_castling = true;
         self.is_castling_king = true;
         self.is_castling_queen = false;
-        self.set_piece(Piece::new(PieceKind::King, Color::White));
+        self.set_piece(Piece::new(
+            PieceKind::King,
+            Color::White,
+            Coord::new(6, 0).unwrap(),
+        ));
         self.set_move_type(MoveType::Castle);
     }
 
@@ -264,13 +254,21 @@ impl Move {
         self.is_castling = true;
         self.is_castling_king = false;
         self.is_castling_queen = true;
-        self.set_piece(Piece::new(PieceKind::King, Color::White));
+        self.set_piece(Piece::new(
+            PieceKind::King,
+            Color::White,
+            Coord::new(6, 0).unwrap(),
+        ));
         self.set_move_type(MoveType::Castle);
     }
 
     /// Set pawn move.
     pub fn set_pawn_move(&mut self) {
-        self.set_piece(Piece::new(PieceKind::Pawn, Color::White));
+        self.set_piece(Piece::new(
+            PieceKind::Pawn,
+            Color::White,
+            Coord::new(6, 0).unwrap(),
+        ));
         self.set_move_type(MoveType::PawnMove);
     }
 
@@ -327,26 +325,50 @@ impl Move {
 
     /// Set the `to_coord` file.
     pub fn set_to_coord_file(&mut self, file: char) {
-        self.from_coord = (self.to_coord.0, self.from_coord.1);
-        self.to_coord = (file, self.to_coord.1);
+        self.from_coord = Some(
+            Coord::new(
+                self.to_coord.unwrap().get_file(),
+                self.from_coord.unwrap().get_rank(),
+            )
+            .unwrap(),
+        );
+        self.to_coord = Some(Coord::try_from((file, self.to_coord.unwrap().get_rank())).unwrap());
     }
 
     /// Set the `to_coord` rank.
     pub fn set_to_coord_rank(&mut self, rank: u8) {
-        self.from_coord = (self.from_coord.0, self.to_coord.1);
-        self.to_coord = (self.to_coord.0, rank);
+        self.from_coord = Some(
+            Coord::new(
+                self.from_coord.unwrap().get_file(),
+                self.to_coord.unwrap().get_rank(),
+            )
+            .unwrap(),
+        );
+        self.to_coord = Some(Coord::try_from((self.to_coord.unwrap().get_file(), rank)).unwrap());
     }
 
     /// Set the `to_index` file.
     pub fn set_to_index_file(&mut self, file: u8) {
-        self.from_index = (self.to_index.0, self.to_index.1);
-        self.to_index = (file, self.to_index.1);
+        self.from_coord = Some(
+            Coord::new(
+                self.to_coord.unwrap().get_file(),
+                self.to_coord.unwrap().get_rank(),
+            )
+            .unwrap(),
+        );
+        self.to_coord = Some(Coord::new(file, self.to_coord.unwrap().get_rank()).unwrap());
     }
 
     /// Set the `to_index` rank.
     pub fn set_to_index_rank(&mut self, rank: u8) {
-        self.from_index = (self.from_index.0, self.to_index.1);
-        self.to_index = (self.to_index.0, rank);
+        self.from_coord = Some(
+            Coord::new(
+                self.from_coord.unwrap().get_file(),
+                self.to_coord.unwrap().get_rank(),
+            )
+            .unwrap(),
+        );
+        self.to_coord = Some(Coord::new(self.to_coord.unwrap().get_file(), rank).unwrap());
     }
 
     //
@@ -388,7 +410,7 @@ impl Move {
             return format!("{} Queen side", move_text);
         }
 
-        let (from_file, from_rank) = self.from_coord;
+        let (from_file, from_rank) = self.from_coord.unwrap().to_char_u8_coord();
 
         let mut is_from = false;
         if from_file != '-' || from_rank <= 8 {
@@ -404,7 +426,7 @@ impl Move {
             move_text = format!("{}{}", move_text, from_rank);
         }
 
-        let (to_file, to_rank) = self.to_coord;
+        let (to_file, to_rank) = self.to_coord.unwrap().to_char_u8_coord();
 
         if to_file != '-' || from_rank <= 8 {
             if is_capture && !is_from {

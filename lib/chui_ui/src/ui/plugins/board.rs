@@ -86,7 +86,7 @@ fn init_board(my_assets: Res<SpriteCollection>, mut commands: Commands, ui_state
     }
 }
 
-/// Initialize the board coordinates.
+/// Initialize the board Coordinates.
 #[allow(clippy::needless_range_loop)]
 fn init_coordinates(
     mut commands: Commands,
@@ -106,7 +106,7 @@ fn init_coordinates(
             - START_Y_COORD * ui_state.square_pixels
             - (ui_state.board_margin / START_Y_COORD)
             + 6_f32;
-        // let (scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
+        // let (scale, start_x, start_y) = compute_Coords(ui_state.square_pixels);
         commands
             .spawn(
                 // Create a TextBundle that has a Text with a single section.
@@ -149,7 +149,7 @@ fn init_coordinates(
             - (ui_state.board_margin / START_Y_COORD)
             + 16_f32
             + ui_state.square_pixels / 2_f32;
-        // let (scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
+        // let (scale, start_x, start_y) = compute_Coords(ui_state.square_pixels);
         commands
             .spawn(
                 // Create a TextBundle that has a Text with a single section.
@@ -184,7 +184,7 @@ fn init_coordinates(
     }
 }
 
-/// Update the board coordinates.
+/// Update the board Coordinates.
 fn update_coordinates(
     mut query: Query<(&mut Style, &BoardCoordinate, &mut Visibility)>,
     ui_state: Res<UiResource>,

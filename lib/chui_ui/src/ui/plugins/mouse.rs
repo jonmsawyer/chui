@@ -10,6 +10,8 @@ use bevy::window::PrimaryWindow;
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
 
+use crate::Coord;
+
 use super::super::components::{FromSquareCursor, MainCamera, MouseCursor, Piece, ToSquareCursor};
 use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
 use super::super::resources::{Engine, UiResource};
@@ -197,17 +199,25 @@ pub fn update_mouse_click(
                     ui_state.mouse_click_to_square[1] as usize,
                 );
 
+                let from_coord = Coord::try_from(from_index).unwrap();
+                let to_coord = Coord::try_from(to_index).unwrap();
+
                 match engine
                     .parser
-                    .generate_move_from_board_coordinates(&engine, from_index, to_index)
+                    .generate_move_from_board_coordinates(&engine, from_coord, to_coord)
                 {
                     Ok(result) => {
                         ui_state.move_representation = result;
                         let mut chess_move = Move::new();
-                        chess_move.from_index = (from_index.0 as u8, from_index.1 as u8);
-                        chess_move.to_index = (to_index.0 as u8, to_index.1 as u8);
-                        let from_piece = engine.board.get_piece(from_index.0, from_index.1);
-                        let to_piece = engine.board.get_piece(to_index.0, to_index.1);
+                        chess_move.from_coord = Some(
+                            Coord::try_from((from_coord.get_file(), from_coord.get_rank()))
+                                .unwrap(),
+                        );
+                        chess_move.to_coord = Some(
+                            Coord::try_from((to_coord.get_file(), to_coord.get_rank())).unwrap(),
+                        );
+                        let from_piece = engine.board.get_piece(from_coord);
+                        let to_piece = engine.board.get_piece(to_coord);
                         chess_move.piece = from_piece;
 
                         if from_piece.is_none() {
@@ -234,10 +244,14 @@ pub fn update_mouse_click(
                         }
 
                         piece_query.for_each_mut(|(mut piece, mut transform)| {
-                            if piece.get_coords() == from_index {
-                                piece.set_coords(to_index.0, to_index.1);
-                                let world_coords =
-                                    compute_world_coords(to_index, ui_state.square_pixels);
+                            if piece.get_coord() == Coord::try_from(from_index).unwrap() {
+                                piece.set_coord(
+                                    Coord::new(to_index.0 as u8, to_index.1 as u8).unwrap(),
+                                );
+                                let world_coords = compute_world_coords(
+                                    Coord::try_from(to_index).unwrap(),
+                                    ui_state.square_pixels,
+                                );
                                 transform.translation.x = world_coords.x;
                                 transform.translation.y = world_coords.y;
                             }
@@ -258,9 +272,9 @@ pub fn update_mouse_click(
 
         // match mouse_input.into() {
         //     MouseButton::Left => {
-        //         ui_state.mouse_click_coords = mouse_world_coords.clone();
-        //         //ui_state.mouse_click_board_coords = board_coords.clone();
-        //         compute_board_coords(&mut ui_state);
+        //         ui_state.mouse_click_Coords = mouse_world_Coords.clone();
+        //         //ui_state.mouse_click_board_Coords = board_Coords.clone();
+        //         compute_board_Coords(&mut ui_state);
         //     },
         //     _ => {}
         // }
