@@ -12,7 +12,10 @@ use crate::{traits::Coordinate, ChuiError, ChuiResult, STR_FILES};
 /// of size 7.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Coordinate)]
 pub struct Coord {
+    /// The file index of the board, restricted to values between 0..=7.
     file: NonMaxU8,
+
+    /// The rank index of the board, restricted to values between 0..=7.
     rank: NonMaxU8,
 }
 
@@ -133,7 +136,9 @@ impl Coord {
     }
 }
 
-/// Formats the position for white.
+/// Formats the position for a coordinate in Algebraic notation.
+///
+/// TODO: Change this to behave with the selected [`Parser`] in a given [`Engine`].
 impl fmt::Display for Coord {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (file, rank) = (self.file.get() as usize, self.rank.get());

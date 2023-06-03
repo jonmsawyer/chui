@@ -219,7 +219,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
         }
         let _to_square =
             engine.board.get_board()[to_coord.get_rank() as usize][to_coord.get_file() as usize];
-        let piece_move_coords = piece.get_move_coords(&(engine.board), &Some(the_move));
+        let piece_move_coords = piece.get_move_coords(&(engine.board));
         for coord in piece_move_coords.iter() {
             if &to_coord == coord {
                 println!("Valid move.");

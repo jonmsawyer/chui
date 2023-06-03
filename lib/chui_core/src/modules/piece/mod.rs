@@ -5,7 +5,7 @@ use std::fmt;
 
 use colored::{ColoredString, Colorize};
 
-use crate::{Board, ChuiError, ChuiResult, Coord, Move};
+use crate::{Board, ChuiError, ChuiResult, Coord};
 
 /// Piece color. Either `White` or `Black` variants.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -79,6 +79,12 @@ pub struct Piece {
 
     /// The index of the sprite in the sprite sheet.
     sprite_index: usize,
+
+    /// The maximum amount of squares a piece can move.
+    move_max: u8,
+
+    /// Has the piece moved or is it on its initial square?
+    on_initial_square: bool,
 }
 
 impl Piece {
@@ -87,20 +93,92 @@ impl Piece {
     //
 
     /// Return a new Piece given a `PieceKind` and a `Color`.
-    pub const fn new(piece: PieceKind, color: Color, coord: Coord) -> Piece {
-        let sprite_index = match (piece, color) {
-            (PieceKind::King, Color::White) => 7,
-            (PieceKind::Queen, Color::White) => 6,
-            (PieceKind::Rook, Color::White) => 5,
-            (PieceKind::Bishop, Color::White) => 4,
-            (PieceKind::Knight, Color::White) => 3,
-            (PieceKind::Pawn, Color::White) => 2,
-            (PieceKind::King, Color::Black) => 13,
-            (PieceKind::Queen, Color::Black) => 12,
-            (PieceKind::Rook, Color::Black) => 11,
-            (PieceKind::Bishop, Color::Black) => 10,
-            (PieceKind::Knight, Color::Black) => 9,
-            (PieceKind::Pawn, Color::Black) => 8,
+    pub fn new(piece: PieceKind, color: Color, coord: Coord) -> Piece {
+        let (sprite_index, move_max, on_initial_square) = match (piece, color) {
+            (PieceKind::King, Color::White) => {
+                if coord == Coord::new(4, 0).unwrap() {
+                    (7, 2, true)
+                } else {
+                    (7, 2, false)
+                }
+            }
+            (PieceKind::Queen, Color::White) => {
+                if coord == Coord::new(3, 0).unwrap() {
+                    (6, 7, true)
+                } else {
+                    (6, 7, false)
+                }
+            }
+            (PieceKind::Rook, Color::White) => {
+                if coord == Coord::new(0, 0).unwrap() || coord == Coord::new(7, 0).unwrap() {
+                    (5, 7, true)
+                } else {
+                    (5, 7, false)
+                }
+            }
+            (PieceKind::Bishop, Color::White) => {
+                if coord == Coord::new(2, 0).unwrap() || coord == Coord::new(5, 0).unwrap() {
+                    (4, 7, true)
+                } else {
+                    (4, 7, false)
+                }
+            }
+            (PieceKind::Knight, Color::White) => {
+                if coord == Coord::new(1, 0).unwrap() || coord == Coord::new(6, 0).unwrap() {
+                    (3, 1, true)
+                } else {
+                    (3, 1, false)
+                }
+            }
+            (PieceKind::Pawn, Color::White) => {
+                if coord.get_rank() == 1 {
+                    (2, 2, true)
+                } else {
+                    (2, 2, false)
+                }
+            }
+            (PieceKind::King, Color::Black) => {
+                if coord == Coord::new(4, 7).unwrap() {
+                    (13, 2, true)
+                } else {
+                    (13, 2, false)
+                }
+            }
+            (PieceKind::Queen, Color::Black) => {
+                if coord == Coord::new(3, 7).unwrap() {
+                    (12, 7, true)
+                } else {
+                    (12, 7, false)
+                }
+            }
+            (PieceKind::Rook, Color::Black) => {
+                if coord == Coord::new(0, 7).unwrap() || coord == Coord::new(7, 7).unwrap() {
+                    (11, 7, true)
+                } else {
+                    (11, 7, false)
+                }
+            }
+            (PieceKind::Bishop, Color::Black) => {
+                if coord == Coord::new(2, 7).unwrap() || coord == Coord::new(5, 7).unwrap() {
+                    (10, 7, true)
+                } else {
+                    (10, 7, false)
+                }
+            }
+            (PieceKind::Knight, Color::Black) => {
+                if coord == Coord::new(1, 7).unwrap() || coord == Coord::new(6, 7).unwrap() {
+                    (9, 1, true)
+                } else {
+                    (9, 1, false)
+                }
+            }
+            (PieceKind::Pawn, Color::Black) => {
+                if coord.get_rank() == 6 {
+                    (8, 2, true)
+                } else {
+                    (8, 2, false)
+                }
+            }
         };
 
         Piece {
@@ -108,6 +186,8 @@ impl Piece {
             color,
             coord,
             sprite_index,
+            move_max,
+            on_initial_square,
         }
     }
 
@@ -130,9 +210,33 @@ impl Piece {
         self.coord
     }
 
+    /// Get the file of this piece.
+    pub fn get_file(&self) -> u8 {
+        self.coord.get_file()
+    }
+
+    /// Get the rank of this piece.
+    pub fn get_rank(&self) -> u8 {
+        self.coord.get_file()
+    }
+
     /// Get the sprite index of the piece.
     pub const fn get_sprite_index(&self) -> usize {
         self.sprite_index
+    }
+
+    /// Get the maximum number of squares this piece can move.
+    pub const fn get_move_max(&self) -> u8 {
+        self.move_max
+    }
+
+    /// Has the piece moved?
+    pub const fn has_moved(&self) -> bool {
+        if self.on_initial_square {
+            false
+        } else {
+            true
+        }
     }
 
     //
@@ -154,6 +258,11 @@ impl Piece {
         self.coord = coord;
     }
 
+    /// Set to true if the piece has moved.
+    pub fn set_has_moved(&mut self, has_moved: bool) {
+        self.on_initial_square = !has_moved;
+    }
+
     /// Get the rendered `String` representation of the piece.
     /// E.g., `"White King".to_string()`.
     pub fn get_text(&self) -> String {
@@ -161,25 +270,24 @@ impl Piece {
     }
 
     /// Get move Coords for piece.
-    pub fn get_move_coords(&self, board: &Board, current_move: &Option<Move>) -> Vec<Coord> {
+    pub fn get_move_coords(&self, board: &Board) -> Vec<Coord> {
         let move_coords = match self.piece {
-            PieceKind::King => board.get_king_move_coords(self.coord, current_move),
-            PieceKind::Queen => board.get_queen_move_coords(self.coord, current_move),
-            PieceKind::Rook => board.get_rook_move_coords(self.coord, current_move),
-            PieceKind::Bishop => board.get_bishop_move_coords(self.coord, current_move),
-            PieceKind::Knight => board.get_knight_move_coords(self.coord),
-            PieceKind::Pawn => board.get_pawn_move_coords(self.coord, self.color),
+            PieceKind::King => board.get_king_move_coords(self),
+            PieceKind::Queen => board.get_queen_move_coords(self),
+            PieceKind::Rook => board.get_rook_move_coords(self),
+            PieceKind::Bishop => board.get_bishop_move_coords(self),
+            PieceKind::Knight => board.get_knight_move_coords(self),
+            PieceKind::Pawn => board.get_pawn_move_coords(self),
         };
 
         println!("Found {} at {}", self, self.coord);
-        println!(" > Move Coords: {:?}", move_coords);
+        print!(" > Move Coords: ");
+        for coord in move_coords.iter() {
+            print!("{}, ", coord);
+        }
+        println!("");
 
         move_coords
-    }
-
-    /// Get the file and rank from board Coordinates.
-    pub fn get_file_rank_from_coords(coord: Coord) -> (char, u8) {
-        coord.to_char_u8_coord()
     }
 
     /// Return a colored string containing the alpha representation of a piece
