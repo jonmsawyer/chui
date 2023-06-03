@@ -72,6 +72,7 @@ macro_rules! asset_collection {
 macro_rules! asset_collection_struct {
     ( $name:ident {  } -> ( $($result:tt)*) ) => {
         #[derive(Default, Debug, Clone, PartialEq, Eq, Resource)]
+        /// Asset Collection
         pub struct $name {
             $($result)*
         }
@@ -79,12 +80,14 @@ macro_rules! asset_collection_struct {
     ($name:ident { Image($asset:ident, $path:expr), $($assets:tt)* } -> ($($result:tt)*) ) => {
         asset_collection_struct!($name { $($assets)* } -> (
             $($result)*
+            /// Image handle
             pub $asset: Handle<Image>,
         ));
     };
     ($name:ident { Atlas($asset:ident, $path:expr, $width:expr, $height:expr, $columns:expr, $rows:expr, $padding:expr, $offset:expr), $($assets:tt)* } -> ($($result:tt)*) ) => {
         asset_collection_struct!($name { $($assets)* } -> (
             $($result)*
+            /// Texture Atlas handle
             pub $asset: Handle<TextureAtlas>,
         ));
     };
@@ -94,6 +97,7 @@ macro_rules! asset_collection_struct {
 macro_rules! asset_collection_impl {
     ( $name:ident $self:ident $ctx:ident $server:ident $atlases:ident {  } -> ($($init:tt)*)($($status:tt)*) ) => {
         impl $name {
+            /// Initialize Asset Collection.
             fn init(
                 $server: &AssetServer,
                 $atlases: &mut Assets<TextureAtlas>,
@@ -105,7 +109,7 @@ macro_rules! asset_collection_impl {
                 $ctx
             }
 
-
+            /// Get the collection load state.
             fn get_collection_load_state(
                 &$self,
                 $server: &AssetServer,

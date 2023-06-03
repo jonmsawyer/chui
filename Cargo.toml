@@ -24,10 +24,13 @@ default-members = ["bin/chui-ui"]
 chui_core = { path = "lib/chui_core" }
 chui_ui = { path = "lib/chui_ui" }
 chui_macros = { path = "lib/chui_macros" }
+chui_error = { path = "lib/chui_error" }
 
 [dependencies]
 chui_core.workspace = true
 chui_ui.workspace = true
+chui_error.workspace = true
+chui_macros.workspace = true
 
 # Enable first level optimizations in debug mode
 [profile.dev]

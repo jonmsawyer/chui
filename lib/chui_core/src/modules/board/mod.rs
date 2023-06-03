@@ -6,9 +6,6 @@
 
 use crate::{ChuiError, ChuiResult, Color, Coord, Move, Piece, PieceKind, FILES, RANKS};
 
-pub mod result;
-pub use result::{BoardError, BoardResult};
-
 /// The various chess variants available in Chui.
 #[derive(Debug, Copy, Clone)]
 pub enum ChessVariant {
@@ -281,7 +278,7 @@ impl Board {
     /// # Errors
     ///
     /// * This function does not Error.
-    pub fn set_coords(&mut self) -> BoardResult<()> {
+    pub fn set_coords(&mut self) -> ChuiResult<()> {
         for (rank_idx, rank_arr) in self.board.iter_mut().enumerate() {
             for (file_idx, piece) in rank_arr.iter_mut().enumerate() {
                 if piece.is_some() {
@@ -689,7 +686,7 @@ impl Board {
     pub fn standard_row_of_pieces(
         color: Color,
         rank_idx: u8,
-    ) -> BoardResult<[Option<Piece>; FILES as usize]> {
+    ) -> ChuiResult<[Option<Piece>; FILES as usize]> {
         if rank_idx <= 7 {
             Ok([
                 Some(Piece::new(
@@ -734,7 +731,7 @@ impl Board {
                 )),
             ])
         } else {
-            Err(BoardError::InvalidRank(format!(
+            Err(ChuiError::InvalidRank(format!(
                 "Rank index ({}) is out of range",
                 rank_idx
             )))

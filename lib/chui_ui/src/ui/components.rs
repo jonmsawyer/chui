@@ -11,6 +11,7 @@ pub use chui_core;
 pub struct Piece(chui_core::Piece);
 
 impl Piece {
+    /// Return a new [`Piece`].
     pub fn new(piece: chui_core::Piece) -> Piece {
         Piece(piece)
     }

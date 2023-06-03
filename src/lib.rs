@@ -6,4 +6,5 @@
 //! here.
 
 pub use chui_core::{Color, Coord, Engine, NonMaxU8, ParserEngine, Piece, Player};
+pub use chui_error::{ChuiError, ChuiResult};
 pub use chui_ui::Ui;

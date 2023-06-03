@@ -17,3 +17,4 @@ publish = false
 
 [dependencies]
 chui_core.workspace = true
+chui_error.workspace = true

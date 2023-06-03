@@ -2,7 +2,8 @@
 //!
 //! Thanks to this guide: https://github.com/imbolc/rust-derive-macro-guide (2023-05-24)
 
-// use std::str::FromStr;
+#![warn(missing_docs)]
+#![deny(broken_intra_doc_links)]
 
 use darling::FromDeriveInput;
 use proc_macro::{self, TokenStream};
@@ -15,6 +16,7 @@ struct Opts {
     base: Option<bool>,
 }
 
+/// Derive Trainer trait.
 #[proc_macro_derive(Trainer, attributes(trainer))]
 pub fn derive_trainer(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input);
@@ -162,6 +164,7 @@ pub fn derive_trainer(input: TokenStream) -> TokenStream {
     output.into()
 }
 
+/// Dervice Coordinate trait.
 #[proc_macro_derive(Coordinate)]
 pub fn derive_coordinate(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input);
@@ -205,34 +208,34 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                 #output
 
                 impl TryFrom<(#t, #u)> for #ident {
-                    type Error = CoordError;
+                    type Error = ChuiError;
 
-                    fn try_from(coord: (#t, #u)) -> CoordResult<Coord> {
+                    fn try_from(coord: (#t, #u)) -> ChuiResult<Coord> {
                         if let Ok(file) = u8::try_from(coord.0) {
                             if let Ok(rank) = u8::try_from(coord.1) {
                                 if let Ok(file) = NonMaxU8::try_from(file) {
                                     if let Ok(rank) = NonMaxU8::try_from(rank) {
                                         Ok(Coord { file, rank })
                                     } else {
-                                        Err(CoordError::InvalidRank(format!(
+                                        Err(ChuiError::InvalidRank(format!(
                                             "{} is an invalid rank",
                                             rank
                                         )))
                                     }
                                 } else {
-                                    Err(CoordError::InvalidFile(format!(
+                                    Err(ChuiError::InvalidFile(format!(
                                         "{} is an invalid file",
                                         file
                                     )))
                                 }
                             } else {
-                                Err(CoordError::InvalidTypeConversion(format!(
+                                Err(ChuiError::InvalidTypeConversion(format!(
                                     "{} could not be converted to a valid u8 type",
                                     coord.1
                                 )))
                             }
                         } else {
-                            Err(CoordError::InvalidTypeConversion(format!(
+                            Err(ChuiError::InvalidTypeConversion(format!(
                                 "{} could not be converted to a valid u8 type",
                                 coord.0
                             )))
@@ -249,34 +252,34 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                 #output
 
                 impl TryFrom<(#t, #u)> for #ident {
-                    type Error = CoordError;
+                    type Error = ChuiError;
 
-                    fn try_from(coord: (#t, #u)) -> CoordResult<Coord> {
+                    fn try_from(coord: (#t, #u)) -> ChuiResult<Coord> {
                         if let Ok(file) = u8::try_from(coord.0) {
                             if let Ok(rank) = u8::try_from(*coord.1) {
                                 if let Ok(file) = NonMaxU8::try_from(file) {
                                     if let Ok(rank) = NonMaxU8::try_from(rank) {
                                         Ok(Coord { file, rank })
                                     } else {
-                                        Err(CoordError::InvalidRank(format!(
+                                        Err(ChuiError::InvalidRank(format!(
                                             "{} is an invalid rank",
                                             rank
                                         )))
                                     }
                                 } else {
-                                    Err(CoordError::InvalidFile(format!(
+                                    Err(ChuiError::InvalidFile(format!(
                                         "{} is an invalid file",
                                         file
                                     )))
                                 }
                             } else {
-                                Err(CoordError::InvalidTypeConversion(format!(
+                                Err(ChuiError::InvalidTypeConversion(format!(
                                     "{} could not be converted to a valid u8 type",
                                     coord.1
                                 )))
                             }
                         } else {
-                            Err(CoordError::InvalidTypeConversion(format!(
+                            Err(ChuiError::InvalidTypeConversion(format!(
                                 "{} could not be converted to a valid u8 type",
                                 coord.0
                             )))
@@ -293,34 +296,34 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                 #output
 
                 impl TryFrom<(#t, #u)> for #ident {
-                    type Error = CoordError;
+                    type Error = ChuiError;
 
-                    fn try_from(coord: (#t, #u)) -> CoordResult<Coord> {
+                    fn try_from(coord: (#t, #u)) -> ChuiResult<Coord> {
                         if let Ok(file) = u8::try_from(*coord.0) {
                             if let Ok(rank) = u8::try_from(coord.1) {
                                 if let Ok(file) = NonMaxU8::try_from(file) {
                                     if let Ok(rank) = NonMaxU8::try_from(rank) {
                                         Ok(Coord { file, rank })
                                     } else {
-                                        Err(CoordError::InvalidRank(format!(
+                                        Err(ChuiError::InvalidRank(format!(
                                             "{} is an invalid rank",
                                             rank
                                         )))
                                     }
                                 } else {
-                                    Err(CoordError::InvalidFile(format!(
+                                    Err(ChuiError::InvalidFile(format!(
                                         "{} is an invalid file",
                                         file
                                     )))
                                 }
                             } else {
-                                Err(CoordError::InvalidTypeConversion(format!(
+                                Err(ChuiError::InvalidTypeConversion(format!(
                                     "{} could not be converted to a valid u8 type",
                                     coord.1
                                 )))
                             }
                         } else {
-                            Err(CoordError::InvalidTypeConversion(format!(
+                            Err(ChuiError::InvalidTypeConversion(format!(
                                 "{} could not be converted to a valid u8 type",
                                 coord.0
                             )))
@@ -337,34 +340,34 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                 #output
 
                 impl TryFrom<(#t, #u)> for #ident {
-                    type Error = CoordError;
+                    type Error = ChuiError;
 
-                    fn try_from(coord: (#t, #u)) -> CoordResult<Coord> {
+                    fn try_from(coord: (#t, #u)) -> ChuiResult<Coord> {
                         if let Ok(file) = u8::try_from(*coord.0) {
                             if let Ok(rank) = u8::try_from(*coord.1) {
                                 if let Ok(file) = NonMaxU8::try_from(file) {
                                     if let Ok(rank) = NonMaxU8::try_from(rank) {
                                         Ok(Coord { file, rank })
                                     } else {
-                                        Err(CoordError::InvalidRank(format!(
+                                        Err(ChuiError::InvalidRank(format!(
                                             "{} is an invalid rank",
                                             rank
                                         )))
                                     }
                                 } else {
-                                    Err(CoordError::InvalidFile(format!(
+                                    Err(ChuiError::InvalidFile(format!(
                                         "{} is an invalid file",
                                         file
                                     )))
                                 }
                             } else {
-                                Err(CoordError::InvalidTypeConversion(format!(
+                                Err(ChuiError::InvalidTypeConversion(format!(
                                     "{} could not be converted to a valid u8 type",
                                     coord.1
                                 )))
                             }
                         } else {
-                            Err(CoordError::InvalidTypeConversion(format!(
+                            Err(ChuiError::InvalidTypeConversion(format!(
                                 "{} could not be converted to a valid u8 type",
                                 coord.0
                             )))
