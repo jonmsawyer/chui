@@ -8,7 +8,7 @@ use colored::{ColoredString, Colorize};
 use crate::{Board, ChuiError, ChuiResult, Coord};
 
 /// Piece color. Either `White` or `Black` variants.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub enum Color {
     /// Player color White.
     White,
@@ -30,26 +30,21 @@ impl fmt::Display for Color {
     }
 }
 
-/// Piece kind. One of `King`, `Queen`, `Rook`, `Knight`, `Bishop`, `Knight`, `Pawn`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Piece kind. One of `Pawn`, `Knight`, `Bishop`, `Rook`, `Queen`, `King`.
+#[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub enum PieceKind {
-    /// The King.
-    King,
-
-    /// The Queen.
-    Queen,
-
-    /// A Rook.
-    Rook,
-
-    /// A Bishop.
-    Bishop,
-
-    /// A Knight.
-    Knight,
-
     /// A Pawn.
     Pawn,
+    /// A Knight.
+    Knight,
+    /// A Bishop.
+    Bishop,
+    /// A Rook.
+    Rook,
+    /// The Queen.
+    Queen,
+    /// The King.
+    King,
 }
 
 /// Represents a piece on the chessboard. Each chess piece has
@@ -196,7 +191,7 @@ impl Piece {
     //
 
     /// Get the kind of the piece.
-    pub const fn get_piece(&self) -> PieceKind {
+    pub const fn get_kind(&self) -> PieceKind {
         self.piece
     }
 
@@ -217,7 +212,7 @@ impl Piece {
 
     /// Get the rank of this piece.
     pub fn get_rank(&self) -> u8 {
-        self.coord.get_file()
+        self.coord.get_rank()
     }
 
     /// Get the sprite index of the piece.
@@ -237,6 +232,11 @@ impl Piece {
         } else {
             true
         }
+    }
+
+    /// Are the pieces the same color?
+    pub fn is_same_color(&self, piece: Piece) -> bool {
+        self.get_color() == piece.get_color()
     }
 
     //
@@ -279,13 +279,6 @@ impl Piece {
             PieceKind::Knight => board.get_knight_move_coords(self),
             PieceKind::Pawn => board.get_pawn_move_coords(self),
         };
-
-        println!("Found {} at {}", self, self.coord);
-        print!(" > Move Coords: ");
-        for coord in move_coords.iter() {
-            print!("{}, ", coord);
-        }
-        println!("");
 
         move_coords
     }

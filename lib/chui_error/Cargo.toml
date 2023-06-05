@@ -18,3 +18,4 @@ publish = false
 [dependencies]
 #anyhow = "1.0"
 thiserror = "1.0"
+nonmax.workspace = true

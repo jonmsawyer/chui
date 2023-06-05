@@ -206,7 +206,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
                 )))
             }
         };
-        match piece.get_piece() {
+        match piece.get_kind() {
             PieceKind::Pawn => {
                 the_move.set_pawn_move();
                 let file = self.match_index_to_file(from_coord.get_file()).unwrap();

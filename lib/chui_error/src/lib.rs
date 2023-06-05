@@ -3,13 +3,16 @@
 #![warn(missing_docs)]
 #![deny(broken_intra_doc_links)]
 
+use std::convert::Infallible;
 use std::fmt;
+use std::num::{ParseIntError, TryFromIntError};
 
+use nonmax;
 use thiserror::Error;
 
 /// The main error that is returned for this application, rather than generic Err().
 #[non_exhaustive]
-#[derive(Error, Debug, PartialEq, Eq)]
+#[derive(Error, Debug, PartialEq, Eq, Clone, Hash)]
 pub enum ChuiError {
     /// Invalid input if the input string is too small or too large, or
     /// if the input move has any interim whitespace.
@@ -51,8 +54,17 @@ pub enum ChuiError {
     /// Invalid file.
     InvalidFile(String),
 
+    /// Invalid coordinates.
+    InvalidCoords(String),
+
     /// Invalid type conversion.
     InvalidTypeConversion(String),
+
+    /// The [`TryFromIntError`] type.
+    TryFromIntError(String),
+
+    /// The [`ParseIntError`] type.
+    ParseIntError(String),
 
     /// Something is not implemented completely. Raise this error when in
     /// development/testing.
@@ -102,14 +114,68 @@ impl fmt::Display for ChuiError {
                 write!(f, "Error (Invalid File): {}.", reason)
             }
 
+            ChuiError::InvalidCoords(reason) => {
+                write!(f, "Error (Invalid Coordinates): {}.", reason)
+            }
+
             ChuiError::InvalidTypeConversion(reason) => {
                 write!(f, "Error (Invalid File): {}.", reason)
+            }
+
+            ChuiError::TryFromIntError(reason) => {
+                write!(f, "Error (TryFromIntError): {}.", reason)
+            }
+
+            ChuiError::ParseIntError(reason) => {
+                write!(f, "Error (ParseIntError): {}.", reason)
             }
 
             ChuiError::Unknown(reason) => {
                 write!(f, "Error (Unknown): {}", reason)
             }
         }
+    }
+}
+
+impl From<TryFromIntError> for ChuiError {
+    fn from(error: TryFromIntError) -> ChuiError {
+        ChuiError::TryFromIntError(format!("Could not parse integer from input: {}", error))
+    }
+}
+
+impl From<ParseIntError> for ChuiError {
+    fn from(error: ParseIntError) -> ChuiError {
+        ChuiError::TryFromIntError(format!("Could not parse integer from input: {}", error))
+    }
+}
+
+impl From<nonmax::TryFromIntError> for ChuiError {
+    fn from(error: nonmax::TryFromIntError) -> ChuiError {
+        ChuiError::TryFromIntError(format!(
+            "Could not parse non-max integer from input: {}",
+            error
+        ))
+    }
+}
+
+impl From<nonmax::ParseIntError> for ChuiError {
+    fn from(error: nonmax::ParseIntError) -> ChuiError {
+        ChuiError::TryFromIntError(format!(
+            "Could not parse non-max integer from input: {}",
+            error
+        ))
+    }
+}
+
+impl From<Infallible> for ChuiError {
+    fn from(inf: Infallible) -> ChuiError {
+        ChuiError::Unknown(format!("Unknown error: {:?}", inf))
+    }
+}
+
+impl<T: fmt::Debug> From<Result<T, ChuiError>> for ChuiError {
+    fn from(result: Result<T, ChuiError>) -> ChuiError {
+        result.unwrap_err()
     }
 }
 

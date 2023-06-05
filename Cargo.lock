@@ -1051,6 +1051,7 @@ dependencies = [
 name = "chui_error"
 version = "0.1.0"
 dependencies = [
+ "nonmax",
  "thiserror",
 ]
 

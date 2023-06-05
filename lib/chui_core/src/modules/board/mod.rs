@@ -4,6 +4,8 @@
 
 // use nonmax::NonMaxU8;
 
+#[allow(unused_imports)]
+use crate::constants::*;
 use crate::{ChuiError, ChuiResult, Color, Coord, Move, Piece, PieceKind, FILES, RANKS};
 
 /// The various chess variants available in Chui.
@@ -258,7 +260,7 @@ impl Board {
                 if some_piece.is_some() {
                     let some_piece = some_piece.expect("Piece cannot be None.");
 
-                    if some_piece.get_piece() == piece.get_piece()
+                    if some_piece.get_kind() == piece.get_kind()
                         && some_piece.get_color() == piece.get_color()
                     {
                         pieces.push(some_piece);
@@ -492,7 +494,6 @@ impl Board {
         if piece.get_color() == Color::White {
             let new_coord_1 = Coord::new(file_idx, rank_idx + 1);
             let new_coord_2 = Coord::new(file_idx, rank_idx + 2);
-
             if let Ok(new_coord) = new_coord_1 {
                 if self.get_piece(new_coord).is_none() {
                     coords.push(new_coord);
@@ -606,12 +607,12 @@ impl Board {
     pub fn get_top_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
         let mut max_counter: u8 = 0;
-        let mut rank_idx = piece.get_rank() + 1;
+        let mut rank_idx = piece.get_rank() + 1; // we're moving North
 
         while max_counter < piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(piece.get_file(), rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
-                    if o_piece.get_color() != piece.get_color() {
+                    if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
 
@@ -627,7 +628,7 @@ impl Board {
             rank_idx += 1;
             max_counter += 1;
         }
-
+        println!("Top Coords: {:?}", coords);
         coords
     }
 
@@ -635,12 +636,12 @@ impl Board {
     pub fn get_right_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
         let mut max_counter: u8 = 0;
-        let mut file_idx = piece.get_file() + 1;
+        let mut file_idx = piece.get_file() + 1; // we're moving East
 
         while max_counter < piece.get_move_max() {
-            if let Ok(new_coord) = Coord::new(piece.get_file(), file_idx) {
+            if let Ok(new_coord) = Coord::new(file_idx, piece.get_rank()) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
-                    if o_piece.get_color() != piece.get_color() {
+                    if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
 
@@ -656,7 +657,7 @@ impl Board {
             file_idx += 1;
             max_counter += 1;
         }
-
+        println!("Right Coords: {:?}", coords);
         coords
     }
 
@@ -664,12 +665,12 @@ impl Board {
     pub fn get_bottom_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
         let mut max_counter: u8 = 0;
-        let mut rank_idx = piece.get_rank().wrapping_sub(1);
+        let mut rank_idx = piece.get_rank().wrapping_sub(1); // we're moving South
 
         while max_counter < piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(piece.get_file(), rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
-                    if o_piece.get_color() != piece.get_color() {
+                    if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
 
@@ -685,7 +686,7 @@ impl Board {
             rank_idx = rank_idx.wrapping_sub(1);
             max_counter += 1;
         }
-
+        println!("Bottom Coords: {:?}", coords);
         coords
     }
 
@@ -693,12 +694,12 @@ impl Board {
     pub fn get_left_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
         let mut max_counter: u8 = 0;
-        let mut file_idx = piece.get_file().wrapping_sub(1);
+        let mut file_idx = piece.get_file().wrapping_sub(1); // we're moving West
 
         while max_counter < piece.get_move_max() {
-            if let Ok(new_coord) = Coord::new(piece.get_file(), file_idx) {
+            if let Ok(new_coord) = Coord::new(file_idx, piece.get_rank()) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
-                    if o_piece.get_color() != piece.get_color() {
+                    if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
 
@@ -714,7 +715,7 @@ impl Board {
             file_idx = file_idx.wrapping_sub(1);
             max_counter += 1;
         }
-
+        println!("Left Coords: {:?}", coords);
         coords
     }
 
@@ -722,13 +723,13 @@ impl Board {
     pub fn get_top_left_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
         let mut max_counter: u8 = 0;
-        let mut file_idx = piece.get_file().wrapping_sub(1);
-        let mut rank_idx = piece.get_rank() + 1;
+        let mut file_idx = piece.get_file().wrapping_sub(1); // we're moving West
+        let mut rank_idx = piece.get_rank() + 1; // we're moving North
 
         while max_counter < piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
-                    if o_piece.get_color() != piece.get_color() {
+                    if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
 
@@ -745,7 +746,7 @@ impl Board {
             rank_idx += 1;
             max_counter += 1;
         }
-
+        println!("Top Left Coords: {:?}", coords);
         coords
     }
 
@@ -753,13 +754,13 @@ impl Board {
     pub fn get_top_right_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
         let mut max_counter: u8 = 0;
-        let mut file_idx = piece.get_file() + 1;
-        let mut rank_idx = piece.get_rank() + 1;
+        let mut file_idx = piece.get_file() + 1; // we're moving East
+        let mut rank_idx = piece.get_rank() + 1; // we're moving North
 
         while max_counter < piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
-                    if o_piece.get_color() != piece.get_color() {
+                    if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
 
@@ -776,7 +777,7 @@ impl Board {
             rank_idx += 1;
             max_counter += 1;
         }
-
+        println!("Top Right Coords: {:?}", coords);
         coords
     }
 
@@ -784,13 +785,13 @@ impl Board {
     pub fn get_bottom_right_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
         let mut max_counter: u8 = 0;
-        let mut file_idx = piece.get_file() + 1;
-        let mut rank_idx = piece.get_rank().wrapping_sub(1);
+        let mut file_idx = piece.get_file() + 1; // we're moving East
+        let mut rank_idx = piece.get_rank().wrapping_sub(1); // we're moving South
 
         while max_counter < piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
-                    if o_piece.get_color() != piece.get_color() {
+                    if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
 
@@ -807,7 +808,7 @@ impl Board {
             rank_idx = rank_idx.wrapping_sub(1);
             max_counter += 1;
         }
-
+        println!("Bottom Right Coords: {:?}", coords);
         coords
     }
 
@@ -815,13 +816,13 @@ impl Board {
     pub fn get_bottom_left_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
         let mut max_counter: u8 = 0;
-        let mut file_idx = piece.get_file().wrapping_sub(1);
-        let mut rank_idx = piece.get_rank().wrapping_sub(1);
+        let mut file_idx = piece.get_file().wrapping_sub(1); // we're moving West
+        let mut rank_idx = piece.get_rank().wrapping_sub(1); // we're moving South
 
         while max_counter < piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
-                    if o_piece.get_color() != piece.get_color() {
+                    if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
 
@@ -838,7 +839,7 @@ impl Board {
             rank_idx = rank_idx.wrapping_sub(1);
             max_counter += 1;
         }
-
+        println!("Bottom Left Coords: {:?}", coords);
         coords
     }
 
@@ -854,46 +855,34 @@ impl Board {
     ) -> ChuiResult<[Option<Piece>; FILES as usize]> {
         if rank_idx <= 7 {
             Ok([
-                Some(Piece::new(
-                    PieceKind::Rook,
-                    color,
-                    Coord::new(0, rank_idx).unwrap(),
-                )),
+                Some(Piece::new(PieceKind::Rook, color, Coord::new(0, rank_idx)?)),
                 Some(Piece::new(
                     PieceKind::Knight,
                     color,
-                    Coord::new(1, rank_idx).unwrap(),
+                    Coord::new(1, rank_idx)?,
                 )),
                 Some(Piece::new(
                     PieceKind::Bishop,
                     color,
-                    Coord::new(2, rank_idx).unwrap(),
+                    Coord::new(2, rank_idx)?,
                 )),
                 Some(Piece::new(
                     PieceKind::Queen,
                     color,
-                    Coord::new(3, rank_idx).unwrap(),
+                    Coord::new(3, rank_idx)?,
                 )),
-                Some(Piece::new(
-                    PieceKind::King,
-                    color,
-                    Coord::new(4, rank_idx).unwrap(),
-                )),
+                Some(Piece::new(PieceKind::King, color, Coord::new(4, rank_idx)?)),
                 Some(Piece::new(
                     PieceKind::Bishop,
                     color,
-                    Coord::new(5, rank_idx).unwrap(),
+                    Coord::new(5, rank_idx)?,
                 )),
                 Some(Piece::new(
                     PieceKind::Knight,
                     color,
-                    Coord::new(6, rank_idx).unwrap(),
+                    Coord::new(6, rank_idx)?,
                 )),
-                Some(Piece::new(
-                    PieceKind::Rook,
-                    color,
-                    Coord::new(7, rank_idx).unwrap(),
-                )),
+                Some(Piece::new(PieceKind::Rook, color, Coord::new(7, rank_idx)?)),
             ])
         } else {
             Err(ChuiError::InvalidRank(format!(
@@ -901,100 +890,6 @@ impl Board {
                 rank_idx
             )))
         }
-    }
-
-    /// "Zips" together top Coords and left Coords.
-    pub fn zip_top_left_coords(
-        &self,
-        top_coords: Vec<Coord>,
-        left_coords: Vec<Coord>,
-    ) -> Vec<Coord> {
-        let mut coords = Vec::<Coord>::new();
-
-        for (rank_coord, file_coord) in top_coords.iter().zip(left_coords) {
-            let new_coord = Coord::new(file_coord.get_file(), rank_coord.get_rank()).unwrap();
-            if self.get_piece(new_coord).is_some() {
-                let move_coords = new_coord.to_char_u8_coord();
-                println!("(Top Left) Breaking on {}{}", move_coords.0, move_coords.1);
-                break;
-            }
-
-            coords.push(new_coord);
-        }
-
-        coords
-    }
-
-    /// "Zips" together top Coords and right Coords.
-    pub fn zip_top_right_coords(
-        &self,
-        top_coords: Vec<Coord>,
-        right_coords: Vec<Coord>,
-    ) -> Vec<Coord> {
-        let mut coords = Vec::<Coord>::new();
-
-        for (rank_coord, file_coord) in top_coords.iter().zip(right_coords) {
-            let new_coord = Coord::new(file_coord.get_file(), rank_coord.get_rank()).unwrap();
-            if self.get_piece(new_coord).is_some() {
-                let move_coords = new_coord.to_char_u8_coord();
-                println!("(Top Right) Breaking on {}{}", move_coords.0, move_coords.1);
-                break;
-            }
-
-            coords.push(new_coord);
-        }
-
-        coords
-    }
-
-    /// "Zips" together bottom Coords and right Coords.
-    pub fn zip_bottom_right_coords(
-        &self,
-        bottom_coords: Vec<Coord>,
-        right_coords: Vec<Coord>,
-    ) -> Vec<Coord> {
-        let mut coords = Vec::<Coord>::new();
-
-        for (rank_coord, file_coord) in bottom_coords.iter().zip(right_coords) {
-            let new_coord = Coord::new(file_coord.get_file(), rank_coord.get_rank()).unwrap();
-            if self.get_piece(new_coord).is_some() {
-                let move_coords = new_coord.to_char_u8_coord();
-                println!(
-                    "(Bottom Right) Breaking on {}{}",
-                    move_coords.0, move_coords.1
-                );
-                break;
-            }
-
-            coords.push(new_coord);
-        }
-
-        coords
-    }
-
-    /// "Zips" together bottom Coords and left Coords.
-    pub fn zip_bottom_left_coords(
-        &self,
-        bottom_coords: Vec<Coord>,
-        left_coords: Vec<Coord>,
-    ) -> Vec<Coord> {
-        let mut coords = Vec::<Coord>::new();
-
-        for (rank_coord, file_coord) in bottom_coords.iter().zip(left_coords) {
-            let new_coord = Coord::new(file_coord.get_file(), rank_coord.get_rank()).unwrap();
-            if self.get_piece(new_coord).is_some() {
-                let move_coords = new_coord.to_char_u8_coord();
-                println!(
-                    "(Bottom Left) Breaking on {}{}",
-                    move_coords.0, move_coords.1
-                );
-                break;
-            }
-
-            coords.push(new_coord);
-        }
-
-        coords
     }
 
     /// Test function to display the board colors by a straight
@@ -1010,5 +905,385 @@ impl Board {
                 println!();
             }
         }
+    }
+
+    /// Print move coordinates in a pretty way.
+    pub fn print_coords(coords: &Vec<Coord>) {
+        let mut c_string = String::new();
+        for c in coords.iter() {
+            if c_string.len() == 0 {
+                c_string.push_str(format!("{}", c).as_str())
+            } else {
+                c_string.push_str(format!(", {}", c).as_str())
+            }
+        }
+        println!(" > {} Move Coords: {}", coords.len(), c_string);
+    }
+
+    /// Print [`Piece`].
+    pub fn print_piece(piece: &Piece) {
+        println!(
+            "Piece: {}, Coord: {} ({:?})",
+            piece,
+            piece.get_coord(),
+            piece.get_coord()
+        );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn new_board() -> Board {
+        Board::new(ChessVariant::StandardChess)
+    }
+
+    fn print_info(piece: &Piece, coords: &Vec<Coord>) {
+        Board::print_piece(piece);
+        Board::print_coords(coords);
+    }
+
+    fn get_piece(board: &Board, coord: Coord) -> ChuiResult<Piece> {
+        board
+            .get_piece(coord)
+            .ok_or(ChuiError::InvalidPiece(format!(
+                "Invalid piece on {}",
+                coord
+            )))
+    }
+
+    fn get_vars(coord: (char, u8)) -> ChuiResult<(Board, Piece)> {
+        let (board, coord) = (new_board(), Coord::try_from(coord)?);
+        Ok((board, get_piece(&board, coord)?))
+    }
+
+    fn assert_coords(expected_coords: &Vec<(char, u8)>, coords: &Vec<Coord>) -> ChuiResult<()> {
+        assert_eq!(expected_coords.len(), coords.len());
+        assert!(expected_coords.iter().all(|e_coord| {
+            let e_coord = Coord::try_from(*e_coord).unwrap();
+            coords.iter().any(|c| e_coord == *c)
+        }));
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_rook_on_a1() -> ChuiResult<()> {
+        let (board, piece) = get_vars(A1)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_knight_on_b1() -> ChuiResult<()> {
+        let (board, piece) = get_vars(B1)?;
+        let expected_coords = vec![A3, C3];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_bishop_on_c1() -> ChuiResult<()> {
+        let (board, piece) = get_vars(C1)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_queen_on_d1() -> ChuiResult<()> {
+        let (board, piece) = get_vars(D1)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_king_on_e1() -> ChuiResult<()> {
+        let (board, piece) = get_vars(E1)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_bishop_on_f1() -> ChuiResult<()> {
+        let (board, piece) = get_vars(F1)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_knight_on_g1() -> ChuiResult<()> {
+        let (board, piece) = get_vars(G1)?;
+        let expected_coords = vec![F3, H3];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_rook_on_h1() -> ChuiResult<()> {
+        let (board, piece) = get_vars(H1)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_pawn_on_a2() -> ChuiResult<()> {
+        let (board, piece) = get_vars(A2)?;
+        let expected_coords = vec![A3, A4];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_pawn_on_b2() -> ChuiResult<()> {
+        let (board, piece) = get_vars(B2)?;
+        let expected_coords = vec![B3, B4];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_pawn_on_c2() -> ChuiResult<()> {
+        let (board, piece) = get_vars(C2)?;
+        let expected_coords = vec![C3, C4];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_pawn_on_d2() -> ChuiResult<()> {
+        let (board, piece) = get_vars(D2)?;
+        let expected_coords = vec![D3, D4];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_pawn_on_e2() -> ChuiResult<()> {
+        let (board, piece) = get_vars(E2)?;
+        let expected_coords = vec![E3, E4];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_pawn_on_f2() -> ChuiResult<()> {
+        let (board, piece) = get_vars(F2)?;
+        let expected_coords = vec![F3, F4];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_pawn_on_g2() -> ChuiResult<()> {
+        let (board, piece) = get_vars(G2)?;
+        let expected_coords = vec![G3, G4];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_white_pawn_on_h2() -> ChuiResult<()> {
+        let (board, piece) = get_vars(H2)?;
+        let expected_coords = vec![H3, H4];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_rook_on_a8() -> ChuiResult<()> {
+        let (board, piece) = get_vars(A8)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_knight_on_b8() -> ChuiResult<()> {
+        let (board, piece) = get_vars(B8)?;
+        let expected_coords = vec![A6, C6];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_bishop_on_c8() -> ChuiResult<()> {
+        let (board, piece) = get_vars(C8)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_queen_on_d8() -> ChuiResult<()> {
+        let (board, piece) = get_vars(D8)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_king_on_e8() -> ChuiResult<()> {
+        let (board, piece) = get_vars(E8)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_bishop_on_f8() -> ChuiResult<()> {
+        let (board, piece) = get_vars(F8)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_knight_on_g8() -> ChuiResult<()> {
+        let (board, piece) = get_vars(G8)?;
+        let expected_coords = vec![F6, H6];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_rook_on_h8() -> ChuiResult<()> {
+        let (board, piece) = get_vars(H8)?;
+        let expected_coords = Vec::<(char, u8)>::new();
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_pawn_on_a7() -> ChuiResult<()> {
+        let (board, piece) = get_vars(A7)?;
+        let expected_coords = vec![A6, A5];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_pawn_on_b7() -> ChuiResult<()> {
+        let (board, piece) = get_vars(B7)?;
+        let expected_coords = vec![B6, B5];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_pawn_on_c7() -> ChuiResult<()> {
+        let (board, piece) = get_vars(C7)?;
+        let expected_coords = vec![C6, C5];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_pawn_on_d7() -> ChuiResult<()> {
+        let (board, piece) = get_vars(D7)?;
+        let expected_coords = vec![D6, D5];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_pawn_on_e7() -> ChuiResult<()> {
+        let (board, piece) = get_vars(E7)?;
+        let expected_coords = vec![E6, E5];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_pawn_on_f7() -> ChuiResult<()> {
+        let (board, piece) = get_vars(F7)?;
+        let expected_coords = vec![F6, F5];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_pawn_on_g7() -> ChuiResult<()> {
+        let (board, piece) = get_vars(G7)?;
+        let expected_coords = vec![G6, G5];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_black_pawn_on_h7() -> ChuiResult<()> {
+        let (board, piece) = get_vars(H7)?;
+        let expected_coords = vec![H6, H5];
+        let coords = piece.get_move_coords(&board);
+        print_info(&piece, &coords);
+        assert_coords(&expected_coords, &coords)?;
+        Ok(())
     }
 }

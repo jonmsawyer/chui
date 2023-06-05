@@ -224,7 +224,7 @@ pub fn update_mouse_click(
                             return;
                         }
 
-                        let kind = from_piece.unwrap().get_piece();
+                        let kind = from_piece.unwrap().get_kind();
 
                         if to_piece.is_none() {
                             chess_move.move_type = match kind {

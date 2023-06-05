@@ -7,7 +7,7 @@ pub use chui_error::{ChuiError, ChuiResult};
 
 mod modules;
 pub use modules::{
-    constants::*,
+    constants::{self, *},
     coord::{Coord, NonMaxU8},
     parser::{self, ParserEngine},
     piece::{Color, Piece, PieceKind},
