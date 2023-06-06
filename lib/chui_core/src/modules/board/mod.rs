@@ -1286,4 +1286,15 @@ mod tests {
         assert_coords(&expected_coords, &coords)?;
         Ok(())
     }
+
+    #[test]
+    fn test_empty_squares() -> ChuiResult<()> {
+        let board = new_board();
+        for i in 2..6 {
+            for j in 0..8 {
+                assert_eq!(None, board.get_piece(Coord::try_from((j, i))?));
+            }
+        }
+        Ok(())
+    }
 }
