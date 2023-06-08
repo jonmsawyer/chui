@@ -1,4 +1,4 @@
-use chui_core::{Color, Engine, ParserEngine, Player};
+use chui_core::{Color, Game, ParserEngine, Player};
 
 #[test]
 fn init_engine() {
@@ -11,7 +11,7 @@ fn init_engine() {
         Some(987),
     );
 
-    if let Ok(engine) = Engine::new(white, black, ParserEngine::Algebraic) {
+    if let Ok(engine) = Game::new(white, black, ParserEngine::Algebraic) {
         assert_eq!(
             &format!("{}", engine),
             "White: Nathan Vander Martin (Age 36) (no Elo rating)

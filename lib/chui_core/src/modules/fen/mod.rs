@@ -2,7 +2,7 @@
 //!
 //! FEN stands for Forsyth-Edwards Notation.
 
-use super::Engine;
+use super::Game;
 
 /// Represents the FEN notation of a chess position.
 #[derive(Debug, Copy, Clone)]
@@ -10,7 +10,7 @@ pub struct Fen;
 
 impl Fen {
     /// Get the FEN layout of the board.
-    pub fn get_fen(engine: &Engine) -> String {
+    pub fn get_fen(engine: &Game) -> String {
         let mut fen = Fen::get_board_fen(engine);
 
         // To move.
@@ -32,7 +32,7 @@ impl Fen {
     }
 
     /// Get the Shredder-FEN layout of the board.
-    pub fn get_shredder_fen(engine: &Engine) -> String {
+    pub fn get_shredder_fen(engine: &Game) -> String {
         let mut fen = Fen::get_board_fen(engine);
 
         // To move.
@@ -54,7 +54,7 @@ impl Fen {
     }
 
     /// Get the X-FEN layout of the board.
-    pub fn get_x_fen(engine: &Engine) -> String {
+    pub fn get_x_fen(engine: &Game) -> String {
         let mut fen = Fen::get_board_fen(engine);
 
         // To move.
@@ -81,7 +81,7 @@ impl Fen {
     /// # Panics
     ///
     /// * Panics if `piece` is None after checking that it is Some.
-    pub fn get_board_fen(engine: &Engine) -> String {
+    pub fn get_board_fen(engine: &Game) -> String {
         let mut fen = String::new();
         let mut empty_squares = 0;
 

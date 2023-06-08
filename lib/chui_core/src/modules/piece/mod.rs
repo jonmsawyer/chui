@@ -61,7 +61,7 @@ pub enum PieceKind {
 /// println!("{}: {:?}", white_pawn.get_text(), white_pawn);
 /// println!("{}: {:?}", black_queen.get_text(), black_queen);
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Piece {
     /// The kind of piece.
     piece: PieceKind,
@@ -237,6 +237,16 @@ impl Piece {
     /// Are the pieces the same color?
     pub fn is_same_color(&self, piece: Piece) -> bool {
         self.get_color() == piece.get_color()
+    }
+
+    /// Are the pieces the same kind?
+    pub fn is_same_kind(&self, piece: Piece) -> bool {
+        self.get_kind() == piece.get_kind()
+    }
+
+    /// Are the pieces the same according to their kind and color?
+    pub fn is_same_piece(&self, piece: Piece) -> bool {
+        self.is_same_kind(piece) && self.is_same_color(piece)
     }
 
     //

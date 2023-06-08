@@ -8,11 +8,14 @@
 use crate::constants::*;
 use crate::{ChuiError, ChuiResult, Color, Coord, Move, Piece, PieceKind, FILES, RANKS};
 
+mod tests;
+
 /// The various chess variants available in Chui.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub enum ChessVariant {
     /// Standard Chess is the default chess variant. Used in all tournaments
     /// and official gameplay.
+    #[default]
     StandardChess,
     //Chess960,
 }
@@ -20,13 +23,32 @@ pub enum ChessVariant {
 /// This struct represents the chessboard. Has a field called `board` which
 /// references an 8x8 board. Has a field called `en_passant` which represents the en passant
 /// target square.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Board {
     /// Represents an 8x8 chessboard using nested arrays.
     board: [[Option<Piece>; FILES as usize]; RANKS as usize],
 
-    /// Represents the en passant target square coordinate.
+    /// Can white castle on the king side?
+    pub white_can_castle_kingside: bool,
+
+    /// Can white castle on the queen side?
+    pub white_can_castle_queenside: bool,
+
+    /// Can black castle on the king side?
+    pub black_can_castle_kingside: bool,
+
+    /// Can black castle on the queen side?
+    pub black_can_castle_queenside: bool,
+
+    /// When a pawn is moved, the en passant target square is
+    /// noted, even if there's no en passant move possible. This
+    /// comes from the FEN layout of the game.
     en_passant_target_square: Option<Coord>,
+
+    /// When a pawn is moved, the en passant target square is
+    /// noted, only if there's an en passant move possible. This
+    /// comes from the X-FEN layout of the game.
+    true_enpassant_target_square: Option<Coord>,
 
     /// Represents the en passant target piece (pawn).
     en_passant_target_piece: Option<Piece>,
@@ -37,12 +59,17 @@ impl Board {
     // Constructors.
     //
 
-    /// Return a new `Board` given a chess variant.
+    /// Return a new [`Board`] given a [`ChessVariant`].
     pub fn new(variant: ChessVariant) -> Board {
         match variant {
             ChessVariant::StandardChess => Board {
                 board: Board::new_standard_chess(),
+                white_can_castle_kingside: true,
+                white_can_castle_queenside: true,
+                black_can_castle_kingside: true,
+                black_can_castle_queenside: true,
                 en_passant_target_square: None,
+                true_enpassant_target_square: None,
                 en_passant_target_piece: None,
             },
         }
@@ -189,8 +216,8 @@ impl Board {
 
         for piece in pieces.iter() {
             if piece.get_move_coords(self).iter().any(|&coord| {
-                coord.get_file() == move_obj.to_coord.unwrap().get_file()
-                    && coord.get_rank() == move_obj.to_coord.unwrap().get_rank()
+                coord.get_file() == move_obj.to_coord.get_file()
+                    && coord.get_rank() == move_obj.to_coord.get_rank()
             }) {
                 pieces_can_move.push(*piece);
             }
@@ -198,7 +225,7 @@ impl Board {
 
         // println!("Pieces can move: {:?}", pieces_can_move);
 
-        let (file, rank) = move_obj.to_coord.unwrap().to_u8_index();
+        let (file, rank) = move_obj.to_coord.to_u8_index();
 
         if pieces_can_move.is_empty() {
             Err(ChuiError::InvalidMove(format!(
@@ -224,7 +251,7 @@ impl Board {
     /// Replace the given piece from one square to another.
     pub fn replace_piece(&mut self, piece_from: &mut Piece, move_obj: &Move) {
         let from_coord = piece_from.get_coord();
-        let to_coord = move_obj.to_coord.unwrap();
+        let to_coord = move_obj.to_coord;
 
         piece_from.set_coord(to_coord);
 
@@ -241,35 +268,18 @@ impl Board {
         &self.board
     }
 
-    /// Get the piece in the defined indicies. Remember that
-    /// this is index-based, not Coordinate-based.
+    /// Get the piece at the given coordinate.
     pub fn get_piece(&self, coord: Coord) -> Option<Piece> {
         self.board[coord.get_rank() as usize][coord.get_file() as usize]
     }
 
     /// Get the available `Piece`s for a `Color`.
-    ///
-    /// # Panics
-    ///
-    /// * Panics when `some_piece` is None after checking that it is Some.
     pub fn get_pieces(&self, piece: &mut Piece) -> Vec<Piece> {
-        let mut pieces = Vec::<Piece>::new();
-
-        for (_, rank_arr) in self.board.iter().enumerate() {
-            for (_, some_piece) in rank_arr.iter().enumerate() {
-                if some_piece.is_some() {
-                    let some_piece = some_piece.expect("Piece cannot be None.");
-
-                    if some_piece.get_kind() == piece.get_kind()
-                        && some_piece.get_color() == piece.get_color()
-                    {
-                        pieces.push(some_piece);
-                    }
-                }
-            }
-        }
-
-        pieces
+        self.board
+            .iter()
+            .flatten()
+            .filter_map(|p| p.filter(|p| p.is_same_piece(*piece)))
+            .collect()
     }
 
     /// Get the en passant target square coordinate.
@@ -282,58 +292,56 @@ impl Board {
         self.en_passant_target_piece
     }
 
+    /// Get the en passant target square and piece.
+    pub fn get_en_passant(&self) -> (Option<Coord>, Option<Piece>) {
+        (self.get_en_passant_coord(), self.get_en_passant_piece())
+    }
+
     //
     // Setters.
     //
 
     /// Set the en passant target square coordinate.
-    pub fn set_en_passant_coord(&mut self, coord: Coord) {
-        self.en_passant_target_square = Some(coord);
+    pub fn set_en_passant_coord(&mut self, coord: Option<Coord>) {
+        self.en_passant_target_square = coord;
+        self.true_enpassant_target_square = coord;
     }
 
-    /// Unset the en passant target square coordinate.
-    pub fn unset_en_passant_coord(&mut self) {
-        self.en_passant_target_square = None;
-    }
-
-    /// Set the en passant target square coordinate.
-    pub fn set_en_passant_piece(&mut self, piece: Piece) {
-        self.en_passant_target_piece = Some(piece);
-    }
-
-    /// Unset the en passant target square coordinate.
-    pub fn unset_en_passant_piece(&mut self) {
-        self.en_passant_target_piece = None;
+    /// Set the en passant target square piece.
+    pub fn set_en_passant_piece(&mut self, piece: Option<Piece>) {
+        self.en_passant_target_piece = piece;
     }
 
     /// Set both the en passant target square and piece.
-    pub fn set_en_passant(&mut self, coord: Coord, piece: Piece) {
+    pub fn set_en_passant(&mut self, coord: Option<Coord>, piece: Option<Piece>) {
         self.set_en_passant_coord(coord);
         self.set_en_passant_piece(piece);
     }
 
-    /// Unset the en passant target square and piece.
-    pub fn unset_en_passant(&mut self) {
-        self.unset_en_passant_coord();
-        self.unset_en_passant_piece();
+    /// Set the Coordinates for all [`Piece`]s.
+    pub fn set_coords(&mut self) {
+        self.board
+            .iter_mut()
+            .flatten()
+            .enumerate()
+            .for_each(|(idx, piece)| {
+                if let Some(piece) = piece {
+                    piece.set_coord(Coord::new_from_idx(idx as u8).unwrap());
+                }
+            });
     }
 
-    /// Set the Coordinates for all `Piece`s.
-    ///
-    /// # Errors
-    ///
-    /// * Errors when an invalid [`Coord`] is created.
-    pub fn set_coords(&mut self) -> ChuiResult<()> {
-        for (rank_idx, rank_arr) in self.board.iter_mut().enumerate() {
-            for (file_idx, piece) in rank_arr.iter_mut().enumerate() {
-                if piece.is_some() {
-                    let piece = piece.as_mut().unwrap();
-                    piece.set_coord(Coord::new(file_idx as u8, rank_idx as u8)?);
-                }
-            }
-        }
+    /// Take a piece off of the board.
+    pub fn take_piece(&mut self, coord: Coord) -> Option<Piece> {
+        self.put_piece(None, coord)
+    }
 
-        Ok(())
+    /// Put a piece onto the board. Return any piece on the given square if it's occupied
+    /// already.
+    pub fn put_piece(&mut self, piece: Option<Piece>, coord: Coord) -> Option<Piece> {
+        let return_piece = self.get_piece(coord);
+        self.board[coord.get_rank() as usize][coord.get_file() as usize] = piece;
+        return_piece
     }
 
     //
@@ -931,370 +939,8 @@ impl Board {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn new_board() -> Board {
+impl Default for Board {
+    fn default() -> Self {
         Board::new(ChessVariant::StandardChess)
-    }
-
-    fn print_info(piece: &Piece, coords: &Vec<Coord>) {
-        Board::print_piece(piece);
-        Board::print_coords(coords);
-    }
-
-    fn get_piece(board: &Board, coord: Coord) -> ChuiResult<Piece> {
-        board
-            .get_piece(coord)
-            .ok_or(ChuiError::InvalidPiece(format!(
-                "Invalid piece on {}",
-                coord
-            )))
-    }
-
-    fn get_vars(coord: (char, u8)) -> ChuiResult<(Board, Piece)> {
-        let (board, coord) = (new_board(), Coord::try_from(coord)?);
-        Ok((board, get_piece(&board, coord)?))
-    }
-
-    fn assert_coords(expected_coords: &Vec<(char, u8)>, coords: &Vec<Coord>) -> ChuiResult<()> {
-        assert_eq!(expected_coords.len(), coords.len());
-        assert!(expected_coords.iter().all(|e_coord| {
-            let e_coord = Coord::try_from(*e_coord).unwrap();
-            coords.iter().any(|c| e_coord == *c)
-        }));
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_rook_on_a1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(A1)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_knight_on_b1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(B1)?;
-        let expected_coords = vec![A3, C3];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_bishop_on_c1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(C1)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_queen_on_d1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(D1)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_king_on_e1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(E1)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_bishop_on_f1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(F1)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_knight_on_g1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(G1)?;
-        let expected_coords = vec![F3, H3];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_rook_on_h1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(H1)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_pawn_on_a2() -> ChuiResult<()> {
-        let (board, piece) = get_vars(A2)?;
-        let expected_coords = vec![A3, A4];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_pawn_on_b2() -> ChuiResult<()> {
-        let (board, piece) = get_vars(B2)?;
-        let expected_coords = vec![B3, B4];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_pawn_on_c2() -> ChuiResult<()> {
-        let (board, piece) = get_vars(C2)?;
-        let expected_coords = vec![C3, C4];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_pawn_on_d2() -> ChuiResult<()> {
-        let (board, piece) = get_vars(D2)?;
-        let expected_coords = vec![D3, D4];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_pawn_on_e2() -> ChuiResult<()> {
-        let (board, piece) = get_vars(E2)?;
-        let expected_coords = vec![E3, E4];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_pawn_on_f2() -> ChuiResult<()> {
-        let (board, piece) = get_vars(F2)?;
-        let expected_coords = vec![F3, F4];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_pawn_on_g2() -> ChuiResult<()> {
-        let (board, piece) = get_vars(G2)?;
-        let expected_coords = vec![G3, G4];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_white_pawn_on_h2() -> ChuiResult<()> {
-        let (board, piece) = get_vars(H2)?;
-        let expected_coords = vec![H3, H4];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_rook_on_a8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(A8)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_knight_on_b8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(B8)?;
-        let expected_coords = vec![A6, C6];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_bishop_on_c8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(C8)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_queen_on_d8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(D8)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_king_on_e8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(E8)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_bishop_on_f8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(F8)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_knight_on_g8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(G8)?;
-        let expected_coords = vec![F6, H6];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_rook_on_h8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(H8)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_pawn_on_a7() -> ChuiResult<()> {
-        let (board, piece) = get_vars(A7)?;
-        let expected_coords = vec![A6, A5];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_pawn_on_b7() -> ChuiResult<()> {
-        let (board, piece) = get_vars(B7)?;
-        let expected_coords = vec![B6, B5];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_pawn_on_c7() -> ChuiResult<()> {
-        let (board, piece) = get_vars(C7)?;
-        let expected_coords = vec![C6, C5];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_pawn_on_d7() -> ChuiResult<()> {
-        let (board, piece) = get_vars(D7)?;
-        let expected_coords = vec![D6, D5];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_pawn_on_e7() -> ChuiResult<()> {
-        let (board, piece) = get_vars(E7)?;
-        let expected_coords = vec![E6, E5];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_pawn_on_f7() -> ChuiResult<()> {
-        let (board, piece) = get_vars(F7)?;
-        let expected_coords = vec![F6, F5];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_pawn_on_g7() -> ChuiResult<()> {
-        let (board, piece) = get_vars(G7)?;
-        let expected_coords = vec![G6, G5];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_black_pawn_on_h7() -> ChuiResult<()> {
-        let (board, piece) = get_vars(H7)?;
-        let expected_coords = vec![H6, H5];
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
-
-    #[test]
-    fn test_empty_squares() -> ChuiResult<()> {
-        let board = new_board();
-        for i in 2..6 {
-            for j in 0..8 {
-                assert_eq!(None, board.get_piece(Coord::try_from((j, i))?));
-            }
-        }
-        Ok(())
     }
 }

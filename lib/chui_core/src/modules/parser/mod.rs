@@ -6,7 +6,7 @@
 
 use std::fmt;
 
-use crate::{ChuiError, ChuiResult, Color, Coord, Engine, Move};
+use crate::{ChuiError, ChuiResult, Color, Coord, Game, Move};
 
 // pub mod coordinate;
 pub mod algebraic;
@@ -75,7 +75,7 @@ pub trait Parser: Send + Sync {
     /// * Errors when the parser cannot generate a move from the board Coordinates.
     fn generate_move_from_board_coordinates(
         &self,
-        engine: &Engine,
+        engine: &Game,
         from_coord: Coord,
         to_coord: Coord,
     ) -> ChuiResult<String>;

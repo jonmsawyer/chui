@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use crate::Engine;
+use crate::Game;
 
 /// The kind of command.
 #[derive(Debug, Clone, Copy)]
@@ -111,9 +111,9 @@ pub struct Command {
 
 impl Command {
     /// New command.
-    pub fn new(engine: &Engine) -> Command {
+    pub fn new(game: &Game) -> Command {
         Command {
-            commands: Command::build_commands(engine),
+            commands: Command::build_commands(game),
         }
     }
 
@@ -139,8 +139,8 @@ impl Command {
     /// Build a new commands list. This is useful when the context
     /// of the `Engine` has changed, such as switching to a new
     /// parser engine.
-    pub fn rebuild_commands(&mut self, engine: &Engine) {
-        self.commands = Command::build_commands(engine);
+    pub fn rebuild_commands(&mut self, game: &Game) {
+        self.commands = Command::build_commands(game);
     }
 
     /// Print the help message for a given context. Goes through
@@ -219,7 +219,7 @@ impl Command {
 
     /// Build (or rebuild) the commands list based on the
     /// (changed) context of `Engine`.
-    pub fn build_commands(engine: &Engine) -> HashMap<CommandContext, Vec<CommandPart>> {
+    pub fn build_commands(game: &Game) -> HashMap<CommandContext, Vec<CommandPart>> {
         let mut map = HashMap::new();
 
         // Insert commands for context `Main`.
@@ -228,7 +228,7 @@ impl Command {
             vec![
                 CommandPart {
                     commands: vec!["MOVE".to_string()],
-                    description: format!("E.g., {}", engine.parser.eg()),
+                    description: format!("E.g., {}", game.parser.eg()),
                     command_kind: CommandKind::Move,
                 },
                 CommandPart {

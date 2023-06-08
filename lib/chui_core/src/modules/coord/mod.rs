@@ -48,6 +48,21 @@ impl Coord {
         })
     }
 
+    /// Create a new [`Coord`] from an index that in the range of (0..64).
+    pub fn new_from_idx(idx: u8) -> ChuiResult<Coord> {
+        if idx >= 64 {
+            return Err(ChuiError::IndexOutOfRange(format!(
+                "{} is out of range (0..64)",
+                idx
+            )));
+        }
+
+        let file_idx = idx % 8;
+        let rank_idx = idx / 8;
+
+        Coord::new(file_idx, rank_idx)
+    }
+
     /// Create a new [`Coord`] with values set to zero.
     pub fn zero() -> Coord {
         Coord::new(0, 0).unwrap()

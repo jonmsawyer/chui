@@ -11,6 +11,6 @@ pub use modules::{
     coord::{Coord, NonMaxU8},
     parser::{self, ParserEngine},
     piece::{Color, Piece, PieceKind},
-    traits, Board, ChessVariant, Command, CommandContext, CommandKind, Engine, Fen, Move,
-    MoveGenerator, MoveType, Player,
+    traits, Board, ChessVariant, Command, CommandContext, CommandKind, DrawCondition, Fen, Game,
+    Move, MoveGenerator, MoveType, Player, WinCondition,
 };

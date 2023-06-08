@@ -10,7 +10,7 @@ use std::convert::TryFrom;
 // use std::collections::HashMap;
 
 use crate::{
-    parser::Parser, ChuiError, ChuiResult, Color, Coord, Engine, Move, MoveGenerator, Piece,
+    parser::Parser, ChuiError, ChuiResult, Color, Coord, Game, Move, MoveGenerator, Piece,
     PieceKind,
 };
 
@@ -188,7 +188,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
     /// parser's notation.
     fn generate_move_from_board_coordinates(
         &self,
-        engine: &Engine,
+        engine: &Game,
         from_coord: Coord,
         to_coord: Coord,
     ) -> ChuiResult<String> {
@@ -279,7 +279,7 @@ impl<'a> AlgebraicParser<'a> {
     /// it in the move.
     fn try_file(&mut self, token: char) -> ChuiResult<()> {
         if let Some(_index) = self.match_file_to_index(token) {
-            self.move_obj.set_to_coord_file(token);
+            self.move_obj.set_to_coord_file(token)?;
         }
 
         AlgebraicParser::token_not_satisfied(token)
@@ -301,7 +301,7 @@ impl<'a> AlgebraicParser<'a> {
     /// it in the move.
     fn try_rank(&mut self, token: char) -> ChuiResult<()> {
         if let Some(index) = self.match_rank_to_index(token) {
-            self.move_obj.set_to_coord_rank(index + 1);
+            self.move_obj.set_to_coord_rank(index + 1)?;
         }
 
         AlgebraicParser::token_not_satisfied(token)

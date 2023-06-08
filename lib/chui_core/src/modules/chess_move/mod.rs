@@ -10,7 +10,7 @@ use std::fmt;
 use crate::{ChuiError, ChuiResult, Color, Coord, Piece, PieceKind};
 
 /// Represents the type of move to be performed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum MoveType {
     /// This move is a pawn move.
     PawnMove,
@@ -32,10 +32,10 @@ pub enum MoveType {
 #[derive(PartialEq, Eq, Clone)]
 pub struct Move {
     /// Represents a move's "from" Coordinate (e.g., `('a', 1)`).
-    pub from_coord: Option<Coord>,
+    pub from_coord: Coord,
 
     /// Represents a move's "to" Coordinate (e.g., `('b' 8)`).
-    pub to_coord: Option<Coord>,
+    pub to_coord: Coord,
 
     /// The chess piece to move.
     pub piece: Option<Piece>,
@@ -107,22 +107,9 @@ impl fmt::Debug for Move {
 
 impl Default for Move {
     fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl fmt::Display for Move {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.input_move)
-    }
-}
-
-impl Move {
-    /// Return a new default `Move`.
-    pub const fn new() -> Move {
         Move {
-            from_coord: None,
-            to_coord: None,
+            from_coord: Coord::zero(),
+            to_coord: Coord::zero(),
             piece: None,
             check: false,
             check_mate: false,
@@ -134,6 +121,19 @@ impl Move {
             input_move: String::new(),
             move_type: None,
         }
+    }
+}
+
+impl fmt::Display for Move {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.input_move)
+    }
+}
+
+impl Move {
+    /// Return a new default `Move`.
+    pub fn new() -> Move {
+        Move::default()
     }
 
     //
@@ -324,51 +324,39 @@ impl Move {
     }
 
     /// Set the `to_coord` file.
-    pub fn set_to_coord_file(&mut self, file: char) {
-        self.from_coord = Some(
-            Coord::new(
-                self.to_coord.unwrap().get_file(),
-                self.from_coord.unwrap().get_rank(),
-            )
-            .unwrap(),
-        );
-        self.to_coord = Some(Coord::try_from((file, self.to_coord.unwrap().get_rank())).unwrap());
+    pub fn set_to_coord_file(&mut self, file: char) -> ChuiResult<()> {
+        let from_coord = Coord::new(self.to_coord.get_file(), self.from_coord.get_rank())?;
+        let to_coord = Coord::try_from((file, self.to_coord.get_rank()))?;
+        self.from_coord = from_coord;
+        self.to_coord = to_coord;
+        Ok(())
     }
 
     /// Set the `to_coord` rank.
-    pub fn set_to_coord_rank(&mut self, rank: u8) {
-        self.from_coord = Some(
-            Coord::new(
-                self.from_coord.unwrap().get_file(),
-                self.to_coord.unwrap().get_rank(),
-            )
-            .unwrap(),
-        );
-        self.to_coord = Some(Coord::try_from((self.to_coord.unwrap().get_file(), rank)).unwrap());
+    pub fn set_to_coord_rank(&mut self, rank: u8) -> ChuiResult<()> {
+        let from_coord = Coord::new(self.from_coord.get_file(), self.to_coord.get_rank())?;
+        let to_coord = Coord::try_from((self.to_coord.get_file(), rank))?;
+        self.from_coord = from_coord;
+        self.to_coord = to_coord;
+        Ok(())
     }
 
     /// Set the `to_index` file.
-    pub fn set_to_index_file(&mut self, file: u8) {
-        self.from_coord = Some(
-            Coord::new(
-                self.to_coord.unwrap().get_file(),
-                self.to_coord.unwrap().get_rank(),
-            )
-            .unwrap(),
-        );
-        self.to_coord = Some(Coord::new(file, self.to_coord.unwrap().get_rank()).unwrap());
+    pub fn set_to_index_file(&mut self, file: u8) -> ChuiResult<()> {
+        let from_coord = Coord::new(self.to_coord.get_file(), self.to_coord.get_rank())?;
+        let to_coord = Coord::new(file, self.to_coord.get_rank())?;
+        self.from_coord = from_coord;
+        self.to_coord = to_coord;
+        Ok(())
     }
 
     /// Set the `to_index` rank.
-    pub fn set_to_index_rank(&mut self, rank: u8) {
-        self.from_coord = Some(
-            Coord::new(
-                self.from_coord.unwrap().get_file(),
-                self.to_coord.unwrap().get_rank(),
-            )
-            .unwrap(),
-        );
-        self.to_coord = Some(Coord::new(self.to_coord.unwrap().get_file(), rank).unwrap());
+    pub fn set_to_index_rank(&mut self, rank: u8) -> ChuiResult<()> {
+        let from_coord = Coord::new(self.from_coord.get_file(), self.to_coord.get_rank())?;
+        let to_coord = Coord::new(self.to_coord.get_file(), rank)?;
+        self.from_coord = from_coord;
+        self.to_coord = to_coord;
+        Ok(())
     }
 
     //
@@ -410,7 +398,7 @@ impl Move {
             return format!("{} Queen side", move_text);
         }
 
-        let (from_file, from_rank) = self.from_coord.unwrap().to_char_u8_coord();
+        let (from_file, from_rank) = self.from_coord.to_char_u8_coord();
 
         let mut is_from = false;
         if from_file != '-' || from_rank <= 8 {
@@ -426,7 +414,7 @@ impl Move {
             move_text = format!("{}{}", move_text, from_rank);
         }
 
-        let (to_file, to_rank) = self.to_coord.unwrap().to_char_u8_coord();
+        let (to_file, to_rank) = self.to_coord.to_char_u8_coord();
 
         if to_file != '-' || from_rank <= 8 {
             if is_capture && !is_from {

@@ -209,13 +209,11 @@ pub fn update_mouse_click(
                     Ok(result) => {
                         ui_state.move_representation = result;
                         let mut chess_move = Move::new();
-                        chess_move.from_coord = Some(
+                        chess_move.from_coord =
                             Coord::try_from((from_coord.get_file(), from_coord.get_rank()))
-                                .unwrap(),
-                        );
-                        chess_move.to_coord = Some(
-                            Coord::try_from((to_coord.get_file(), to_coord.get_rank())).unwrap(),
-                        );
+                                .unwrap();
+                        chess_move.to_coord =
+                            Coord::try_from((to_coord.get_file(), to_coord.get_rank())).unwrap();
                         let from_piece = engine.board.get_piece(from_coord);
                         let to_piece = engine.board.get_piece(to_coord);
                         chess_move.piece = from_piece;

@@ -1,26 +1,26 @@
 //! Commands module.
 
-use super::super::{Command, CommandContext, CommandKind, Engine};
+use super::super::{Command, CommandContext, CommandKind, Game};
 use super::parser::ParserEngine;
 
 /// Switch the current move parser based on a `CommandKind`.
-pub fn switch_parser(engine: &mut Engine, command: &Command) {
+pub fn switch_parser(game: &mut Game, command: &Command) {
     let context = CommandContext::SwitchParser;
 
     loop {
         println!();
-        println!("Current parser: {}", engine.parser.name());
+        println!("Current parser: {}", game.parser.name());
         command.display_help(context);
         println!();
         println!("Select option. (1-8, b to go back, h for help)");
 
-        let input = Engine::get_input();
+        let input = Game::get_input();
 
         match command.process_command(context, input) {
             Some(CommandKind::SwitchToAlgebraicParser) => {
                 let parser_engine = ParserEngine::Algebraic;
                 println!("Switching parser to {:?}.", parser_engine);
-                engine.set_parser(parser_engine);
+                game.set_parser(parser_engine);
                 break;
             }
 

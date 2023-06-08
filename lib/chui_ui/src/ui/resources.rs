@@ -10,10 +10,10 @@ pub use chui_core;
 
 /// Resource to engage the core Engine
 #[derive(Resource, Debug)]
-pub struct Engine(chui_core::Engine);
+pub struct Engine(chui_core::Game);
 
 impl Deref for Engine {
-    type Target = chui_core::Engine;
+    type Target = chui_core::Game;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -21,14 +21,14 @@ impl Deref for Engine {
 }
 
 impl DerefMut for Engine {
-    fn deref_mut(&mut self) -> &mut chui_core::Engine {
+    fn deref_mut(&mut self) -> &mut chui_core::Game {
         &mut self.0
     }
 }
 
 impl Default for Engine {
     fn default() -> Engine {
-        Engine(chui_core::Engine::default())
+        Engine(chui_core::Game::default())
     }
 }
 

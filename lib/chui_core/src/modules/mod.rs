@@ -12,8 +12,8 @@ pub use piece::{Color, Piece, PieceKind};
 pub mod player;
 pub use player::Player;
 
-pub mod engine;
-pub use engine::Engine;
+pub mod game;
+pub use game::{DrawCondition, Game, WinCondition};
 
 pub mod board;
 pub use board::{Board, ChessVariant};

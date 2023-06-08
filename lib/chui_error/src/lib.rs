@@ -57,6 +57,9 @@ pub enum ChuiError {
     /// Invalid coordinates.
     InvalidCoords(String),
 
+    /// The square at a coordinate is occupied.
+    SquareOccupied(String),
+
     /// Invalid type conversion.
     InvalidTypeConversion(String),
 
@@ -116,6 +119,10 @@ impl fmt::Display for ChuiError {
 
             ChuiError::InvalidCoords(reason) => {
                 write!(f, "Error (Invalid Coordinates): {}.", reason)
+            }
+
+            ChuiError::SquareOccupied(reason) => {
+                write!(f, "Error (Square Occupied): {}.", reason)
             }
 
             ChuiError::InvalidTypeConversion(reason) => {
