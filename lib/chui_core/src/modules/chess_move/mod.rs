@@ -194,6 +194,36 @@ impl Move {
         self.piece
     }
 
+    /// Match the given file (`char`) to its index (`u8`).
+    fn match_file_to_index(&self, file: char) -> Option<u8> {
+        match file {
+            'a' => Some(0),
+            'b' => Some(1),
+            'c' => Some(2),
+            'd' => Some(3),
+            'e' => Some(4),
+            'f' => Some(5),
+            'g' => Some(6),
+            'h' => Some(7),
+            _ => None,
+        }
+    }
+
+    /// Match the given rank (`char`) to its index (`u8`).
+    fn _match_rank_to_index(&self, rank: char) -> Option<u8> {
+        match rank {
+            '1' => Some(0),
+            '2' => Some(1),
+            '3' => Some(2),
+            '4' => Some(3),
+            '5' => Some(4),
+            '6' => Some(5),
+            '7' => Some(6),
+            '8' => Some(7),
+            _ => None,
+        }
+    }
+
     //
     // Setters
     //
@@ -325,19 +355,17 @@ impl Move {
 
     /// Set the `to_coord` file.
     pub fn set_to_coord_file(&mut self, file: char) -> ChuiResult<()> {
-        let from_coord = Coord::new(self.to_coord.get_file(), self.from_coord.get_rank())?;
-        let to_coord = Coord::try_from((file, self.to_coord.get_rank()))?;
-        self.from_coord = from_coord;
-        self.to_coord = to_coord;
+        if let Some(idx) = self.match_file_to_index(file) {
+            self.from_coord.set_file(self.to_coord.get_file())?;
+            self.to_coord.set_file(idx)?;
+        }
         Ok(())
     }
 
     /// Set the `to_coord` rank.
     pub fn set_to_coord_rank(&mut self, rank: u8) -> ChuiResult<()> {
-        let from_coord = Coord::new(self.from_coord.get_file(), self.to_coord.get_rank())?;
-        let to_coord = Coord::try_from((self.to_coord.get_file(), rank))?;
-        self.from_coord = from_coord;
-        self.to_coord = to_coord;
+        self.from_coord.set_rank(self.to_coord.get_rank())?;
+        self.to_coord.set_rank(rank)?;
         Ok(())
     }
 

@@ -5,7 +5,7 @@ use std::fmt;
 
 use colored::{ColoredString, Colorize};
 
-use crate::{Board, ChuiError, ChuiResult, Coord};
+use crate::{constants::*, Board, ChuiError, ChuiResult, Coord};
 
 /// Piece color. Either `White` or `Black` variants.
 #[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
@@ -35,16 +35,69 @@ impl fmt::Display for Color {
 pub enum PieceKind {
     /// A Pawn.
     Pawn,
+
     /// A Knight.
     Knight,
+
     /// A Bishop.
     Bishop,
+
     /// A Rook.
     Rook,
+
     /// The Queen.
     Queen,
+
     /// The King.
     King,
+}
+
+impl PieceKind {
+    /// Get the sprite index of the board asset.
+    pub const fn get_sprite_index(&self, color: Color) -> usize {
+        match (self, color) {
+            (PieceKind::King, Color::Black) => 13,
+            (PieceKind::Queen, Color::Black) => 12,
+            (PieceKind::Rook, Color::Black) => 11,
+            (PieceKind::Bishop, Color::Black) => 10,
+            (PieceKind::Knight, Color::Black) => 9,
+            (PieceKind::Pawn, Color::Black) => 8,
+            (PieceKind::King, Color::White) => 7,
+            (PieceKind::Queen, Color::White) => 6,
+            (PieceKind::Rook, Color::White) => 5,
+            (PieceKind::Bishop, Color::White) => 4,
+            (PieceKind::Knight, Color::White) => 3,
+            (PieceKind::Pawn, Color::White) => 2,
+        }
+    }
+
+    /// Get the maximum number of squares this piece kind can move.
+    pub const fn get_move_max(&self) -> u8 {
+        match self {
+            PieceKind::Pawn => 2,
+            PieceKind::Knight | PieceKind::King => 1,
+            PieceKind::Bishop | PieceKind::Rook | PieceKind::Queen => 7,
+        }
+    }
+
+    /// Return true if the piece kind, with color, if the passed in coord represents an initial
+    /// square for that piece.
+    pub fn on_initial_square(&self, color: Color, coord: Coord) -> bool {
+        match (self, color) {
+            (PieceKind::King, Color::White) => coord.eq(&E1),
+            (PieceKind::Queen, Color::White) => coord.eq(&D1),
+            (PieceKind::Rook, Color::White) => coord.eq(&A1) || coord.eq(&H1),
+            (PieceKind::Bishop, Color::White) => coord.eq(&C1) || coord.eq(&F1),
+            (PieceKind::Knight, Color::White) => coord.eq(&B1) || coord.eq(&G1),
+            (PieceKind::Pawn, Color::White) => coord.get_rank() == 1,
+            (PieceKind::King, Color::Black) => coord.eq(&E8),
+            (PieceKind::Queen, Color::Black) => coord.eq(&D8),
+            (PieceKind::Rook, Color::Black) => coord.eq(&A8) || coord.eq(&H8),
+            (PieceKind::Bishop, Color::Black) => coord.eq(&C8) || coord.eq(&F8),
+            (PieceKind::Knight, Color::Black) => coord.eq(&B8) || coord.eq(&G8),
+            (PieceKind::Pawn, Color::Black) => coord.get_rank() == 6,
+        }
+    }
 }
 
 /// Represents a piece on the chessboard. Each chess piece has
@@ -64,19 +117,13 @@ pub enum PieceKind {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Piece {
     /// The kind of piece.
-    piece: PieceKind,
+    kind: PieceKind,
 
     /// The color of the piece.
     color: Color,
 
     /// The Coordinates (by index) of the piece.
     coord: Coord,
-
-    /// The index of the sprite in the sprite sheet.
-    sprite_index: usize,
-
-    /// The maximum amount of squares a piece can move.
-    move_max: u8,
 
     /// Has the piece moved or is it on its initial square?
     on_initial_square: bool,
@@ -87,102 +134,13 @@ impl Piece {
     // Constructors.
     //
 
-    /// Return a new Piece given a `PieceKind` and a `Color`.
-    pub fn new(piece: PieceKind, color: Color, coord: Coord) -> Piece {
-        let (sprite_index, move_max, on_initial_square) = match (piece, color) {
-            (PieceKind::King, Color::White) => {
-                if coord == Coord::new(4, 0).unwrap() {
-                    (7, 2, true)
-                } else {
-                    (7, 2, false)
-                }
-            }
-            (PieceKind::Queen, Color::White) => {
-                if coord == Coord::new(3, 0).unwrap() {
-                    (6, 7, true)
-                } else {
-                    (6, 7, false)
-                }
-            }
-            (PieceKind::Rook, Color::White) => {
-                if coord == Coord::new(0, 0).unwrap() || coord == Coord::new(7, 0).unwrap() {
-                    (5, 7, true)
-                } else {
-                    (5, 7, false)
-                }
-            }
-            (PieceKind::Bishop, Color::White) => {
-                if coord == Coord::new(2, 0).unwrap() || coord == Coord::new(5, 0).unwrap() {
-                    (4, 7, true)
-                } else {
-                    (4, 7, false)
-                }
-            }
-            (PieceKind::Knight, Color::White) => {
-                if coord == Coord::new(1, 0).unwrap() || coord == Coord::new(6, 0).unwrap() {
-                    (3, 1, true)
-                } else {
-                    (3, 1, false)
-                }
-            }
-            (PieceKind::Pawn, Color::White) => {
-                if coord.get_rank() == 1 {
-                    (2, 2, true)
-                } else {
-                    (2, 2, false)
-                }
-            }
-            (PieceKind::King, Color::Black) => {
-                if coord == Coord::new(4, 7).unwrap() {
-                    (13, 2, true)
-                } else {
-                    (13, 2, false)
-                }
-            }
-            (PieceKind::Queen, Color::Black) => {
-                if coord == Coord::new(3, 7).unwrap() {
-                    (12, 7, true)
-                } else {
-                    (12, 7, false)
-                }
-            }
-            (PieceKind::Rook, Color::Black) => {
-                if coord == Coord::new(0, 7).unwrap() || coord == Coord::new(7, 7).unwrap() {
-                    (11, 7, true)
-                } else {
-                    (11, 7, false)
-                }
-            }
-            (PieceKind::Bishop, Color::Black) => {
-                if coord == Coord::new(2, 7).unwrap() || coord == Coord::new(5, 7).unwrap() {
-                    (10, 7, true)
-                } else {
-                    (10, 7, false)
-                }
-            }
-            (PieceKind::Knight, Color::Black) => {
-                if coord == Coord::new(1, 7).unwrap() || coord == Coord::new(6, 7).unwrap() {
-                    (9, 1, true)
-                } else {
-                    (9, 1, false)
-                }
-            }
-            (PieceKind::Pawn, Color::Black) => {
-                if coord.get_rank() == 6 {
-                    (8, 2, true)
-                } else {
-                    (8, 2, false)
-                }
-            }
-        };
-
+    /// Return a new [`Piece`] given a [`PieceKind`], [`Color`], and [`Coord`].
+    pub fn new(kind: PieceKind, color: Color, coord: Coord) -> Piece {
         Piece {
-            piece,
+            kind,
             color,
             coord,
-            sprite_index,
-            move_max,
-            on_initial_square,
+            on_initial_square: kind.on_initial_square(color, coord),
         }
     }
 
@@ -192,7 +150,7 @@ impl Piece {
 
     /// Get the kind of the piece.
     pub const fn get_kind(&self) -> PieceKind {
-        self.piece
+        self.kind
     }
 
     /// Get the color of the piece.
@@ -217,21 +175,17 @@ impl Piece {
 
     /// Get the sprite index of the piece.
     pub const fn get_sprite_index(&self) -> usize {
-        self.sprite_index
+        self.kind.get_sprite_index(self.get_color())
     }
 
     /// Get the maximum number of squares this piece can move.
     pub const fn get_move_max(&self) -> u8 {
-        self.move_max
+        self.kind.get_move_max()
     }
 
     /// Has the piece moved?
     pub const fn has_moved(&self) -> bool {
-        if self.on_initial_square {
-            false
-        } else {
-            true
-        }
+        !self.on_initial_square
     }
 
     /// Are the pieces the same color?
@@ -255,7 +209,7 @@ impl Piece {
 
     /// Set the piece kind.
     pub fn set_piece(&mut self, piece: PieceKind) {
-        self.piece = piece;
+        self.kind = piece;
     }
 
     /// Set the piece color.
@@ -276,12 +230,12 @@ impl Piece {
     /// Get the rendered `String` representation of the piece.
     /// E.g., `"White King".to_string()`.
     pub fn get_text(&self) -> String {
-        format!("{:?} {:?}", self.color, self.piece)
+        format!("{:?} {:?}", self.color, self.kind)
     }
 
     /// Get move Coords for piece.
     pub fn get_move_coords(&self, board: &Board) -> Vec<Coord> {
-        let move_coords = match self.piece {
+        let move_coords = match self.kind {
             PieceKind::King => board.get_king_move_coords(self),
             PieceKind::Queen => board.get_queen_move_coords(self),
             PieceKind::Rook => board.get_rook_move_coords(self),
@@ -296,7 +250,7 @@ impl Piece {
     /// Return a colored string containing the alpha representation of a piece
     /// and a UTF-8 representation of a piece.
     pub fn repr_colored(&self) -> (ColoredString, ColoredString) {
-        match (self.piece, self.color) {
+        match (self.kind, self.color) {
             (PieceKind::King, Color::White) => ("K".yellow().bold(), "♔".yellow().bold()),
             (PieceKind::Queen, Color::White) => ("Q".yellow().bold(), "♕".yellow().bold()),
             (PieceKind::Rook, Color::White) => ("R".yellow().bold(), "♖".yellow().bold()),
@@ -315,7 +269,7 @@ impl Piece {
     /// Return a string containing the alpha representation of a piece
     /// and a UTF-8 representation of a piece.
     pub fn repr(&self) -> (String, String) {
-        match (self.piece, self.color) {
+        match (self.kind, self.color) {
             (PieceKind::King, Color::White) => ("K".to_string(), "♔".to_string()),
             (PieceKind::Queen, Color::White) => ("Q".to_string(), "♕".to_string()),
             (PieceKind::Rook, Color::White) => ("R".to_string(), "♖".to_string()),
@@ -339,7 +293,7 @@ impl Piece {
 /// TODO: Make representation configurable.
 impl fmt::Display for Piece {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.repr().0)
+        write!(f, "{}", self.repr_colored().0)
     }
 }
 

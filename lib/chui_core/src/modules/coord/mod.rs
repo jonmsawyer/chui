@@ -129,6 +129,11 @@ impl Coord {
     pub fn to_char_u8_coord(&self) -> (char, u8) {
         ((self.file.get() + 'a' as u8) as char, self.rank.get() + 1)
     }
+
+    /// Return true if the given coordinate is equal to this coordinate.
+    pub fn is_eq(&self, coord: (char, u8)) -> bool {
+        *self == Coord::try_from(coord).unwrap()
+    }
 }
 
 /// Formats the position for a coordinate in Algebraic notation.
@@ -145,12 +150,11 @@ impl fmt::Display for Coord {
     }
 }
 
-impl From<(NonMaxU8, NonMaxU8)> for Coord {
-    fn from(coord: (NonMaxU8, NonMaxU8)) -> Coord {
-        Coord {
-            file: coord.0,
-            rank: coord.1,
-        }
+impl TryFrom<(NonMaxU8, NonMaxU8)> for Coord {
+    type Error = ChuiError;
+
+    fn try_from(coord: (NonMaxU8, NonMaxU8)) -> ChuiResult<Coord> {
+        Coord::new(coord.0.get(), coord.1.get())
     }
 }
 
@@ -234,6 +238,66 @@ impl TryFrom<(char, char)> for Coord {
     }
 }
 
+impl PartialEq<(NonMaxU8, NonMaxU8)> for Coord {
+    fn eq(&self, coord: &(NonMaxU8, NonMaxU8)) -> bool {
+        if let Ok(new_coord) = Coord::try_from(*coord) {
+            *self == new_coord
+        } else {
+            false
+        }
+    }
+}
+
+impl PartialEq<(char, u8)> for Coord {
+    fn eq(&self, coord: &(char, u8)) -> bool {
+        if let Ok(new_coord) = Coord::try_from(*coord) {
+            *self == new_coord
+        } else {
+            false
+        }
+    }
+}
+
+impl PartialEq<(&str, u8)> for Coord {
+    fn eq(&self, coord: &(&str, u8)) -> bool {
+        if let Ok(new_coord) = Coord::try_from(*coord) {
+            *self == new_coord
+        } else {
+            false
+        }
+    }
+}
+
+impl PartialEq<&str> for Coord {
+    fn eq(&self, coord: &&str) -> bool {
+        if let Ok(new_coord) = Coord::try_from(*coord) {
+            *self == new_coord
+        } else {
+            false
+        }
+    }
+}
+
+impl PartialEq<(&str, &str)> for Coord {
+    fn eq(&self, coord: &(&str, &str)) -> bool {
+        if let Ok(new_coord) = Coord::try_from(*coord) {
+            *self == new_coord
+        } else {
+            false
+        }
+    }
+}
+
+impl PartialEq<(char, char)> for Coord {
+    fn eq(&self, coord: &(char, char)) -> bool {
+        if let Ok(new_coord) = Coord::try_from(*coord) {
+            *self == new_coord
+        } else {
+            false
+        }
+    }
+}
+
 //
 // Tests
 //
@@ -284,12 +348,12 @@ mod tests {
 
     #[test]
     #[allow(non_snake_case)]
-    fn Coord_from_NonMaxU8() -> ChuiResult<()> {
+    fn Coord_try_from_NonMaxU8() -> ChuiResult<()> {
         for i in 0..8_u8 {
             for j in 0..8_u8 {
                 let file = NonMaxU8::try_from(i)?;
                 let rank = NonMaxU8::try_from(j)?;
-                let c = Coord::from((file, rank));
+                let c = Coord::try_from((file, rank))?;
                 println!("({}, {}): {:?}", i, j, c);
             }
         }
@@ -298,12 +362,12 @@ mod tests {
 
     #[test]
     #[allow(non_snake_case)]
-    fn NonMaxU8_into_Coord() -> ChuiResult<()> {
+    fn NonMaxU8_try_into_Coord() -> ChuiResult<()> {
         for i in 0..8_u8 {
             for j in 0..8_u8 {
                 let file = NonMaxU8::try_from(i)?;
                 let rank = NonMaxU8::try_from(j)?;
-                let c: Coord = (file, rank).into();
+                let c: Coord = (file, rank).try_into()?;
                 println!("({}, {}): {:?}", i, j, c);
             }
         }

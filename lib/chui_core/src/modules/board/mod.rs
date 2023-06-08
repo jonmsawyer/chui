@@ -17,6 +17,9 @@ pub enum ChessVariant {
     /// and official gameplay.
     #[default]
     StandardChess,
+
+    /// Empty chessboard.
+    Empty,
     //Chess960,
 }
 
@@ -61,16 +64,22 @@ impl Board {
 
     /// Return a new [`Board`] given a [`ChessVariant`].
     pub fn new(variant: ChessVariant) -> Board {
+        let default = Board {
+            board: Board::new_standard_chess(),
+            white_can_castle_kingside: true,
+            white_can_castle_queenside: true,
+            black_can_castle_kingside: true,
+            black_can_castle_queenside: true,
+            en_passant_target_square: None,
+            true_enpassant_target_square: None,
+            en_passant_target_piece: None,
+        };
+
         match variant {
-            ChessVariant::StandardChess => Board {
-                board: Board::new_standard_chess(),
-                white_can_castle_kingside: true,
-                white_can_castle_queenside: true,
-                black_can_castle_kingside: true,
-                black_can_castle_queenside: true,
-                en_passant_target_square: None,
-                true_enpassant_target_square: None,
-                en_passant_target_piece: None,
+            ChessVariant::StandardChess => default,
+            ChessVariant::Empty => Board {
+                board: Board::new_empty_board(),
+                ..default
             },
         }
     }
@@ -175,6 +184,11 @@ impl Board {
         ]
     }
 
+    /// Return an empty board.
+    pub fn new_empty_board() -> [[Option<Piece>; FILES as usize]; RANKS as usize] {
+        [[None; FILES as usize]; RANKS as usize]
+    }
+
     //
     // Conditionals.
     //
@@ -241,8 +255,7 @@ impl Board {
             Ok(())
         } else {
             Err(ChuiError::InvalidMove(format!(
-                "Ambiguous move. More than one piece can \
-                        move to target square {}{}",
+                "Ambiguous move. More than one piece can move to target square {}{}",
                 file, rank
             )))
         }

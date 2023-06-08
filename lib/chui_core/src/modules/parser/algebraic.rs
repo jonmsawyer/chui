@@ -278,8 +278,9 @@ impl<'a> AlgebraicParser<'a> {
     /// be one of \[abcdefgh\]. If a valid file is found, record
     /// it in the move.
     fn try_file(&mut self, token: char) -> ChuiResult<()> {
-        if let Some(_index) = self.match_file_to_index(token) {
+        if let Some(_) = self.match_file_to_index(token) {
             self.move_obj.set_to_coord_file(token)?;
+            return Ok(());
         }
 
         AlgebraicParser::token_not_satisfied(token)
@@ -300,8 +301,9 @@ impl<'a> AlgebraicParser<'a> {
     /// be one of \[12345678\]. If a valid rank is found, record
     /// it in the move.
     fn try_rank(&mut self, token: char) -> ChuiResult<()> {
-        if let Some(index) = self.match_rank_to_index(token) {
-            self.move_obj.set_to_coord_rank(index + 1)?;
+        if let Some(idx) = self.match_rank_to_index(token) {
+            self.move_obj.set_to_coord_rank(idx)?;
+            return Ok(());
         }
 
         AlgebraicParser::token_not_satisfied(token)
@@ -507,7 +509,8 @@ impl<'a> AlgebraicParser<'a> {
         //
         // Else, a pawn was registered in this token. This
         // token should be a valid file.
-        if self.try_piece(token).is_ok() || self.try_file(token).is_ok() {
+        if self.try_piece(token).is_err() {
+            self.try_file(token)?;
             return Ok(());
         }
 
