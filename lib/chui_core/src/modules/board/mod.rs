@@ -94,42 +94,42 @@ impl Board {
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::White,
-                    Coord::new(0, 1).unwrap(),
+                    Coord::try_from(A2).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::White,
-                    Coord::new(1, 1).unwrap(),
+                    Coord::try_from(B2).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::White,
-                    Coord::new(2, 1).unwrap(),
+                    Coord::try_from(C2).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::White,
-                    Coord::new(3, 1).unwrap(),
+                    Coord::try_from(D2).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::White,
-                    Coord::new(4, 1).unwrap(),
+                    Coord::try_from(E2).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::White,
-                    Coord::new(5, 1).unwrap(),
+                    Coord::try_from(F2).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::White,
-                    Coord::new(6, 1).unwrap(),
+                    Coord::try_from(G2).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::White,
-                    Coord::new(7, 1).unwrap(),
+                    Coord::try_from(H2).unwrap(),
                 )),
             ],
             [None; FILES as usize], // rank 3
@@ -141,42 +141,42 @@ impl Board {
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::Black,
-                    Coord::new(0, 6).unwrap(),
+                    Coord::try_from(A7).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::Black,
-                    Coord::new(1, 6).unwrap(),
+                    Coord::try_from(B7).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::Black,
-                    Coord::new(2, 6).unwrap(),
+                    Coord::try_from(C7).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::Black,
-                    Coord::new(3, 6).unwrap(),
+                    Coord::try_from(D7).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::Black,
-                    Coord::new(4, 6).unwrap(),
+                    Coord::try_from(E7).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::Black,
-                    Coord::new(5, 6).unwrap(),
+                    Coord::try_from(F7).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::Black,
-                    Coord::new(6, 6).unwrap(),
+                    Coord::try_from(G7).unwrap(),
                 )),
                 Some(Piece::new(
                     PieceKind::Pawn,
                     Color::Black,
-                    Coord::new(7, 6).unwrap(),
+                    Coord::try_from(H7).unwrap(),
                 )),
             ],
             // rank 8
@@ -195,34 +195,17 @@ impl Board {
 
     /// Apply the passed in move onto the chessboard.
     ///
-    /// # Panics
-    ///
-    /// * Panics if the current move is `None` after returning a `ChuiError`.
-    /// * Panics if the piece to move is `None` after returning a `ChuiError`.
-    ///
     /// # Errors
     ///
     /// * Errors if the piece we're moving is `None`.
-    pub fn apply_move(&mut self, current_move: &Option<Move>) -> ChuiResult<()> {
-        if current_move.is_none() {
-            return Err(ChuiError::InvalidMove(
-                "No piece to apply move.".to_string(),
-            ));
-        }
-
-        let move_obj = current_move.as_ref().expect("Current move cannot be None.");
-
+    pub fn apply_move(&mut self, move_obj: &Move) -> ChuiResult<Option<Piece>> {
         if move_obj.get_piece().is_none() {
             return Err(ChuiError::InvalidMove(
                 "No piece to apply move.".to_string(),
             ));
         }
 
-        let pieces = self.get_pieces(
-            &mut move_obj
-                .get_piece()
-                .expect("The piece to move cannot be None."),
-        );
+        let pieces = self.get_pieces(move_obj.get_piece().unwrap());
 
         // println!("Pieces: {:?}", pieces);
 
@@ -243,16 +226,13 @@ impl Board {
 
         if pieces_can_move.is_empty() {
             Err(ChuiError::InvalidMove(format!(
-                "No {} can move to target square {}{}",
-                move_obj
-                    .get_piece()
-                    .expect("The piece to move cannot be None."),
-                file,
-                rank
+                "No {} can move to target square {}",
+                move_obj.get_piece().unwrap(),
+                move_obj.to_coord
             )))
         } else if pieces_can_move.len() == 1 {
-            self.replace_piece(&mut pieces_can_move[0], move_obj);
-            Ok(())
+            let piece = pieces_can_move.get(0).unwrap();
+            Ok(self.put_piece(Some(*piece), piece.get_coord()))
         } else {
             Err(ChuiError::InvalidMove(format!(
                 "Ambiguous move. More than one piece can move to target square {}{}",
@@ -287,11 +267,11 @@ impl Board {
     }
 
     /// Get the available `Piece`s for a `Color`.
-    pub fn get_pieces(&self, piece: &mut Piece) -> Vec<Piece> {
+    pub fn get_pieces(&self, piece: Piece) -> Vec<Piece> {
         self.board
             .iter()
             .flatten()
-            .filter_map(|p| p.filter(|p| p.is_same_piece(*piece)))
+            .filter_map(|p| p.filter(|p| p.is_same_piece(piece)))
             .collect()
     }
 
@@ -373,6 +353,65 @@ impl Board {
         coords.extend(self.get_bottom_coords(piece));
         coords.extend(self.get_bottom_left_coords(piece));
         coords.extend(self.get_left_coords(piece));
+
+        // Trim the move coordinates which are attacking the King.
+        let mut coords: Vec<Coord> = coords
+            .into_iter()
+            .filter(|&c| {
+                self.get_pieces_attacking_coord(piece.get_color(), c)
+                    .is_empty()
+            })
+            .collect();
+
+        // Add any valid castling coordinates
+        match piece.get_color() {
+            Color::White => {
+                if self.white_can_castle_kingside {
+                    let d1 = Coord::try_from(D1).unwrap();
+                    let c1 = Coord::try_from(C1).unwrap();
+                    let d1_pieces = self.get_pieces_attacking_coord(piece.get_color(), d1);
+                    let c1_pieces = self.get_pieces_attacking_coord(piece.get_color(), c1);
+
+                    if d1_pieces.is_empty() && c1_pieces.is_empty() {
+                        coords.extend(vec![c1]);
+                    }
+                }
+
+                if self.white_can_castle_queenside {
+                    let f1 = Coord::try_from(F1).unwrap();
+                    let g1 = Coord::try_from(G1).unwrap();
+                    let f1_pieces = self.get_pieces_attacking_coord(piece.get_color(), f1);
+                    let g1_pieces = self.get_pieces_attacking_coord(piece.get_color(), g1);
+
+                    if f1_pieces.is_empty() && g1_pieces.is_empty() {
+                        coords.extend(vec![g1]);
+                    }
+                }
+            }
+            Color::Black => {
+                if self.black_can_castle_kingside {
+                    let d8 = Coord::try_from(D8).unwrap();
+                    let c8 = Coord::try_from(C8).unwrap();
+                    let d8_pieces = self.get_pieces_attacking_coord(piece.get_color(), d8);
+                    let c8_pieces = self.get_pieces_attacking_coord(piece.get_color(), c8);
+
+                    if d8_pieces.is_empty() && c8_pieces.is_empty() {
+                        coords.extend(vec![c8]);
+                    }
+                }
+
+                if self.black_can_castle_queenside {
+                    let f8 = Coord::try_from(F8).unwrap();
+                    let g8 = Coord::try_from(G8).unwrap();
+                    let f8_pieces = self.get_pieces_attacking_coord(piece.get_color(), f8);
+                    let g8_pieces = self.get_pieces_attacking_coord(piece.get_color(), g8);
+
+                    if f8_pieces.is_empty() && g8_pieces.is_empty() {
+                        coords.extend(vec![g8]);
+                    }
+                }
+            }
+        }
 
         coords
     }
@@ -627,10 +666,9 @@ impl Board {
     /// Get any Coordates North of the indicated indices that a piece can move.
     pub fn get_top_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
-        let mut max_counter: u8 = 0;
         let mut rank_idx = piece.get_rank() + 1; // we're moving North
 
-        while max_counter < piece.get_move_max() {
+        for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(piece.get_file(), rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
                     if !o_piece.is_same_color(*piece) {
@@ -647,19 +685,17 @@ impl Board {
             }
 
             rank_idx += 1;
-            max_counter += 1;
         }
-        println!("Top Coords: {:?}", coords);
+
         coords
     }
 
     /// Get any Coordates East of the indicated indices that a piece can move.
     pub fn get_right_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
-        let mut max_counter: u8 = 0;
         let mut file_idx = piece.get_file() + 1; // we're moving East
 
-        while max_counter < piece.get_move_max() {
+        for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, piece.get_rank()) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
                     if !o_piece.is_same_color(*piece) {
@@ -676,19 +712,17 @@ impl Board {
             }
 
             file_idx += 1;
-            max_counter += 1;
         }
-        println!("Right Coords: {:?}", coords);
+
         coords
     }
 
     /// Get any Coordates South of the indicated indices that a piece can move.
     pub fn get_bottom_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
-        let mut max_counter: u8 = 0;
         let mut rank_idx = piece.get_rank().wrapping_sub(1); // we're moving South
 
-        while max_counter < piece.get_move_max() {
+        for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(piece.get_file(), rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
                     if !o_piece.is_same_color(*piece) {
@@ -705,19 +739,17 @@ impl Board {
             }
 
             rank_idx = rank_idx.wrapping_sub(1);
-            max_counter += 1;
         }
-        println!("Bottom Coords: {:?}", coords);
+
         coords
     }
 
     /// Get any Coordates West of the indicated indices that a piece can move.
     pub fn get_left_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
-        let mut max_counter: u8 = 0;
         let mut file_idx = piece.get_file().wrapping_sub(1); // we're moving West
 
-        while max_counter < piece.get_move_max() {
+        for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, piece.get_rank()) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
                     if !o_piece.is_same_color(*piece) {
@@ -734,20 +766,18 @@ impl Board {
             }
 
             file_idx = file_idx.wrapping_sub(1);
-            max_counter += 1;
         }
-        println!("Left Coords: {:?}", coords);
+
         coords
     }
 
     /// Get any Coordates North West of the indicated indices that a piece can move.
     pub fn get_top_left_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
-        let mut max_counter: u8 = 0;
         let mut file_idx = piece.get_file().wrapping_sub(1); // we're moving West
         let mut rank_idx = piece.get_rank() + 1; // we're moving North
 
-        while max_counter < piece.get_move_max() {
+        for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
                     if !o_piece.is_same_color(*piece) {
@@ -765,20 +795,18 @@ impl Board {
 
             file_idx = file_idx.wrapping_sub(1);
             rank_idx += 1;
-            max_counter += 1;
         }
-        println!("Top Left Coords: {:?}", coords);
+
         coords
     }
 
     /// Get any Coordates North East of the indicated indices that a piece can move.
     pub fn get_top_right_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
-        let mut max_counter: u8 = 0;
         let mut file_idx = piece.get_file() + 1; // we're moving East
         let mut rank_idx = piece.get_rank() + 1; // we're moving North
 
-        while max_counter < piece.get_move_max() {
+        for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
                     if !o_piece.is_same_color(*piece) {
@@ -796,20 +824,18 @@ impl Board {
 
             file_idx += 1;
             rank_idx += 1;
-            max_counter += 1;
         }
-        println!("Top Right Coords: {:?}", coords);
+
         coords
     }
 
     /// Get any Coordates South East of the indicated indices that a piece can move.
     pub fn get_bottom_right_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
-        let mut max_counter: u8 = 0;
         let mut file_idx = piece.get_file() + 1; // we're moving East
         let mut rank_idx = piece.get_rank().wrapping_sub(1); // we're moving South
 
-        while max_counter < piece.get_move_max() {
+        for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
                     if !o_piece.is_same_color(*piece) {
@@ -827,20 +853,18 @@ impl Board {
 
             file_idx += 1;
             rank_idx = rank_idx.wrapping_sub(1);
-            max_counter += 1;
         }
-        println!("Bottom Right Coords: {:?}", coords);
+
         coords
     }
 
     /// Get any Coordates South West of the indicated indices that a piece can move.
     pub fn get_bottom_left_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
-        let mut max_counter: u8 = 0;
         let mut file_idx = piece.get_file().wrapping_sub(1); // we're moving West
         let mut rank_idx = piece.get_rank().wrapping_sub(1); // we're moving South
 
-        while max_counter < piece.get_move_max() {
+        for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
                 if let Some(o_piece) = self.get_piece(new_coord) {
                     if !o_piece.is_same_color(*piece) {
@@ -858,10 +882,20 @@ impl Board {
 
             file_idx = file_idx.wrapping_sub(1);
             rank_idx = rank_idx.wrapping_sub(1);
-            max_counter += 1;
         }
-        println!("Bottom Left Coords: {:?}", coords);
+
         coords
+    }
+
+    /// Get all [`Piece`]s attacking a given coordinate.
+    pub fn get_pieces_attacking_coord(&self, color: Color, coord: Coord) -> Vec<Piece> {
+        self.board
+            .iter()
+            .flatten()
+            .filter_map(|p| {
+                p.filter(|p| p.get_color() != color && p.get_move_coords(self).contains(&coord))
+            })
+            .collect()
     }
 
     //

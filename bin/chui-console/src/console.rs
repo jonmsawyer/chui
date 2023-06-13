@@ -160,7 +160,7 @@ impl Console {
                         match game.parse(the_move, game.to_move).as_ref() {
                             Ok(move_obj) => {
                                 println!("Ok! The move: {:?}", move_obj);
-                                game.current_move = Some(move_obj.clone());
+                                game.set_current_move(Some(move_obj.clone()));
                                 if game.apply_move().is_ok() {
                                     println!("{}", move_obj.get_move_text());
                                     println!();

@@ -25,22 +25,24 @@ impl Coord {
     pub fn new(file: u8, rank: u8) -> ChuiResult<Coord> {
         if file > 7 {
             return Err(ChuiError::InvalidFile(format!(
-                "{} is an invalid file index",
+                "{} is an invalid file index (Coord::new)",
                 file
             )));
         }
 
         if rank > 7 {
             return Err(ChuiError::InvalidRank(format!(
-                "{} is an invalid rank index",
+                "{} is an invalid rank index (Coord::new)",
                 rank
             )));
         }
 
-        let file = NonMaxU8::try_from(file)
-            .map_err(|_| ChuiError::InvalidFile(format!("{} is an invalid file index", file)))?;
-        let rank = NonMaxU8::try_from(rank)
-            .map_err(|_| ChuiError::InvalidRank(format!("{} is an invalid rank index", rank)))?;
+        let file = NonMaxU8::try_from(file).map_err(|_| {
+            ChuiError::InvalidFile(format!("{} is an invalid file index (Coord::new)", file))
+        })?;
+        let rank = NonMaxU8::try_from(rank).map_err(|_| {
+            ChuiError::InvalidRank(format!("{} is an invalid rank index (Coord::new)", rank))
+        })?;
 
         Ok(Coord {
             file: NonMaxU8::try_from(file)?,
@@ -52,7 +54,7 @@ impl Coord {
     pub fn new_from_idx(idx: u8) -> ChuiResult<Coord> {
         if idx >= 64 {
             return Err(ChuiError::IndexOutOfRange(format!(
-                "{} is out of range (0..64)",
+                "{} is out of range (0..=63) (Coord::new_from_idx)",
                 idx
             )));
         }
@@ -83,7 +85,7 @@ impl Coord {
         if let Ok(file) = NonMaxU8::try_from(value) {
             if file.get() > 7 {
                 return Err(ChuiError::InvalidFile(format!(
-                    "{} is an invalid file index",
+                    "{} is an invalid file index (Coord::set_file)",
                     file
                 )));
             }
@@ -93,7 +95,7 @@ impl Coord {
             Ok(())
         } else {
             Err(ChuiError::InvalidFile(format!(
-                "{} is an invalid file index",
+                "{} is an invalid file index (Coord::set_file)",
                 value
             )))
         }
@@ -104,7 +106,7 @@ impl Coord {
         if let Ok(rank) = NonMaxU8::try_from(value) {
             if rank.get() > 7 {
                 return Err(ChuiError::InvalidRank(format!(
-                    "{} is an invalid rank index",
+                    "{} is an invalid rank index (Coord::set_rank)",
                     rank
                 )));
             }
@@ -114,7 +116,7 @@ impl Coord {
             Ok(())
         } else {
             Err(ChuiError::InvalidFile(format!(
-                "{} is an invalid rank index",
+                "{} is an invalid rank index (Coord::set_rank)",
                 value
             )))
         }
@@ -138,7 +140,7 @@ impl Coord {
 
 /// Formats the position for a coordinate in Algebraic notation.
 ///
-/// TODO: Change this to behave with the selected [`Parser`] in a given [`Engine`].
+/// TODO: Change this to behave with the selected [`Parser`] in a given [`Game`].
 impl fmt::Display for Coord {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
@@ -177,7 +179,7 @@ impl TryFrom<(&str, u8)> for Coord {
             Coord::try_from((file, coord.1))
         } else {
             Err(ChuiError::InvalidCoords(format!(
-                "{:?} is an invalid coordinate",
+                "{:?} is an invalid coordinate (try_from((&str, u8)))",
                 coord
             )))
         }
@@ -190,7 +192,7 @@ impl TryFrom<&str> for Coord {
     fn try_from(coord: &str) -> ChuiResult<Coord> {
         if coord.len() > 2 {
             return Err(ChuiError::InvalidCoords(format!(
-                "{:?} is an invalid coordinate",
+                "{:?} is an invalid coordinate (try_from(&str))",
                 coord
             )));
         }
@@ -201,7 +203,7 @@ impl TryFrom<&str> for Coord {
             Coord::try_from((file, rank))
         } else {
             Err(ChuiError::InvalidCoords(format!(
-                "{:?} is an invalid coordinate",
+                "{:?} is an invalid coordinate (try_from(&str))",
                 coord
             )))
         }
@@ -214,7 +216,7 @@ impl TryFrom<(&str, &str)> for Coord {
     fn try_from(coord: (&str, &str)) -> ChuiResult<Coord> {
         if coord.0.len() > 1 || coord.1.len() > 1 {
             return Err(ChuiError::InvalidCoords(format!(
-                "{:?} is an invalid coordinate",
+                "{:?} is an invalid coordinate (try_from((&str, &str)))",
                 coord
             )));
         }
@@ -223,7 +225,7 @@ impl TryFrom<(&str, &str)> for Coord {
             Coord::try_from((file, rank))
         } else {
             Err(ChuiError::InvalidCoords(format!(
-                "{:?} is an invalid coordinate",
+                "{:?} is an invalid coordinate (try_from((&str, &str)))",
                 coord
             )))
         }
@@ -337,7 +339,7 @@ mod tests {
     fn to_char_u8_coord() -> ChuiResult<()> {
         for i in 0..8_u8 {
             for j in 0..8_u8 {
-                let file = STR_FILES[i as usize].chars().collect::<Vec<char>>()[0];
+                let file = (i + 'a' as u8) as char;
                 let c = Coord::new(i, j)?.to_char_u8_coord();
                 assert_eq!((file, j + 1), c);
                 println!("({}, {}): {:?}", i, j, c);

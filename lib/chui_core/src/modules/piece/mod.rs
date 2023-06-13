@@ -144,6 +144,114 @@ impl Piece {
         }
     }
 
+    /// Return a new White Pawn on a given (char, u8) coord.
+    pub fn white_pawn(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Pawn,
+            Color::White,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new White Knight on a given (char, u8) coord.
+    pub fn white_knight(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Knight,
+            Color::White,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new White Bishop on a given (char, u8) coord.
+    pub fn white_bishop(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Bishop,
+            Color::White,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new White Rook on a given (char, u8) coord.
+    pub fn white_rook(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Rook,
+            Color::White,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new White Queen on a given (char, u8) coord.
+    pub fn white_queen(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Queen,
+            Color::White,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new White King on a given (char, u8) coord.
+    pub fn white_king(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::King,
+            Color::White,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new Black Pawn on a given (char, u8) coord.
+    pub fn black_pawn(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Pawn,
+            Color::Black,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new Black Knight on a given (char, u8) coord.
+    pub fn black_knight(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Knight,
+            Color::Black,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new Black Bishop on a given (char, u8) coord.
+    pub fn black_bishop(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Bishop,
+            Color::Black,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new Black Rook on a given (char, u8) coord.
+    pub fn black_rook(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Rook,
+            Color::Black,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new Black Queen on a given (char, u8) coord.
+    pub fn black_queen(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::Queen,
+            Color::Black,
+            Coord::try_from(coord)?,
+        ))
+    }
+
+    /// Return a new Black King on a given (char, u8) coord.
+    pub fn black_king(coord: (char, u8)) -> ChuiResult<Piece> {
+        Ok(Piece::new(
+            PieceKind::King,
+            Color::Black,
+            Coord::try_from(coord)?,
+        ))
+    }
+
     //
     // Getters.
     //
@@ -235,16 +343,14 @@ impl Piece {
 
     /// Get move Coords for piece.
     pub fn get_move_coords(&self, board: &Board) -> Vec<Coord> {
-        let move_coords = match self.kind {
+        match self.kind {
             PieceKind::King => board.get_king_move_coords(self),
             PieceKind::Queen => board.get_queen_move_coords(self),
             PieceKind::Rook => board.get_rook_move_coords(self),
             PieceKind::Bishop => board.get_bishop_move_coords(self),
             PieceKind::Knight => board.get_knight_move_coords(self),
             PieceKind::Pawn => board.get_pawn_move_coords(self),
-        };
-
-        move_coords
+        }
     }
 
     /// Return a colored string containing the alpha representation of a piece

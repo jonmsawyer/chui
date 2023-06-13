@@ -202,6 +202,10 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
 
     let mut output = quote! {};
 
+    //
+    // TryFrom impls
+    //
+
     for t in primitive_types.iter() {
         for u in primitive_types.iter() {
             output = quote! {
@@ -239,6 +243,16 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                                 "{} could not be converted to a valid u8 type",
                                 coord.0
                             )))
+                        }
+                    }
+                }
+
+                impl PartialEq<(#t, #u)> for #ident {
+                    fn eq(&self, coord: &(#t, #u)) -> bool {
+                        if let Ok(new_coord) = Coord::try_from(*coord) {
+                            *self == new_coord
+                        } else {
+                            false
                         }
                     }
                 }
@@ -286,6 +300,16 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                         }
                     }
                 }
+
+                impl PartialEq<(#t, #u)> for #ident {
+                    fn eq(&self, coord: &(#t, #u)) -> bool {
+                        if let Ok(new_coord) = Coord::try_from(*coord) {
+                            *self == new_coord
+                        } else {
+                            false
+                        }
+                    }
+                }
             }
         }
     }
@@ -330,6 +354,16 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                         }
                     }
                 }
+
+                impl PartialEq<(#t, #u)> for #ident {
+                    fn eq(&self, coord: &(#t, #u)) -> bool {
+                        if let Ok(new_coord) = Coord::try_from(*coord) {
+                            *self == new_coord
+                        } else {
+                            false
+                        }
+                    }
+                }
             }
         }
     }
@@ -371,6 +405,16 @@ pub fn derive_coordinate(input: TokenStream) -> TokenStream {
                                 "{} could not be converted to a valid u8 type",
                                 coord.0
                             )))
+                        }
+                    }
+                }
+
+                impl PartialEq<(#t, #u)> for #ident {
+                    fn eq(&self, coord: &(#t, #u)) -> bool {
+                        if let Ok(new_coord) = Coord::try_from(*coord) {
+                            *self == new_coord
+                        } else {
+                            false
                         }
                     }
                 }

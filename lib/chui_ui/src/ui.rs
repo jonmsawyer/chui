@@ -27,7 +27,7 @@ impl Ui {
             .add_plugin(EguiPlugin) // Default Egui plugins
             //.add_plugin(EditorPlugin) // Wait til this is in crates.io
             // Chui's resources
-            .init_resource::<resources::Engine>()
+            .init_resource::<resources::Game>()
             // Chui's plugins
             .add_plugin(plugins::CameraControllerPlugin)
             .add_plugin(plugins::GameStatePlugin)

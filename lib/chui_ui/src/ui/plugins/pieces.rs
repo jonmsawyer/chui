@@ -6,7 +6,7 @@ use bevy::sprite::Anchor;
 use super::super::components::Piece;
 use super::super::constants::{START_X_COORD, START_Y_COORD};
 use super::super::events::ResizeBoardEvent;
-use super::super::resources::{Engine, UiResource};
+use super::super::resources::{Game, UiResource};
 use super::super::states::GameState;
 use super::super::utils::compute_coords;
 use super::SpriteCollection;
@@ -16,7 +16,7 @@ fn init_pieces(
     my_assets: Res<SpriteCollection>,
     mut commands: Commands,
     ui_state: Res<UiResource>,
-    engine: Res<Engine>,
+    engine: Res<Game>,
 ) {
     let (scale, _, _) = compute_coords(ui_state.square_pixels);
 

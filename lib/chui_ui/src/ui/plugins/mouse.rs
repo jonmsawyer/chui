@@ -14,7 +14,7 @@ use crate::Coord;
 
 use super::super::components::{FromSquareCursor, MainCamera, MouseCursor, Piece, ToSquareCursor};
 use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
-use super::super::resources::{Engine, UiResource};
+use super::super::resources::{Game, UiResource};
 use super::super::states::GameState;
 use super::super::utils::{
     compute_board_coords, compute_coords, get_mouse_coords, get_world_coords,
@@ -150,7 +150,7 @@ pub fn update_mouse_click(
         (&mut Transform, &mut Visibility),
         (With<ToSquareCursor>, Without<FromSquareCursor>),
     >,
-    mut engine: ResMut<Engine>,
+    mut game: ResMut<Game>,
     mut piece_query: Query<
         (&mut Piece, &mut Transform),
         (Without<FromSquareCursor>, Without<ToSquareCursor>),
@@ -202,9 +202,9 @@ pub fn update_mouse_click(
                 let from_coord = Coord::try_from(from_index).unwrap();
                 let to_coord = Coord::try_from(to_index).unwrap();
 
-                match engine
+                match game
                     .parser
-                    .generate_move_from_board_coordinates(&engine, from_coord, to_coord)
+                    .generate_move_from_board_coordinates(&game, from_coord, to_coord)
                 {
                     Ok(result) => {
                         ui_state.move_representation = result;
@@ -214,8 +214,8 @@ pub fn update_mouse_click(
                                 .unwrap();
                         chess_move.to_coord =
                             Coord::try_from((to_coord.get_file(), to_coord.get_rank())).unwrap();
-                        let from_piece = engine.board.get_piece(from_coord);
-                        let to_piece = engine.board.get_piece(to_coord);
+                        let from_piece = game.board.get_piece(from_coord);
+                        let to_piece = game.board.get_piece(to_coord);
                         chess_move.piece = from_piece;
 
                         if from_piece.is_none() {
@@ -236,7 +236,9 @@ pub fn update_mouse_click(
                             };
                         }
 
-                        match engine.board.apply_move(&Some(chess_move)) {
+                        game.set_current_move(Some(chess_move));
+
+                        match game.apply_move() {
                             Ok(_) => (),
                             Err(_) => return,
                         }

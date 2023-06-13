@@ -151,7 +151,7 @@ pub struct Game {
     pub move_list: Vec<Move>,
 
     /// The current move.
-    pub current_move: Option<Move>,
+    current_move: Option<Move>,
 
     /// The win condition.
     pub win_condition: Option<WinCondition>,
@@ -401,17 +401,26 @@ impl Game {
 
     /// Apply the move.
     ///
+    /// TODO: Set more game state per the rules, such as en passant.
+    ///
     /// # Errors
     ///
     /// * Errors if the piece we're moving is `None`.
     pub fn apply_move(&mut self) -> ChuiResult<()> {
-        let apply = self.board.apply_move(&self.current_move);
+        if let Some(current_move) = self.current_move.as_ref() {
+            let apply = self.board.apply_move(current_move);
 
-        if apply.is_ok() {
-            self.toggle_to_move();
+            if let Ok(captured_piece) = apply {
+                if let Some(captured_piece) = captured_piece {
+                    self.captured_pieces.push(captured_piece);
+                }
+                self.toggle_to_move();
+            }
+
+            Ok(())
+        } else {
+            Err(ChuiError::InvalidMove(format!("No move to apply")))
         }
-
-        apply
     }
 
     /// Switch `Player` to move.
@@ -421,6 +430,11 @@ impl Game {
         } else {
             self.to_move = Color::White;
         }
+    }
+
+    /// Set the current move.
+    pub fn set_current_move(&mut self, current_move: Option<Move>) {
+        self.current_move = current_move;
     }
 }
 

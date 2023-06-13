@@ -10,9 +10,9 @@ pub use chui_core;
 
 /// Resource to engage the core Engine
 #[derive(Resource, Debug)]
-pub struct Engine(chui_core::Game);
+pub struct Game(chui_core::Game);
 
-impl Deref for Engine {
+impl Deref for Game {
     type Target = chui_core::Game;
 
     fn deref(&self) -> &Self::Target {
@@ -20,20 +20,20 @@ impl Deref for Engine {
     }
 }
 
-impl DerefMut for Engine {
+impl DerefMut for Game {
     fn deref_mut(&mut self) -> &mut chui_core::Game {
         &mut self.0
     }
 }
 
-impl Default for Engine {
-    fn default() -> Engine {
-        Engine(chui_core::Game::default())
+impl Default for Game {
+    fn default() -> Game {
+        Game(chui_core::Game::default())
     }
 }
 
 /// Formats the position for white.
-impl fmt::Display for Engine {
+impl fmt::Display for Game {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0.white_to_string())
     }
