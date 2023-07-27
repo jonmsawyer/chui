@@ -407,8 +407,12 @@ impl Game {
     ///
     /// * Errors if the piece we're moving is `None`.
     pub fn apply_move(&mut self) -> ChuiResult<()> {
-        if let Some(current_move) = self.current_move.as_ref() {
-            let apply = self.board.apply_move(current_move);
+        let current_move = self.process_move()?;
+        if let Some(current_move) = current_move {
+            println!("Apply Move: {:?}", current_move);
+            println!("{}", current_move.get_move_text());
+            println!();
+            let apply = self.board.apply_move(&current_move);
 
             if let Ok(captured_piece) = apply {
                 if let Some(captured_piece) = captured_piece {
@@ -421,6 +425,16 @@ impl Game {
         } else {
             Err(ChuiError::InvalidMove(format!("No move to apply")))
         }
+    }
+
+    /// Process the chess move.
+    pub fn process_move(&mut self) -> ChuiResult<Option<Move>> {
+        if let Some(mut chess_move) = self.current_move.clone() {
+            chess_move.process_move(self)?;
+            return Ok(Some(chess_move));
+        }
+
+        Err(ChuiError::InvalidMove(format!("No move to apply")))
     }
 
     /// Switch `Player` to move.

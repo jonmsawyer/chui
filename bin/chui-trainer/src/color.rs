@@ -5,12 +5,13 @@ use std::time::{Duration, SystemTime};
 
 use rand::Rng;
 
-use super::{trait_defs::*, CommandType};
+use super::{trait_defs::Trainer, CommandType};
 
 use chui_core::{STR_FILES, STR_RANKS};
 
 #[derive(Debug, Trainer)]
 #[trainer(base = true)]
+/// `ColorTrainer` struct. Train square colors of board coordinates.
 pub struct ColorTrainer {
     /// Verbose name of this trainer.
     name_verbose: String,
@@ -55,12 +56,12 @@ impl Default for ColorTrainer {
 }
 
 impl ColorTrainer {
-    // Print the help message when the CommandType is Help.
+    /// Print the help message when the [`CommandType`] is Help.
     fn print_help(&self) {
         println!("+=======================================+");
         println!("| {} Trainer Help |", self.name_verbose);
         println!("+=======================================+");
-        println!("");
+        println!();
         println!("Commands:");
         println!("(* Selected)");
         println!(
@@ -84,7 +85,7 @@ impl ColorTrainer {
             "{:24}Quit this training session (but not this application).",
             "  q, quit, or exit"
         );
-        println!("");
+        println!();
     }
 
     /// Print the output correlating to an incorrect answer.
@@ -100,7 +101,7 @@ impl ColorTrainer {
             color,
             self.vec_correct.len(),
             self.vec_incorrect.len()
-        )
+        );
     }
 
     /// Print the output correlating to a comprehensive score sheet.
@@ -149,18 +150,21 @@ impl ColorTrainer {
             avg_duration / self.vec_incorrect.len() as f32
         );
 
-        if let Ok(elapsed) = self.session_timer.elapsed() {
-            println!(
-                "Elapsed Time for Training Session:{:>18}",
-                format!("[{:0.2} secs]", elapsed.as_secs_f32())
-            );
-        } else {
-            println!(
-                "Could not determine the elapsed time since you started this training session."
-            );
-        }
+        self.session_timer.elapsed().map_or_else(
+            |_| {
+                println!(
+                    "Could not determine the elapsed time since you started this training session."
+                );
+            },
+            |elapsed| {
+                println!(
+                    "Elapsed Time for Training Session:{:>18}",
+                    format!("[{:0.2} secs]", elapsed.as_secs_f32())
+                );
+            },
+        );
 
-        println!("");
+        println!();
     }
 
     /// Get user input from `stdin` and store it in `self.input`.
@@ -172,7 +176,7 @@ impl ColorTrainer {
                 println!(
                     " === What is {}? '1' for Light, '2' for Dark",
                     self.get_algebraic_coordinate()
-                )
+                );
             }
             CommandType::Help => {
                 println!(" === Please input command. '?' or 'help' for help. 'q' to quit.");
@@ -203,7 +207,7 @@ impl ColorTrainer {
 
         self.input = input.trim().to_string();
 
-        println!("");
+        println!();
     }
 
     /// Generate the color coordinate.
@@ -249,19 +253,17 @@ impl ColorTrainer {
     fn solve_answer(&mut self) {
         self.evaluate_answer();
 
-        if self.answer_color == false
-            && (self.input.eq("1") || self.input.to_ascii_lowercase().eq("light"))
-        {
-            self.add_correct();
-        } else if self.answer_color == true
-            && (self.input.eq("2") || self.input.to_ascii_lowercase().eq("dark"))
+        if (!self.answer_color
+            && (self.input.eq("1") || self.input.to_ascii_lowercase().eq("light")))
+            || (self.answer_color
+                && (self.input.eq("2") || self.input.to_ascii_lowercase().eq("dark")))
         {
             self.add_correct();
         } else {
             self.add_incorrect();
         }
 
-        println!("");
+        println!();
 
         self.clear_saved_color_coordinate();
     }
@@ -296,11 +298,7 @@ impl ColorTrainer {
             self.input.clone()
         };
 
-        let element = (
-            self.get_algebraic_coordinate(),
-            color,
-            self.input_duration.clone(),
-        );
+        let element = (self.get_algebraic_coordinate(), color, self.input_duration);
         self.vec_correct.push(element);
         self.print_correct();
     }
@@ -316,11 +314,7 @@ impl ColorTrainer {
             self.input.clone()
         };
 
-        let element = (
-            self.get_algebraic_coordinate(),
-            color,
-            self.input_duration.clone(),
-        );
+        let element = (self.get_algebraic_coordinate(), color, self.input_duration);
         self.vec_incorrect.push(element);
         self.print_incorrect();
     }

@@ -7,7 +7,7 @@ use std::convert::Infallible;
 use std::fmt;
 use std::num::{ParseIntError, TryFromIntError};
 
-use nonmax;
+// use nonmax;
 use thiserror::Error;
 
 /// The main error that is returned for this application, rather than generic Err().

@@ -409,69 +409,22 @@ impl TryFrom<&str> for Piece {
 
     fn try_from(piece: &str) -> ChuiResult<Piece> {
         match piece {
-            "K" | "♔" => Ok(Piece::new(
-                PieceKind::King,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "Q" | "♕" => Ok(Piece::new(
-                PieceKind::Queen,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "R" | "♖" => Ok(Piece::new(
-                PieceKind::Rook,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "B" | "♗" => Ok(Piece::new(
-                PieceKind::Bishop,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "N" | "♘" => Ok(Piece::new(
-                PieceKind::Knight,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "P" | "♙" => Ok(Piece::new(
-                PieceKind::Pawn,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "k" | "♚" => Ok(Piece::new(
-                PieceKind::King,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "q" | "♛" => Ok(Piece::new(
-                PieceKind::Queen,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "r" | "♜" => Ok(Piece::new(
-                PieceKind::Rook,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "b" | "♝" => Ok(Piece::new(
-                PieceKind::Bishop,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "n" | "♞" => Ok(Piece::new(
-                PieceKind::Knight,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            "p" | "♟" => Ok(Piece::new(
-                PieceKind::Pawn,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
+            "K" | "♔" => Piece::white_king(E1),
+            "Q" | "♕" => Piece::white_queen(D1),
+            "R" | "♖" => Piece::white_rook(A1),
+            "B" | "♗" => Piece::white_bishop(C1),
+            "N" | "♘" => Piece::white_knight(B1),
+            "P" | "♙" => Piece::white_pawn(A2),
+
+            "k" | "♚" => Piece::black_king(E8),
+            "q" | "♛" => Piece::black_queen(D8),
+            "r" | "♜" => Piece::black_rook(A8),
+            "b" | "♝" => Piece::black_bishop(C8),
+            "n" | "♞" => Piece::black_knight(B8),
+            "p" | "♟" => Piece::black_pawn(A7),
 
             _ => Err(ChuiError::InvalidPiece(format!(
-                "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk]",
+                "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk♙♘♗♖♕♔♟♞♝♜♛♚]",
                 piece
             ))),
         }
@@ -484,70 +437,22 @@ impl TryFrom<char> for Piece {
 
     fn try_from(piece: char) -> ChuiResult<Piece> {
         match piece {
-            'K' => Ok(Piece::new(
-                PieceKind::King,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'Q' => Ok(Piece::new(
-                PieceKind::Queen,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'R' => Ok(Piece::new(
-                PieceKind::Rook,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'B' => Ok(Piece::new(
-                PieceKind::Bishop,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'N' => Ok(Piece::new(
-                PieceKind::Knight,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'P' => Ok(Piece::new(
-                PieceKind::Pawn,
-                Color::White,
-                Coord::new(0, 0).unwrap(),
-            )),
+            'K' | '♔' => Piece::white_king(E1),
+            'Q' | '♕' => Piece::white_queen(D1),
+            'R' | '♖' => Piece::white_rook(A1),
+            'B' | '♗' => Piece::white_bishop(C1),
+            'N' | '♘' => Piece::white_knight(B1),
+            'P' | '♙' => Piece::white_pawn(A2),
 
-            'k' => Ok(Piece::new(
-                PieceKind::King,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'q' => Ok(Piece::new(
-                PieceKind::Queen,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'r' => Ok(Piece::new(
-                PieceKind::Rook,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'b' => Ok(Piece::new(
-                PieceKind::Bishop,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'n' => Ok(Piece::new(
-                PieceKind::Knight,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
-            'p' => Ok(Piece::new(
-                PieceKind::Pawn,
-                Color::Black,
-                Coord::new(0, 0).unwrap(),
-            )),
+            'k' | '♚' => Piece::black_king(E8),
+            'q' | '♛' => Piece::black_queen(D8),
+            'r' | '♜' => Piece::black_rook(A8),
+            'b' | '♝' => Piece::black_bishop(C8),
+            'n' | '♞' => Piece::black_knight(B8),
+            'p' | '♟' => Piece::black_pawn(A7),
 
             _ => Err(ChuiError::InvalidPiece(format!(
-                "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk]",
+                "`{}` is an invalid piece. Expected one of [PRNBQKprnbqk♙♘♗♖♕♔♟♞♝♜♛♚]",
                 piece
             ))),
         }

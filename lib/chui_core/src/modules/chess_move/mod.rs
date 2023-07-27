@@ -7,7 +7,7 @@
 
 use std::fmt;
 
-use crate::{ChuiError, ChuiResult, Color, Coord, Piece, PieceKind};
+use crate::{constants::E1, ChuiError, ChuiResult, Color, Coord, Game, Piece};
 
 /// Represents the type of move to be performed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -31,6 +31,9 @@ pub enum MoveType {
 /// Represents a chess move.
 #[derive(PartialEq, Eq, Clone)]
 pub struct Move {
+    /// The color to move.
+    pub to_move: Color,
+
     /// Represents a move's "from" Coordinate (e.g., `('a', 1)`).
     pub from_coord: Coord,
 
@@ -74,8 +77,9 @@ impl fmt::Debug for Move {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let output = format!(
             "{{
-    from_Coord: {:?},
-    to_coord: {:?},
+    to_move: {:?},
+    from_coord: {} ({:?}),
+    to_coord: {} ({:?}),
     piece: {:?},
     check: {:?},
     check_mate: {:?},
@@ -87,7 +91,10 @@ impl fmt::Debug for Move {
     input_move: {:?},
     move_type: {:?}
 }}",
+            self.to_move,
             self.from_coord,
+            self.from_coord,
+            self.to_coord,
             self.to_coord,
             self.piece,
             self.check,
@@ -108,6 +115,7 @@ impl fmt::Debug for Move {
 impl Default for Move {
     fn default() -> Self {
         Move {
+            to_move: Color::White,
             from_coord: Coord::zero(),
             to_coord: Coord::zero(),
             piece: None,
@@ -195,7 +203,7 @@ impl Move {
     }
 
     /// Match the given file (`char`) to its index (`u8`).
-    fn match_file_to_index(&self, file: char) -> Option<u8> {
+    const fn match_file_to_index(&self, file: char) -> Option<u8> {
         match file {
             'a' => Some(0),
             'b' => Some(1),
@@ -210,7 +218,7 @@ impl Move {
     }
 
     /// Match the given rank (`char`) to its index (`u8`).
-    fn _match_rank_to_index(&self, rank: char) -> Option<u8> {
+    const fn _match_rank_to_index(&self, rank: char) -> Option<u8> {
         match rank {
             '1' => Some(0),
             '2' => Some(1),
@@ -248,7 +256,7 @@ impl Move {
     ///
     /// # Panics
     ///
-    /// * Panics when `self.piece` is None after checking if it's Some.
+    /// Panics when `self.piece` is None after checking if it's Some.
     pub fn set_color(&mut self, color: Color) {
         if self.piece.is_some() {
             let piece = self.piece.as_mut().expect("Piece cannot be None.");
@@ -267,38 +275,41 @@ impl Move {
     }
 
     /// Set castling king.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a `Piece` (White King) could not be constructed and placed on the E1
+    /// square. This functiion should never panic in this case.
     pub fn set_castling_king(&mut self) {
         self.is_castling = true;
         self.is_castling_king = true;
         self.is_castling_queen = false;
-        self.set_piece(Piece::new(
-            PieceKind::King,
-            Color::White,
-            Coord::new(6, 0).unwrap(),
-        ));
+        self.set_piece(Piece::white_king(E1).unwrap());
         self.set_move_type(MoveType::Castle);
     }
 
     /// Set castling queen.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a `Piece` (White King) could not be constructed and placed on the E1
+    /// square. This functiion should never panic in this case.
     pub fn set_castling_queen(&mut self) {
         self.is_castling = true;
         self.is_castling_king = false;
         self.is_castling_queen = true;
-        self.set_piece(Piece::new(
-            PieceKind::King,
-            Color::White,
-            Coord::new(6, 0).unwrap(),
-        ));
+        self.set_piece(Piece::white_king(E1).unwrap());
         self.set_move_type(MoveType::Castle);
     }
 
     /// Set pawn move.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a `Piece` could not be constructed. This function should never panic in
+    /// this case.
     pub fn set_pawn_move(&mut self) {
-        self.set_piece(Piece::new(
-            PieceKind::Pawn,
-            Color::White,
-            Coord::new(6, 0).unwrap(),
-        ));
+        self.set_piece(Piece::try_from("P").unwrap());
         self.set_move_type(MoveType::PawnMove);
     }
 
@@ -354,6 +365,10 @@ impl Move {
     }
 
     /// Set the `to_coord` file.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `ChuiError` result if the file index is out of range. See `set_file`.
     pub fn set_to_coord_file(&mut self, file: char) -> ChuiResult<()> {
         if let Some(idx) = self.match_file_to_index(file) {
             self.from_coord.set_file(self.to_coord.get_file())?;
@@ -363,6 +378,10 @@ impl Move {
     }
 
     /// Set the `to_coord` rank.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `ChuiError` result if the rank index is out of range. See `set_rank`.
     pub fn set_to_coord_rank(&mut self, rank: u8) -> ChuiResult<()> {
         self.from_coord.set_rank(self.to_coord.get_rank())?;
         self.to_coord.set_rank(rank)?;
@@ -370,6 +389,10 @@ impl Move {
     }
 
     /// Set the `to_index` file.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `ChuiError` result if a new `Coord` could not be constructed.
     pub fn set_to_index_file(&mut self, file: u8) -> ChuiResult<()> {
         let from_coord = Coord::new(self.to_coord.get_file(), self.to_coord.get_rank())?;
         let to_coord = Coord::new(file, self.to_coord.get_rank())?;
@@ -379,6 +402,10 @@ impl Move {
     }
 
     /// Set the `to_index` rank.
+    ///
+    /// # Errors
+    ///
+    /// Returns a `ChuiError` result if a new `Coord` could not be constructed.
     pub fn set_to_index_rank(&mut self, rank: u8) -> ChuiResult<()> {
         let from_coord = Coord::new(self.from_coord.get_file(), self.to_coord.get_rank())?;
         let to_coord = Coord::new(self.to_coord.get_file(), rank)?;
@@ -395,7 +422,7 @@ impl Move {
     ///
     /// # Panics
     ///
-    /// * Panics when `self.piece` is None after checking that it's Some.
+    /// Panics when `self.piece` is None after checking that it's Some.
     pub fn get_move_text(&self) -> String {
         if self.piece.is_none() || self.move_type.is_none() {
             return String::new();
@@ -473,5 +500,38 @@ impl Move {
         }
 
         move_text
+    }
+
+    /// Mogrify the internal state of the Chess Move for application from the [`Board`] and the
+    /// [`Game`].
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result when `self.move_type` is None.
+    pub fn process_move(&mut self, game: &mut Game) -> ChuiResult<()> {
+        self.set_color(game.to_move);
+        match self.move_type {
+            Some(MoveType::Castle) => {
+                println!("Move Type is Castle.");
+            }
+            Some(MoveType::PawnCapture) => {
+                println!("Move Type is Pawn Capture.");
+            }
+            Some(MoveType::PawnMove) => {
+                println!("Move Type is Pawn Move");
+            }
+            Some(MoveType::PieceCapture) => {
+                println!("Move Type is Piece Capture.");
+            }
+            Some(MoveType::PieceMove) => {
+                println!("Move Type is Piece Move.");
+            }
+            None => {
+                println!("Move Type is None.");
+                return Err(ChuiError::InvalidMove("Unknown Move Type".to_string()));
+            }
+        }
+
+        Ok(())
     }
 }

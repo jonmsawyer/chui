@@ -2,7 +2,7 @@
 //!
 //! Console application.
 
-use chui_core::ChuiResult;
+use chui_error::ChuiResult;
 
 mod console;
 use console::Console;

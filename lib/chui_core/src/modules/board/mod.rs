@@ -85,6 +85,10 @@ impl Board {
     }
 
     /// New standard chess setup.
+    ///
+    /// # Panics
+    ///
+    /// This method does not panic because of the use of known constants.
     pub fn new_standard_chess() -> [[Option<Piece>; FILES as usize]; RANKS as usize] {
         [
             // rank 1
@@ -185,7 +189,7 @@ impl Board {
     }
 
     /// Return an empty board.
-    pub fn new_empty_board() -> [[Option<Piece>; FILES as usize]; RANKS as usize] {
+    pub const fn new_empty_board() -> [[Option<Piece>; FILES as usize]; RANKS as usize] {
         [[None; FILES as usize]; RANKS as usize]
     }
 
@@ -197,7 +201,11 @@ impl Board {
     ///
     /// # Errors
     ///
-    /// * Errors if the piece we're moving is `None`.
+    /// Errors if the piece we're moving is `None`.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the `move_obj`'s piece is None after checking that it is Some.
     pub fn apply_move(&mut self, move_obj: &Move) -> ChuiResult<Option<Piece>> {
         if move_obj.get_piece().is_none() {
             return Err(ChuiError::InvalidMove(
@@ -232,7 +240,7 @@ impl Board {
             )))
         } else if pieces_can_move.len() == 1 {
             let piece = pieces_can_move.get(0).unwrap();
-            Ok(self.put_piece(Some(*piece), piece.get_coord()))
+            self.replace_piece(*piece, &move_obj)
         } else {
             Err(ChuiError::InvalidMove(format!(
                 "Ambiguous move. More than one piece can move to target square {}{}",
@@ -242,14 +250,18 @@ impl Board {
     }
 
     /// Replace the given piece from one square to another.
-    pub fn replace_piece(&mut self, piece_from: &mut Piece, move_obj: &Move) {
-        let from_coord = piece_from.get_coord();
-        let to_coord = move_obj.to_coord;
-
-        piece_from.set_coord(to_coord);
-
-        self.board[from_coord.get_rank() as usize][from_coord.get_file() as usize] = None;
-        self.board[to_coord.get_rank() as usize][to_coord.get_file() as usize] = Some(*piece_from);
+    ///
+    /// # Errors
+    ///
+    /// This method does not error.
+    pub fn replace_piece(
+        &mut self,
+        mut piece_from: Piece,
+        move_obj: &Move,
+    ) -> ChuiResult<Option<Piece>> {
+        self.take_piece(piece_from.get_coord());
+        piece_from.set_coord(move_obj.to_coord);
+        Ok(self.put_piece(Some(piece_from), move_obj.to_coord))
     }
 
     //

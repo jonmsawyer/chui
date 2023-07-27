@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use crate::Game;
 
 /// The kind of command.
+#[non_exhaustive]
 #[derive(Debug, Clone, Copy)]
 pub enum CommandKind {
     /// A move. Passed into the current `Parser` for the `Engine`.
@@ -63,6 +64,9 @@ pub enum CommandKind {
     /// Display the list of moves.
     DisplayMoveList,
 
+    /// Display captures.
+    DisplayCaptures,
+
     /// White resigns.
     WhiteResigns,
 
@@ -77,9 +81,10 @@ pub enum CommandKind {
 }
 
 /// The context of the command.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub enum CommandContext {
     /// Main context. Top level command processor.
+    #[default]
     Main,
 
     /// Switch parser command. Apply the command within the context
@@ -281,6 +286,11 @@ impl Command {
                     commands: vec!["ml".to_string(), "move list".to_string()],
                     description: "Display the move list notation".to_string(),
                     command_kind: CommandKind::DisplayMoveList,
+                },
+                CommandPart {
+                    commands: vec!["c".to_string(), "captures".to_string()],
+                    description: "Display captures for both players.".to_string(),
+                    command_kind: CommandKind::DisplayCaptures,
                 },
                 CommandPart {
                     commands: vec!["fen".to_string()],

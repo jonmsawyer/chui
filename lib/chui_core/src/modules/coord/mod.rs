@@ -22,6 +22,10 @@ pub struct Coord {
 impl Coord {
     /// Create a new [`Coord`] from a file and a rank parameter. File and rank parameters must
     /// evaluate to the u8 type and be less than 8 in value.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if the `file` or the `rank` is out of range.
     pub fn new(file: u8, rank: u8) -> ChuiResult<Coord> {
         if file > 7 {
             return Err(ChuiError::InvalidFile(format!(
@@ -40,17 +44,19 @@ impl Coord {
         let file = NonMaxU8::try_from(file).map_err(|_| {
             ChuiError::InvalidFile(format!("{} is an invalid file index (Coord::new)", file))
         })?;
+
         let rank = NonMaxU8::try_from(rank).map_err(|_| {
             ChuiError::InvalidRank(format!("{} is an invalid rank index (Coord::new)", rank))
         })?;
 
-        Ok(Coord {
-            file: NonMaxU8::try_from(file)?,
-            rank: NonMaxU8::try_from(rank)?,
-        })
+        Ok(Coord { file, rank })
     }
 
     /// Create a new [`Coord`] from an index that in the range of (0..64).
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if the `idx` (index) is out of range.
     pub fn new_from_idx(idx: u8) -> ChuiResult<Coord> {
         if idx >= 64 {
             return Err(ChuiError::IndexOutOfRange(format!(
@@ -66,21 +72,30 @@ impl Coord {
     }
 
     /// Create a new [`Coord`] with values set to zero.
+    ///
+    /// # Panics
+    ///
+    /// Panics when a new [`Coord`] could not be constructed. This function should never panic
+    /// in this case.
     pub fn zero() -> Coord {
         Coord::new(0, 0).unwrap()
     }
 
     /// Return the value of [`Coord`]'s file.
-    pub fn get_file(&self) -> u8 {
+    pub const fn get_file(&self) -> u8 {
         self.file.get()
     }
 
     /// Return the value of [`Coord`]'s rank.
-    pub fn get_rank(&self) -> u8 {
+    pub const fn get_rank(&self) -> u8 {
         self.rank.get()
     }
 
     /// Set the value of [`Coord`]'s file.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if the file is out of range.
     pub fn set_file(&mut self, value: u8) -> ChuiResult<()> {
         if let Ok(file) = NonMaxU8::try_from(value) {
             if file.get() > 7 {
@@ -102,6 +117,10 @@ impl Coord {
     }
 
     /// Set the value of [`Coord`]'s rank.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if the rank is out of range.
     pub fn set_rank(&mut self, value: u8) -> ChuiResult<()> {
         if let Ok(rank) = NonMaxU8::try_from(value) {
             if rank.get() > 7 {
@@ -123,16 +142,24 @@ impl Coord {
     }
 
     /// Return a 2-tuple representing the [`Coord`] as index values.
-    pub fn to_u8_index(&self) -> (u8, u8) {
+    pub const fn to_u8_index(&self) -> (u8, u8) {
         (self.file.get(), self.rank.get())
     }
 
     /// Return a 2-tuple representing the [`Coord`] as alphanumeric values via char and u8.
-    pub fn to_char_u8_coord(&self) -> (char, u8) {
-        ((self.file.get() + 'a' as u8) as char, self.rank.get() + 1)
+    pub const fn to_char_u8_coord(&self) -> (char, u8) {
+        ((self.file.get() + b'a') as char, self.rank.get() + 1)
     }
 
     /// Return true if the given coordinate is equal to this coordinate.
+    ///
+    /// # Panics
+    ///
+    /// Panics when a [`Coord`] could not be constructed from the `coord` parameter.
+    ///
+    /// # TODO
+    ///
+    /// Mitigate a panic scenario.
     pub fn is_eq(&self, coord: (char, u8)) -> bool {
         *self == Coord::try_from(coord).unwrap()
     }
@@ -146,7 +173,7 @@ impl fmt::Display for Coord {
         write!(
             f,
             "{}{}",
-            (self.file.get() + 'a' as u8) as char,
+            (self.file.get() + b'a') as char,
             self.rank.get() + 1
         )
     }
@@ -164,10 +191,7 @@ impl TryFrom<(char, u8)> for Coord {
     type Error = ChuiError;
 
     fn try_from(coord: (char, u8)) -> ChuiResult<Coord> {
-        Coord::new(
-            (coord.0 as u8).wrapping_sub('a' as u8),
-            coord.1.wrapping_sub(1),
-        )
+        Coord::new((coord.0 as u8).wrapping_sub(b'a'), coord.1.wrapping_sub(1))
     }
 }
 
@@ -175,14 +199,15 @@ impl TryFrom<(&str, u8)> for Coord {
     type Error = ChuiError;
 
     fn try_from(coord: (&str, u8)) -> ChuiResult<Coord> {
-        if let Some(file) = coord.0.chars().next() {
-            Coord::try_from((file, coord.1))
-        } else {
-            Err(ChuiError::InvalidCoords(format!(
-                "{:?} is an invalid coordinate (try_from((&str, u8)))",
-                coord
-            )))
-        }
+        coord.0.chars().next().map_or_else(
+            || {
+                Err(ChuiError::InvalidCoords(format!(
+                    "{:?} is an invalid coordinate (try_from((&str, u8)))",
+                    coord
+                )))
+            },
+            |file| Coord::try_from((file, coord.1)),
+        )
     }
 }
 
@@ -236,67 +261,43 @@ impl TryFrom<(char, char)> for Coord {
     type Error = ChuiError;
 
     fn try_from(coord: (char, char)) -> ChuiResult<Coord> {
-        Coord::try_from((coord.0, (coord.1 as u8).wrapping_sub('0' as u8)))
+        Coord::try_from((coord.0, (coord.1 as u8).wrapping_sub(b'0')))
     }
 }
 
 impl PartialEq<(NonMaxU8, NonMaxU8)> for Coord {
     fn eq(&self, coord: &(NonMaxU8, NonMaxU8)) -> bool {
-        if let Ok(new_coord) = Coord::try_from(*coord) {
-            *self == new_coord
-        } else {
-            false
-        }
+        Coord::try_from(*coord).map_or(false, |new_coord| *self == new_coord)
     }
 }
 
 impl PartialEq<(char, u8)> for Coord {
     fn eq(&self, coord: &(char, u8)) -> bool {
-        if let Ok(new_coord) = Coord::try_from(*coord) {
-            *self == new_coord
-        } else {
-            false
-        }
+        Coord::try_from(*coord).map_or(false, |new_coord| *self == new_coord)
     }
 }
 
 impl PartialEq<(&str, u8)> for Coord {
     fn eq(&self, coord: &(&str, u8)) -> bool {
-        if let Ok(new_coord) = Coord::try_from(*coord) {
-            *self == new_coord
-        } else {
-            false
-        }
+        Coord::try_from(*coord).map_or(false, |new_coord| *self == new_coord)
     }
 }
 
 impl PartialEq<&str> for Coord {
     fn eq(&self, coord: &&str) -> bool {
-        if let Ok(new_coord) = Coord::try_from(*coord) {
-            *self == new_coord
-        } else {
-            false
-        }
+        Coord::try_from(*coord).map_or(false, |new_coord| *self == new_coord)
     }
 }
 
 impl PartialEq<(&str, &str)> for Coord {
     fn eq(&self, coord: &(&str, &str)) -> bool {
-        if let Ok(new_coord) = Coord::try_from(*coord) {
-            *self == new_coord
-        } else {
-            false
-        }
+        Coord::try_from(*coord).map_or(false, |new_coord| *self == new_coord)
     }
 }
 
 impl PartialEq<(char, char)> for Coord {
     fn eq(&self, coord: &(char, char)) -> bool {
-        if let Ok(new_coord) = Coord::try_from(*coord) {
-            *self == new_coord
-        } else {
-            false
-        }
+        Coord::try_from(*coord).map_or(false, |new_coord| *self == new_coord)
     }
 }
 
@@ -339,7 +340,7 @@ mod tests {
     fn to_char_u8_coord() -> ChuiResult<()> {
         for i in 0..8_u8 {
             for j in 0..8_u8 {
-                let file = (i + 'a' as u8) as char;
+                let file = (i + b'a') as char;
                 let c = Coord::new(i, j)?.to_char_u8_coord();
                 assert_eq!((file, j + 1), c);
                 println!("({}, {}): {:?}", i, j, c);

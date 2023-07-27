@@ -1,6 +1,6 @@
 //! Chui Macros
 //!
-//! Thanks to this guide: https://github.com/imbolc/rust-derive-macro-guide (2023-05-24)
+//! Thanks to this guide: <https://github.com/imbolc/rust-derive-macro-guide> (2023-05-24)
 
 #![warn(missing_docs)]
 #![deny(broken_intra_doc_links)]
@@ -12,7 +12,9 @@ use syn::{parse_macro_input, DeriveInput};
 
 #[derive(FromDeriveInput, Default)]
 #[darling(default, attributes(trainer))]
+/// Options for use in macros.
 struct Opts {
+    /// Base option.
     base: Option<bool>,
 }
 

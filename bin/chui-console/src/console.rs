@@ -4,10 +4,11 @@ use chui_core::{ChuiResult, Color, Command, CommandContext, CommandKind, Game, W
 
 /// [`Console`] struct that drives the console application.
 #[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Clone, Copy, Hash)]
-pub struct Console {}
+pub struct Console;
 
 impl Console {
-    pub fn new() -> Console {
+    /// Return a new `[Console]` object.
+    pub const fn new() -> Console {
         Console {}
     }
 
@@ -136,6 +137,30 @@ impl Console {
                         println!("Move List Notation:\n{}", output.trim());
                     }
 
+                    Some(CommandKind::DisplayCaptures) => {
+                        let mut white_output = String::new();
+                        let mut black_output = String::new();
+
+                        println!();
+
+                        for piece in game.captured_pieces.iter() {
+                            match piece.get_color() {
+                                Color::White => {
+                                    black_output = format!("{}{} ", black_output, piece)
+                                }
+                                Color::Black => {
+                                    white_output = format!("{}{} ", white_output, piece)
+                                }
+                            }
+                        }
+
+                        display_board = false;
+
+                        println!("Captures:");
+                        println!("White: {}", white_output);
+                        println!("Black: {}", black_output);
+                    }
+
                     _ => {
                         println!();
                         println!("Input move or command: {}", the_move);
@@ -159,12 +184,8 @@ impl Console {
 
                         match game.parse(the_move, game.to_move).as_ref() {
                             Ok(move_obj) => {
-                                println!("Ok! The move: {:?}", move_obj);
                                 game.set_current_move(Some(move_obj.clone()));
                                 if game.apply_move().is_ok() {
-                                    println!("{}", move_obj.get_move_text());
-                                    println!();
-
                                     game.move_list.push(move_obj.clone());
 
                                     game.half_move_counter += 1;

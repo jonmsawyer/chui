@@ -510,11 +510,14 @@ impl<'a> AlgebraicParser<'a> {
         // Else, a pawn was registered in this token. This
         // token should be a valid file.
         if self.try_piece(token).is_err() {
-            self.try_file(token)?;
-            return Ok(());
+            if let Ok(_) = self.try_file(token) {
+                return Ok(());
+            } else {
+                return AlgebraicParser::invalid_pawn_or_piece_move(token);
+            };
         }
 
-        AlgebraicParser::invalid_pawn_or_piece_move(token)
+        Ok(())
     }
 
     /// Parse the second token in the input move.
