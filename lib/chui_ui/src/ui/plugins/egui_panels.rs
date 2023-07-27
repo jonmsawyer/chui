@@ -108,6 +108,7 @@ fn egui_panels(
 }
 
 /// egui panels Bevy plugin.
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct EguiPanelsPlugin;
 
 impl Plugin for EguiPanelsPlugin {

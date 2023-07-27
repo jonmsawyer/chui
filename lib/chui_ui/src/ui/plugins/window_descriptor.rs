@@ -36,6 +36,7 @@ fn resize_notificator(
 }
 
 /// Window Descriptor Bevy plugin.
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct WindowDescriptorPlugin;
 
 impl Plugin for WindowDescriptorPlugin {

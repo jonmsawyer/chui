@@ -226,11 +226,12 @@ impl<'a> Parser for AlgebraicParser<'a> {
                 break;
             } else {
                 _move_string = "Invalid move.".to_string();
-                println!("{}", _move_string);
+                // println!("{}", _move_string);
             }
         }
 
-        Ok(_move_string)
+        // Ok(_move_string)
+        Ok("move_string not implemented".to_string())
     }
 }
 
@@ -277,8 +278,12 @@ impl<'a> AlgebraicParser<'a> {
     /// Try to parse the current token as a valid file. Must
     /// be one of \[abcdefgh\]. If a valid file is found, record
     /// it in the move.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if the `token` is not a correct file.
     fn try_file(&mut self, token: char) -> ChuiResult<()> {
-        if let Some(_) = self.match_file_to_index(token) {
+        if self.match_file_to_index(token).is_some() {
             self.move_obj.set_to_coord_file(token)?;
             return Ok(());
         }
@@ -288,6 +293,10 @@ impl<'a> AlgebraicParser<'a> {
 
     /// Try to parse the current token as a capture. Must be
     /// 'x'. If a valid capture is found, record it in the move.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if `set_capture` fails.
     fn try_capture(&mut self, token: char) -> ChuiResult<()> {
         if self.move_generator.capture.starts_with(token) {
             self.move_obj.set_capture()?;
@@ -300,6 +309,10 @@ impl<'a> AlgebraicParser<'a> {
     /// Try to parse the current token as a valid rank. Must
     /// be one of \[12345678\]. If a valid rank is found, record
     /// it in the move.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if the matched token has an out of range index.
     fn try_rank(&mut self, token: char) -> ChuiResult<()> {
         if let Some(idx) = self.match_rank_to_index(token) {
             self.move_obj.set_to_coord_rank(idx)?;
@@ -313,6 +326,10 @@ impl<'a> AlgebraicParser<'a> {
     /// be '+'. If valid check is found, record it in the move.
     /// If the move's check flag is already set, record this
     /// move as a check mate.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
     fn try_check(&mut self, token: char) -> ChuiResult<()> {
         if self.move_generator.check.starts_with(token) {
             // A check has been recorded before (via `set_check()` if
@@ -330,6 +347,10 @@ impl<'a> AlgebraicParser<'a> {
 
     /// Try to parse the current token as a valid check mate.
     /// If a valid check mate is found, record it in the move.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
     fn try_check_mate(&mut self, token: char) -> ChuiResult<()> {
         for check_mate in self.move_generator.check_mate.iter() {
             if check_mate.starts_with(token) {
@@ -346,6 +367,10 @@ impl<'a> AlgebraicParser<'a> {
     /// it in the move. Note, we don't yet known what the
     /// promotion piece is. Next token should be the proper
     /// promotion piece.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
     fn try_promotion_notation(&mut self, token: char) -> ChuiResult<()> {
         for notation in self.move_generator.promotion_notation.iter() {
             if notation.starts_with(token) {
@@ -360,6 +385,10 @@ impl<'a> AlgebraicParser<'a> {
     /// Try to parse the current token as a promotion piece. The
     /// move's promotion flag need not be set. If a valid promotion
     /// is found, flag the move as a promotion and record the piece.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
     fn try_promotion_piece(&mut self, token: char) -> ChuiResult<()> {
         if let Ok(piece) = Piece::try_from(token) {
             if let Color::White = piece.get_color() {
@@ -374,6 +403,10 @@ impl<'a> AlgebraicParser<'a> {
     /// Try to parse the current token as a castle move. Note: this
     /// is the first attempt at parsing a castling move, so
     /// tentatively  set this move to be castling king side.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
     fn try_castle_king(&mut self, token: char) -> ChuiResult<()> {
         for castle_notation in self.move_generator.castle_notation.iter() {
             if castle_notation.starts_with(token) && self.move_obj.is_castling() {
@@ -389,6 +422,10 @@ impl<'a> AlgebraicParser<'a> {
     /// continuation. Must have already found castle king side
     /// notation. If token is a valid castling continuation notation,
     /// do nothing (as there's nothing to do).
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
     fn try_castle_king_continuation(&self, token: char) -> ChuiResult<()> {
         if self.move_generator.move_notation.starts_with(token) && self.move_obj.is_castling_king()
         {
@@ -403,6 +440,10 @@ impl<'a> AlgebraicParser<'a> {
     /// notation. If token is a valid castling continuation notation,
     /// flag the move as castling queen side. Next token must be
     /// the final castling notation.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
     fn try_castle_queen_continuation(&mut self, token: char) -> ChuiResult<()> {
         if self.move_generator.move_notation.starts_with(token) && self.move_obj.is_castling_king()
         {
@@ -416,6 +457,10 @@ impl<'a> AlgebraicParser<'a> {
     /// Try to parse the current token as a castle queen side.
     /// Must have already found castle queen side continuation
     /// notation. If a valid castle move is found, do nothing.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
     fn try_castle_queen(&self, token: char) -> ChuiResult<()> {
         for castle_notation in self.move_generator.castle_notation.iter() {
             if castle_notation.starts_with(token) && self.move_obj.is_castling_queen() {
@@ -510,7 +555,7 @@ impl<'a> AlgebraicParser<'a> {
         // Else, a pawn was registered in this token. This
         // token should be a valid file.
         if self.try_piece(token).is_err() {
-            if let Ok(_) = self.try_file(token) {
+            if self.try_file(token).is_ok() {
                 return Ok(());
             } else {
                 return AlgebraicParser::invalid_pawn_or_piece_move(token);

@@ -93,6 +93,7 @@ fn scale_factor(
 }
 
 /// Our UI State plugin
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct UiStatePlugin;
 
 impl Plugin for UiStatePlugin {

@@ -105,6 +105,7 @@ fn resize_pieces(
 }
 
 /// Our UI State plugin
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct PiecesPlugin;
 
 impl Plugin for PiecesPlugin {

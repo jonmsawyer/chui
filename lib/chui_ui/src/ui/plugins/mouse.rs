@@ -139,6 +139,12 @@ fn update_mouse_cursor(
 
 /// ECS System. Run on each frame. Update the on-board From Square and To Square
 /// mouse cursors on each mouse click.
+///
+/// # Panics
+///
+/// Panics if a new `Coord` could not be constructed.
+///
+/// TODO: Mitigate panics.
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 pub fn update_mouse_click(
     mut ui_state: ResMut<UiResource>,
@@ -282,6 +288,7 @@ pub fn update_mouse_click(
 }
 
 /// Mouse Bevy plugin.
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct MousePlugin;
 
 impl Plugin for MousePlugin {

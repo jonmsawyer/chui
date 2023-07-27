@@ -4,7 +4,7 @@
 
 // use nonmax::NonMaxU8;
 
-#[allow(unused_imports)]
+#[allow(clippy::wildcard_imports)]
 use crate::constants::*;
 use crate::{ChuiError, ChuiResult, Color, Coord, Move, Piece, PieceKind, FILES, RANKS};
 
@@ -240,7 +240,7 @@ impl Board {
             )))
         } else if pieces_can_move.len() == 1 {
             let piece = pieces_can_move.get(0).unwrap();
-            self.replace_piece(*piece, &move_obj)
+            self.replace_piece(*piece, move_obj)
         } else {
             Err(ChuiError::InvalidMove(format!(
                 "Ambiguous move. More than one piece can move to target square {}{}",
@@ -274,31 +274,31 @@ impl Board {
     }
 
     /// Get the piece at the given coordinate.
-    pub fn get_piece(&self, coord: Coord) -> Option<Piece> {
+    pub const fn get_piece(&self, coord: Coord) -> Option<Piece> {
         self.board[coord.get_rank() as usize][coord.get_file() as usize]
     }
 
-    /// Get the available `Piece`s for a `Color`.
+    /// Get the available [`Piece`]s for a [`Color`].
     pub fn get_pieces(&self, piece: Piece) -> Vec<Piece> {
         self.board
             .iter()
             .flatten()
-            .filter_map(|p| p.filter(|p| p.is_same_piece(piece)))
+            .filter_map(|o_p| o_p.filter(|p| p.is_same_piece(piece)))
             .collect()
     }
 
     /// Get the en passant target square coordinate.
-    pub fn get_en_passant_coord(&self) -> Option<Coord> {
+    pub const fn get_en_passant_coord(&self) -> Option<Coord> {
         self.en_passant_target_square
     }
 
     /// Get the en passant target piece.
-    pub fn get_en_passant_piece(&self) -> Option<Piece> {
+    pub const fn get_en_passant_piece(&self) -> Option<Piece> {
         self.en_passant_target_piece
     }
 
     /// Get the en passant target square and piece.
-    pub fn get_en_passant(&self) -> (Option<Coord>, Option<Piece>) {
+    pub const fn get_en_passant(&self) -> (Option<Coord>, Option<Piece>) {
         (self.get_en_passant_coord(), self.get_en_passant_piece())
     }
 
@@ -324,6 +324,10 @@ impl Board {
     }
 
     /// Set the Coordinates for all [`Piece`]s.
+    ///
+    /// # Panics
+    ///
+    /// This method should never panic due to the iterated index never being out of range.
     pub fn set_coords(&mut self) {
         self.board
             .iter_mut()
@@ -353,7 +357,12 @@ impl Board {
     // Piece move Coords.
     //
 
+    #[allow(clippy::similar_names)]
     /// Get a King's available move Coordinates.
+    ///
+    /// # Panics
+    ///
+    /// This method should never panic because of the use of defined constants.
     pub fn get_king_move_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
 
@@ -477,7 +486,7 @@ impl Board {
         if let Ok(n_coord) = Coord::new(file_idx + 1, rank_idx + 2) {
             if let Some(n_piece) = self.get_piece(n_coord) {
                 if n_piece.get_color() != piece.get_color() {
-                    coords.push(n_coord)
+                    coords.push(n_coord);
                 }
             } else {
                 coords.push(n_coord);
@@ -487,7 +496,7 @@ impl Board {
         if let Ok(n_coord) = Coord::new(file_idx + 1, rank_idx.wrapping_sub(2)) {
             if let Some(n_piece) = self.get_piece(n_coord) {
                 if n_piece.get_color() != piece.get_color() {
-                    coords.push(n_coord)
+                    coords.push(n_coord);
                 }
             } else {
                 coords.push(n_coord);
@@ -497,7 +506,7 @@ impl Board {
         if let Ok(n_coord) = Coord::new(file_idx.wrapping_sub(1), rank_idx + 2) {
             if let Some(n_piece) = self.get_piece(n_coord) {
                 if n_piece.get_color() != piece.get_color() {
-                    coords.push(n_coord)
+                    coords.push(n_coord);
                 }
             } else {
                 coords.push(n_coord);
@@ -507,7 +516,7 @@ impl Board {
         if let Ok(n_coord) = Coord::new(file_idx.wrapping_sub(1), rank_idx.wrapping_sub(2)) {
             if let Some(n_piece) = self.get_piece(n_coord) {
                 if n_piece.get_color() != piece.get_color() {
-                    coords.push(n_coord)
+                    coords.push(n_coord);
                 }
             } else {
                 coords.push(n_coord);
@@ -517,7 +526,7 @@ impl Board {
         if let Ok(n_coord) = Coord::new(file_idx + 2, rank_idx + 1) {
             if let Some(n_piece) = self.get_piece(n_coord) {
                 if n_piece.get_color() != piece.get_color() {
-                    coords.push(n_coord)
+                    coords.push(n_coord);
                 }
             } else {
                 coords.push(n_coord);
@@ -527,7 +536,7 @@ impl Board {
         if let Ok(n_coord) = Coord::new(file_idx + 2, rank_idx.wrapping_sub(1)) {
             if let Some(n_piece) = self.get_piece(n_coord) {
                 if n_piece.get_color() != piece.get_color() {
-                    coords.push(n_coord)
+                    coords.push(n_coord);
                 }
             } else {
                 coords.push(n_coord);
@@ -537,7 +546,7 @@ impl Board {
         if let Ok(n_coord) = Coord::new(file_idx.wrapping_sub(2), rank_idx + 1) {
             if let Some(n_piece) = self.get_piece(n_coord) {
                 if n_piece.get_color() != piece.get_color() {
-                    coords.push(n_coord)
+                    coords.push(n_coord);
                 }
             } else {
                 coords.push(n_coord);
@@ -547,7 +556,7 @@ impl Board {
         if let Ok(n_coord) = Coord::new(file_idx.wrapping_sub(2), rank_idx.wrapping_sub(1)) {
             if let Some(n_piece) = self.get_piece(n_coord) {
                 if n_piece.get_color() != piece.get_color() {
-                    coords.push(n_coord)
+                    coords.push(n_coord);
                 }
             } else {
                 coords.push(n_coord);
@@ -557,6 +566,7 @@ impl Board {
         coords
     }
 
+    #[allow(clippy::cognitive_complexity)]
     /// Get a Pawn's available move Coordinates. Also accounts for en passant.
     pub fn get_pawn_move_coords(&self, piece: &Piece) -> Vec<Coord> {
         let mut coords = Vec::<Coord>::new();
@@ -904,8 +914,8 @@ impl Board {
         self.board
             .iter()
             .flatten()
-            .filter_map(|p| {
-                p.filter(|p| p.get_color() != color && p.get_move_coords(self).contains(&coord))
+            .filter_map(|o_p| {
+                o_p.filter(|p| p.get_color() != color && p.get_move_coords(self).contains(&coord))
             })
             .collect()
     }
@@ -916,6 +926,10 @@ impl Board {
 
     /// Produces a row (`[Option<Piece>; FILES]`) of pieces
     /// according their color.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if `rank_idx` is out of range.
     pub fn standard_row_of_pieces(
         color: Color,
         rank_idx: u8,
@@ -978,10 +992,10 @@ impl Board {
     pub fn print_coords(coords: &Vec<Coord>) {
         let mut c_string = String::new();
         for c in coords.iter() {
-            if c_string.len() == 0 {
-                c_string.push_str(format!("{}", c).as_str())
+            if c_string.is_empty() {
+                c_string.push_str(format!("{}", c).as_str());
             } else {
-                c_string.push_str(format!(", {}", c).as_str())
+                c_string.push_str(format!(", {}", c).as_str());
             }
         }
         println!(" > {} Move Coords: {}", coords.len(), c_string);

@@ -5,6 +5,7 @@ use std::fmt;
 
 use colored::{ColoredString, Colorize};
 
+#[allow(clippy::wildcard_imports)]
 use crate::{constants::*, Board, ChuiError, ChuiResult, Coord};
 
 /// Piece color. Either `White` or `Black` variants.
@@ -145,6 +146,10 @@ impl Piece {
     }
 
     /// Return a new White Pawn on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn white_pawn(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Pawn,
@@ -154,6 +159,10 @@ impl Piece {
     }
 
     /// Return a new White Knight on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn white_knight(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Knight,
@@ -163,6 +172,10 @@ impl Piece {
     }
 
     /// Return a new White Bishop on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn white_bishop(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Bishop,
@@ -172,6 +185,10 @@ impl Piece {
     }
 
     /// Return a new White Rook on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn white_rook(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Rook,
@@ -181,6 +198,10 @@ impl Piece {
     }
 
     /// Return a new White Queen on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn white_queen(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Queen,
@@ -190,6 +211,10 @@ impl Piece {
     }
 
     /// Return a new White King on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn white_king(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::King,
@@ -199,6 +224,10 @@ impl Piece {
     }
 
     /// Return a new Black Pawn on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn black_pawn(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Pawn,
@@ -208,6 +237,10 @@ impl Piece {
     }
 
     /// Return a new Black Knight on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn black_knight(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Knight,
@@ -217,6 +250,10 @@ impl Piece {
     }
 
     /// Return a new Black Bishop on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn black_bishop(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Bishop,
@@ -226,6 +263,10 @@ impl Piece {
     }
 
     /// Return a new Black Rook on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn black_rook(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Rook,
@@ -235,6 +276,10 @@ impl Piece {
     }
 
     /// Return a new Black Queen on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn black_queen(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::Queen,
@@ -244,6 +289,10 @@ impl Piece {
     }
 
     /// Return a new Black King on a given (char, u8) coord.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if a new [`Coord`] could not be constructed.
     pub fn black_king(coord: (char, u8)) -> ChuiResult<Piece> {
         Ok(Piece::new(
             PieceKind::King,
@@ -272,12 +321,12 @@ impl Piece {
     }
 
     /// Get the file of this piece.
-    pub fn get_file(&self) -> u8 {
+    pub const fn get_file(&self) -> u8 {
         self.coord.get_file()
     }
 
     /// Get the rank of this piece.
-    pub fn get_rank(&self) -> u8 {
+    pub const fn get_rank(&self) -> u8 {
         self.coord.get_rank()
     }
 

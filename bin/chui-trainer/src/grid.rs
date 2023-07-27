@@ -5,32 +5,42 @@ use std::time::{Duration, SystemTime};
 
 use rand::Rng;
 
-use super::{trait_defs::*, CommandType};
+use super::{trait_defs::Trainer, CommandType};
 use super::{STR_FILES, STR_RANKS};
 
-#[derive(Debug, Trainer)]
+#[derive(Debug, Trainer, Clone)]
 #[trainer(base = true)]
+/// Grid trainer.
 pub struct GridTrainer {
     /// The verbose name of the trainer.
     name_verbose: String,
+
     /// The Vector containing a list of verbose names for submodules in this trainer.
     names_verbose: Vec<String>,
+
     /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the correct answers in the order they were given.
     vec_correct: Vec<(String, String, Duration)>,
+
     /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the incorrect answers in the order they were given.
     vec_incorrect: Vec<(String, String, Duration)>,
+
     /// The state of the application as a type of command.
     command_type: CommandType,
+
     /// The user input string, when prompted.
     input: String,
+
     /// A timer to hold the elapsed time since the session started.
     session_timer: SystemTime,
+
     /// A Duration to hold the elapsed time since the problem was displayed and input was received.
     input_duration: Duration,
+
     /// Color coordinate
     color_coordinate: (usize, usize),
+
     /// The answer to the color problem.
     answer_color: bool,
 }
@@ -54,12 +64,12 @@ impl Default for GridTrainer {
 }
 
 impl GridTrainer {
-    // Print the help message when the CommandType is Help.
+    /// Print the help message when the [`CommandType`] is Help.
     fn print_help(&self) {
         println!("+=======================================+");
         println!("| {} Trainer Help |", self.name_verbose);
         println!("+=======================================+");
-        println!("");
+        println!();
         println!("Commands:");
         println!("(* Selected)");
         println!(
@@ -83,7 +93,7 @@ impl GridTrainer {
             "{:24}Quit this training session (but not this application).",
             "  q, quit, or exit"
         );
-        println!("");
+        println!();
     }
 
     /// Print the output correlating to an incorrect answer.
@@ -99,7 +109,7 @@ impl GridTrainer {
             color,
             self.vec_correct.len(),
             self.vec_incorrect.len()
-        )
+        );
     }
 
     /// Print the output correlating to a comprehensive score sheet.
@@ -148,18 +158,21 @@ impl GridTrainer {
             avg_duration / self.vec_incorrect.len() as f32
         );
 
-        if let Ok(elapsed) = self.session_timer.elapsed() {
-            println!(
-                "Elapsed Time for Training Session:{:>18}",
-                format!("[{:0.2} secs]", elapsed.as_secs_f32())
-            );
-        } else {
-            println!(
-                "Could not determine the elapsed time since you started this training session."
-            );
-        }
+        self.session_timer.elapsed().map_or_else(
+            |_| {
+                println!(
+                    "Could not determine the elapsed time since you started this training session."
+                );
+            },
+            |elapsed| {
+                println!(
+                    "Elapsed Time for Training Session:{:>18}",
+                    format!("[{:0.2} secs]", elapsed.as_secs_f32())
+                );
+            },
+        );
 
-        println!("");
+        println!();
     }
 
     /// Get user input from `stdin` and store it in `self.input`.
@@ -171,7 +184,7 @@ impl GridTrainer {
                 println!(
                     " === What is {}? '1' for Light, '2' for Dark",
                     self.get_algebraic_coordinate()
-                )
+                );
             }
             CommandType::Help => {
                 println!(" === Please input command. '?' or 'help' for help. 'q' to quit.");
@@ -202,7 +215,7 @@ impl GridTrainer {
 
         self.input = input.trim().to_string();
 
-        println!("");
+        println!();
     }
 
     /// Generate the color coordinate.
@@ -248,19 +261,17 @@ impl GridTrainer {
     fn solve_answer(&mut self) {
         self.evaluate_answer();
 
-        if self.answer_color == false
-            && (self.input.eq("1") || self.input.to_ascii_lowercase().eq("light"))
-        {
-            self.add_correct();
-        } else if self.answer_color == true
-            && (self.input.eq("2") || self.input.to_ascii_lowercase().eq("dark"))
+        if (!self.answer_color
+            && (self.input.eq("1") || self.input.to_ascii_lowercase().eq("light")))
+            || (self.answer_color
+                && (self.input.eq("2") || self.input.to_ascii_lowercase().eq("dark")))
         {
             self.add_correct();
         } else {
             self.add_incorrect();
         }
 
-        println!("");
+        println!();
     }
 
     /// Return a String representing the Algebraic coordinate chosen.
@@ -293,11 +304,7 @@ impl GridTrainer {
             self.input.clone()
         };
 
-        let element = (
-            self.get_algebraic_coordinate(),
-            color,
-            self.input_duration.clone(),
-        );
+        let element = (self.get_algebraic_coordinate(), color, self.input_duration);
         self.vec_correct.push(element);
         self.print_correct();
     }
@@ -313,11 +320,7 @@ impl GridTrainer {
             self.input.clone()
         };
 
-        let element = (
-            self.get_algebraic_coordinate(),
-            color,
-            self.input_duration.clone(),
-        );
+        let element = (self.get_algebraic_coordinate(), color, self.input_duration);
         self.vec_incorrect.push(element);
         self.print_incorrect();
     }

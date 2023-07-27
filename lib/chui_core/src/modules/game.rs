@@ -305,6 +305,12 @@ impl Game {
     }
 
     /// Return the formatted board for a given `Color` as a `String`.
+    ///
+    /// # Panics
+    ///
+    /// Panice if a new [`Coord`] could not be constructed.
+    ///
+    /// TODO: Mitigate panics.
     pub fn to_string(&self, color: Color) -> String {
         let alpha_coords: Vec<char> = match color {
             Color::White => ('a'..='h').collect(),
@@ -423,18 +429,22 @@ impl Game {
 
             Ok(())
         } else {
-            Err(ChuiError::InvalidMove(format!("No move to apply")))
+            Err(ChuiError::InvalidMove("No move to apply".to_string()))
         }
     }
 
     /// Process the chess move.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result if the chess move could not be processed.
     pub fn process_move(&mut self) -> ChuiResult<Option<Move>> {
         if let Some(mut chess_move) = self.current_move.clone() {
             chess_move.process_move(self)?;
             return Ok(Some(chess_move));
         }
 
-        Err(ChuiError::InvalidMove(format!("No move to apply")))
+        Err(ChuiError::InvalidMove("No move to apply".to_string()))
     }
 
     /// Switch `Player` to move.

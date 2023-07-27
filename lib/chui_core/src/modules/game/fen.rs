@@ -35,11 +35,10 @@ pub fn get_fen_castle(engine: &Game) -> String {
 
 /// Get the FEN en passant square.
 pub fn get_fen_en_passant(engine: &Game) -> String {
-    if let Some(coord) = engine.board.get_en_passant_coord() {
-        coord.to_string()
-    } else {
-        "-".to_string()
-    }
+    engine
+        .board
+        .get_en_passant_coord()
+        .map_or_else(|| "-".to_string(), |coord| coord.to_string())
 }
 
 /// Get the X-FEN en passant square.

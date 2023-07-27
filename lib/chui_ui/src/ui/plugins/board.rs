@@ -313,6 +313,7 @@ fn resize_board(
 }
 
 /// Our UI State plugin
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {

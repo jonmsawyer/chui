@@ -6,43 +6,58 @@ use std::time::{Duration, SystemTime};
 
 use rand::Rng;
 
-use super::{trait_defs::*, CommandType};
+use super::{trait_defs::Trainer, CommandType};
 use super::{INT_FILES, STR_FILES, STR_RANKS};
 
-#[derive(Debug, Trainer)]
+#[derive(Debug, Trainer, Clone)]
 #[trainer(base = true)]
+/// Alphanumeric trainer.
 pub struct AlphaNumericTrainer {
     /// Verbose name.
     name_verbose: String,
+
     /// Vec of Strings of internal names dependeing on context.
     names_verbose: Vec<String>,
+
     /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the correct answers in the order they were given.
     vec_correct: Vec<(String, String, Duration)>,
+
     /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the incorrect answers in the order they were given.
     vec_incorrect: Vec<(String, String, Duration)>,
+
     /// The state of the application as a type of command.
     command_type: CommandType,
+
     /// The user input string, when prompted.
     input: String,
+
     /// The answer to the generated problem.
     answer: usize,
+
     /// The left-hand-side of the generated problem (expression).
     lhs: usize,
+
     /// The right-hand-side of the generated problem (expression).
     rhs: usize,
+
     /// A random operation. False means subtract the `lhs` from the `rhs`. True means add the
     /// two sides together.
     operation: bool,
+
     /// A String representing the last rendering of the left-hand-side of the expression.
     saved_lhs: String,
+
     /// A String representing the last rendering of the right-hand-side of the expression.
     saved_rhs: String,
+
     /// A String representing the last rendering of the operation of the expression.
     saved_operation: String,
+
     /// A timer to hold the elapsed time since the session started.
     session_timer: SystemTime,
+
     /// A Duration to hold the elapsed time since the problem was displayed and input was received.
     input_duration: Duration,
 }
@@ -85,12 +100,12 @@ impl AlphaNumericTrainer {
         }
     }
 
-    // Print the help message when the CommandType is Help.
+    /// Print the help message when the [`CommandType`] is Help.
     fn print_help(&self) {
         println!("+=======================================+");
         println!("| {} Trainer Help |", self.name_verbose);
         println!("+=======================================+");
-        println!("");
+        println!();
 
         println!("Commands:");
         println!("(* Selected)");
@@ -147,7 +162,7 @@ impl AlphaNumericTrainer {
             "{:24}Quit this training session (but not this application).",
             "  q, quit, or exit"
         );
-        println!("");
+        println!();
     }
 
     /// Return a String representing the `self.get_help()` `?` and `help` text.
@@ -167,7 +182,7 @@ impl AlphaNumericTrainer {
             STR_FILES[self.answer - 1],
             self.vec_correct.len(),
             self.vec_incorrect.len()
-        )
+        );
     }
 
     /// Print the output correlating to a comprehensive score sheet.
@@ -223,18 +238,21 @@ impl AlphaNumericTrainer {
             avg_duration / self.vec_incorrect.len() as f32
         );
 
-        if let Ok(elapsed) = self.session_timer.elapsed() {
-            println!(
-                "Elapsed Time for Training Session:{:>18}",
-                format!("[{:0.2} secs]", elapsed.as_secs_f32())
-            );
-        } else {
-            println!(
-                "Could not determine the elapsed time since you started this training session."
-            );
-        }
+        self.session_timer.elapsed().map_or_else(
+            |_| {
+                println!(
+                    "Could not determine the elapsed time since you started this training session."
+                );
+            },
+            |elapsed| {
+                println!(
+                    "Elapsed Time for Training Session:{:>18}",
+                    format!("[{:0.2} secs]", elapsed.as_secs_f32())
+                );
+            },
+        );
 
-        println!("");
+        println!();
     }
 
     /// Get user input from `stdin` and store it in `self.input`.
@@ -274,7 +292,7 @@ impl AlphaNumericTrainer {
 
         self.input = input.trim().to_string();
 
-        println!("");
+        println!();
     }
 
     /// Generate the problem. Don't let any answers fall outside of the range 1..=8 for any
@@ -380,7 +398,7 @@ impl AlphaNumericTrainer {
             self.add_incorrect();
         }
 
-        println!("");
+        println!();
     }
 
     /// Return a String representing the left-hand-side of the equation.
@@ -466,7 +484,7 @@ impl AlphaNumericTrainer {
         let element = (
             self.get_expression(),
             self.input.clone(),
-            self.input_duration.clone(),
+            self.input_duration,
         );
         self.vec_correct.push(element);
         self.print_correct();
@@ -478,7 +496,7 @@ impl AlphaNumericTrainer {
         let element = (
             self.get_expression(),
             self.input.clone(),
-            self.input_duration.clone(),
+            self.input_duration,
         );
         self.vec_incorrect.push(element);
         self.print_incorrect();

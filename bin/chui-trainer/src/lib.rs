@@ -4,6 +4,7 @@ use std::io::{self, Write};
 use std::time::{Duration, SystemTime};
 
 use chui_core::{INT_FILES, STR_FILES, STR_RANKS, VERSION};
+use chui_error::ChuiResult;
 
 pub mod trait_defs;
 use trait_defs::Trainer;
@@ -38,31 +39,41 @@ pub enum CommandType {
     Input,
 }
 
-#[derive(Debug, Trainer)]
+#[derive(Debug, Trainer, Clone)]
 #[trainer(base = true)]
 pub struct CoordinateTrainer {
     /// Verbose name.
     name_verbose: String,
+
     /// Vec of Strings of internal names dependeing on context.
     names_verbose: Vec<String>,
+
     /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the correct answers in the order they were given.
     vec_correct: Vec<(String, String, Duration)>,
+
     /// A vector of 3-tuples, containing Strings, representing (<expression>, <input>).
     /// This vector stores the incorrect answers in the order they were given.
     vec_incorrect: Vec<(String, String, Duration)>,
+
     /// The state of the application as a type of command.
     command_type: CommandType,
+
     /// The user input string, when prompted.
     input: String,
+
     /// A timer to hold the elapsed time since the session started.
     session_timer: SystemTime,
+
     /// A Duration to hold the elapsed time since the problem was displayed and input was received.
     input_duration: Duration,
+
     /// Coordinate Trainer
     coord_trainer: AlphaNumericTrainer,
+
     /// Color Trainer
     color_trainer: ColorTrainer,
+
     /// Grid Trainer
     grid_trainer: GridTrainer,
 }
@@ -90,9 +101,13 @@ impl CoordinateTrainer {
     /// Run the Coordinate Trainer application. Runs inside of two main loops. The outer loop
     /// controls the outer game loop logic, the inner loop, .e.g, when `self.train()` is called,
     /// runs the game mode logic.
-    pub fn run(&mut self) -> Result<(), String> {
+    ///
+    /// # Errors
+    ///
+    /// This method does not error.
+    pub fn run(&mut self) -> ChuiResult<()> {
         println!(r#" = Chui: Coordinate Trainer v{} ="#, VERSION);
-        println!("");
+        println!();
 
         loop {
             self.get_input();
@@ -100,18 +115,23 @@ impl CoordinateTrainer {
             match self.command_type {
                 // Train the user in the given session type.
                 CommandType::Numeric | CommandType::Alpha | CommandType::Both => {
-                    self.coord_trainer.train(self.command_type)
+                    self.coord_trainer.train(self.command_type);
                 }
+
                 // Train the user in the colors of squares.
                 CommandType::Color => self.color_trainer.train(self.command_type),
+
                 // Train the user in grid coordinates.
                 CommandType::Grid => self.grid_trainer.train(self.command_type),
+
                 // Print help and continue.
                 CommandType::Help => self.print_help(),
+
                 // Quit the application. Don't print scores, don't collect $200.
                 CommandType::Quit => {
                     break;
                 }
+
                 // Could not process further input.
                 _ => {}
             }
@@ -120,12 +140,12 @@ impl CoordinateTrainer {
         Ok(())
     }
 
-    // Print the help message when the `CommandType` is Help.
+    /// Print the help message when the `CommandType` is Help.
     fn print_help(&self) {
         println!("+===============================+");
         println!("| Chui: Coordinate Trainer Help |");
         println!("+===============================+");
-        println!("");
+        println!();
 
         let numeric = if self.command_type == CommandType::Numeric {
             "* numeric".to_string()
@@ -209,7 +229,7 @@ impl CoordinateTrainer {
         );
         println!("{:24}This help message.", help);
         println!("{:24}Exit out of this application.", "  q, quit, or exit");
-        println!("");
+        println!();
     }
 
     /// Print the output correlating to a comprehensive score sheet.
@@ -266,29 +286,28 @@ impl CoordinateTrainer {
             avg_duration / self.vec_incorrect.len() as f32
         );
 
-        if let Ok(elapsed) = self.session_timer.elapsed() {
-            println!(
-                "Elapsed Time for Training Session:{:>18}",
-                format!("[{:0.2} secs]", elapsed.as_secs_f32())
-            );
-        } else {
-            println!(
-                "Could not determine the elapsed time since you started this training session."
-            );
-        }
+        self.session_timer.elapsed().map_or_else(
+            |_| {
+                println!(
+                    "Could not determine the elapsed time since you started this training session."
+                );
+            },
+            |elapsed| {
+                println!(
+                    "Elapsed Time for Training Session:{:>18}",
+                    format!("[{:0.2} secs]", elapsed.as_secs_f32())
+                );
+            },
+        );
 
-        println!("");
+        println!();
     }
 
     /// Get user input from `stdin` and store it in `self.input`.
     fn get_input(&mut self) {
         let input_timer = SystemTime::now();
 
-        match self.command_type {
-            _ => {
-                println!(" === Please input command. '?' or 'help' for help. 'q' to quit.");
-            }
-        }
+        println!(" === Please input command. '?' or 'help' for help. 'q' to quit.");
 
         // Do some fancy "prompt" work.
         print!(" >>> ");
@@ -308,7 +327,7 @@ impl CoordinateTrainer {
 
         self.input = input.trim().to_string();
 
-        println!("");
+        println!();
     }
 
     /// Given user input on `self.input`, process the command that follows that input. If

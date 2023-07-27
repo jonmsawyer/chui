@@ -326,6 +326,7 @@ impl<'a> MoveGenerator<'a> {
         (true, "Valid.".to_string())
     }
 
+    #[allow(clippy::similar_names)]
     /// Checks to see if the move from the given
     /// `{file_a}{rank_b}{-,x}{file_b}{rank_b}` is valid.
     /// Return `true` on valid, `false` on invalid.
@@ -389,6 +390,7 @@ impl<'a> MoveGenerator<'a> {
         false
     }
 
+    #[allow(clippy::similar_names)]
     /// Checks to see if the move from the given
     /// `{file_a}{rank_a}{-,x}{file_b}{rank_b}` is a valid
     /// pawn promotion move.
@@ -407,7 +409,6 @@ impl<'a> MoveGenerator<'a> {
     ///     )
     /// );
     /// ```
-
     pub const fn move_is_valid_promotion(
         file_a_idx: usize,
         rank_a_idx: usize,

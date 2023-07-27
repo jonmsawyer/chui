@@ -35,6 +35,7 @@ fn check_assets_ready(
 }
 
 /// Assets Bevy plugin.
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {

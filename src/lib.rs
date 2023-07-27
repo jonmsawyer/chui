@@ -7,4 +7,5 @@
 
 pub use chui_core::{Color, Coord, Game, NonMaxU8, ParserEngine, Piece, Player};
 pub use chui_error::{ChuiError, ChuiResult};
+use chui_macros as _;
 pub use chui_ui::Ui;

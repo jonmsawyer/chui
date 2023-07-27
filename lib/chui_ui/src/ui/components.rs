@@ -4,15 +4,15 @@ use std::ops::{Deref, DerefMut};
 
 use bevy::prelude::*;
 
-pub use chui_core;
+use chui_core;
 
 /// Component to attach to the rendering of the pieces.
-#[derive(Component)]
+#[derive(Debug, Component, Copy, Clone, Hash)]
 pub struct Piece(chui_core::Piece);
 
 impl Piece {
     /// Return a new [`Piece`].
-    pub fn new(piece: chui_core::Piece) -> Piece {
+    pub const fn new(piece: chui_core::Piece) -> Piece {
         Piece(piece)
     }
 }
@@ -36,23 +36,23 @@ impl DerefMut for Piece {
 /// Doing this allows us to easily query for it, while also allowing for cameras to
 /// exist that we aren't controlling. This is also extensible, as we can add
 /// configurable options on a per-camera basis in the future.
-#[derive(Component, Default)]
+#[derive(Debug, Component, Copy, Clone, Hash)]
 pub struct MainCamera;
 
 /// Component to attach to the mouse cursor.
-#[derive(Component)]
+#[derive(Debug, Component, Copy, Clone, Hash)]
 pub struct MouseCursor;
 
 /// Component to mark the "from square" mouse cursor.
-#[derive(Component)]
+#[derive(Debug, Component, Copy, Clone, Hash)]
 pub struct FromSquareCursor;
 
 /// Component to mark the "to square" mouse cursor.
-#[derive(Component)]
+#[derive(Debug, Component, Copy, Clone, Hash)]
 pub struct ToSquareCursor;
 
 /// Component to attach to each square on the chessboard.
-#[derive(Component)]
+#[derive(Debug, Component, Copy, Clone, Hash)]
 pub struct Square {
     /// The index associated with this Square. 0-63 (one for each square
     /// on the chessboard).
@@ -60,11 +60,11 @@ pub struct Square {
 }
 
 /// Component representing the board background.
-#[derive(Component)]
+#[derive(Debug, Component, Copy, Clone, Hash)]
 pub struct BoardBackground;
 
 /// Component representing board Coordinates
-#[derive(Component)]
+#[derive(Debug, Component, Copy, Clone, Hash)]
 pub struct BoardCoordinate {
     /// File index. -1 to 7.
     pub file_index: isize,

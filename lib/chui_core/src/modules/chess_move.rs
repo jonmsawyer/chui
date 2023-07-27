@@ -202,6 +202,7 @@ impl Move {
         self.piece
     }
 
+    #[allow(clippy::unused_self)]
     /// Match the given file (`char`) to its index (`u8`).
     const fn match_file_to_index(&self, file: char) -> Option<u8> {
         match file {
@@ -217,6 +218,7 @@ impl Move {
         }
     }
 
+    #[allow(clippy::unused_self)]
     /// Match the given rank (`char`) to its index (`u8`).
     const fn _match_rank_to_index(&self, rank: char) -> Option<u8> {
         match rank {

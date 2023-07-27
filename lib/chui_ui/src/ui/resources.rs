@@ -9,7 +9,7 @@ use bevy::prelude::*;
 pub use chui_core;
 
 /// Resource to engage the core Engine
-#[derive(Resource, Debug)]
+#[derive(Debug, Resource, Default)]
 pub struct Game(chui_core::Game);
 
 impl Deref for Game {
@@ -26,12 +26,6 @@ impl DerefMut for Game {
     }
 }
 
-impl Default for Game {
-    fn default() -> Game {
-        Game(chui_core::Game::default())
-    }
-}
-
 /// Formats the position for white.
 impl fmt::Display for Game {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -40,7 +34,7 @@ impl fmt::Display for Game {
 }
 
 /// Resource to keep track of the state of the User Interface.
-#[derive(Default, Clone, Resource)]
+#[derive(Debug, Default, Clone, Resource)]
 pub struct UiResource {
     /// Is the window open? (Needed anymore?)
     pub is_window_open: bool,

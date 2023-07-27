@@ -9,7 +9,7 @@ use super::{trait_defs::Trainer, CommandType};
 
 use chui_core::{STR_FILES, STR_RANKS};
 
-#[derive(Debug, Trainer)]
+#[derive(Debug, Trainer, Clone)]
 #[trainer(base = true)]
 /// `ColorTrainer` struct. Train square colors of board coordinates.
 pub struct ColorTrainer {

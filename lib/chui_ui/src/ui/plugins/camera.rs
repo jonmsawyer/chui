@@ -10,6 +10,7 @@ use super::super::resources::UiResource;
 use super::super::states::GameState;
 
 /// Event when we pan the camera, containing the delta of the move
+#[derive(Debug, Default, Copy, Clone)]
 pub struct CameraPanned(Vec2);
 
 /// Set up our 2D orthographic camera
@@ -20,7 +21,7 @@ fn setup_camera(mut commands: Commands) {
     // Position our camera in the center of the world
     //camera.transform.translation = WorldPoint::center().as_vec3(camera.transform.translation.z);
 
-    commands.spawn(camera).insert(MainCamera::default());
+    commands.spawn(camera).insert(MainCamera);
 }
 
 /// Fire pan camera event
@@ -78,6 +79,7 @@ fn pan_camera(
 }
 
 /// Our camera controller plugin
+#[derive(Debug, Copy, Clone)]
 pub struct CameraControllerPlugin;
 
 impl Plugin for CameraControllerPlugin {

@@ -6,7 +6,8 @@ allow = [
     "clippy::nonminimal_bool",
     "clippy::print_stdout",
     "clippy::print_stderr",
-    "clippy::use_debug"
+    "clippy::use_debug",
+    "clippy::similar_names"
 ]
 
 warn = [
