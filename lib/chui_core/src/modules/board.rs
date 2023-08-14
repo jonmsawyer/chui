@@ -335,7 +335,7 @@ impl Board {
             .enumerate()
             .for_each(|(idx, piece)| {
                 if let Some(piece) = piece {
-                    piece.set_coord(Coord::new_from_idx(idx as u8).unwrap());
+                    piece.set_coord(Coord::new_from_idx(idx as u8).unwrap()); // .unwrap() should never panic.
                 }
             });
     }

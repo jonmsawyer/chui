@@ -16,7 +16,7 @@ use std::fmt::Write as _; // import without risk of name clashing
 /// Example:
 ///
 /// ```
-/// use chui::MoveGenerator;
+/// use chui_core::MoveGenerator;
 ///
 /// let g = MoveGenerator::generate_move_list();
 /// let (answer, _reason) = g.validate_moves();
@@ -253,7 +253,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let g = MoveGenerator::new();
     ///
@@ -308,7 +308,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::generate_move_list();
     /// let (answer, _reason) = g.validate_moves();
@@ -334,7 +334,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let file_a: usize = 0; let rank_a: usize = 6; // a7
     /// let file_b: usize = 0; let rank_b: usize = 7; // a8
@@ -399,7 +399,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let file_a: usize = 0; let rank_a: usize = 6; // a7
     /// let file_b: usize = 0; let rank_b: usize = 7; // a8
@@ -447,7 +447,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_pawn_moves();
@@ -507,7 +507,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_pawn_captures();
@@ -701,7 +701,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_king_moves();
@@ -742,7 +742,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_king_captures();
@@ -787,7 +787,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_queen_moves();
@@ -824,7 +824,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_queen_captures();
@@ -864,7 +864,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_rook_moves();
@@ -901,7 +901,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_rook_captures();
@@ -941,7 +941,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_bishop_moves();
@@ -978,7 +978,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_bishop_captures();
@@ -1018,7 +1018,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_knight_moves();
@@ -1055,7 +1055,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_knight_captures();
@@ -1094,7 +1094,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_castle_moves();
@@ -1126,7 +1126,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_square_to_square_moves();
@@ -1261,7 +1261,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let mut g = MoveGenerator::new();
     /// g.generate_square_to_square_captures();
@@ -1391,7 +1391,7 @@ impl<'a> MoveGenerator<'a> {
     /// Example:
     ///
     /// ```
-    /// use chui::MoveGenerator;
+    /// use chui_core::MoveGenerator;
     ///
     /// let g = MoveGenerator::generate_move_list();
     /// let (answer, _reason) = g.validate_moves();

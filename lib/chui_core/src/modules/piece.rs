@@ -107,10 +107,12 @@ impl PieceKind {
 /// Example:
 ///
 /// ```
-/// use chui::{Piece, PieceKind, Color};
+/// #[allow(clippy::wildcard_imports)]
+/// use chui_core::{Piece, PieceKind, Color, Coord, constants::*};
 ///
-/// let white_pawn = Piece::new(PieceKind::Pawn, Color::White);
-/// let black_queen = Piece::new(PieceKind::Queen, Color::Black);
+/// // `.unwrap()` should not panic if using our constants.
+/// let white_pawn = Piece::new(PieceKind::Pawn, Color::White, Coord::try_from(A2).unwrap());
+/// let black_queen = Piece::new(PieceKind::Queen, Color::Black, Coord::try_from(D8).unwrap());
 ///
 /// println!("{}: {:?}", white_pawn.get_text(), white_pawn);
 /// println!("{}: {:?}", black_queen.get_text(), black_queen);

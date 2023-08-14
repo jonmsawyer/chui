@@ -1,7 +1,7 @@
-//! Chui: Chess UI
+//! Chui Core
 
 #![warn(missing_docs)]
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 #![allow(clippy::mod_module_files)]
 
 pub use chui_error::{ChuiError, ChuiResult};

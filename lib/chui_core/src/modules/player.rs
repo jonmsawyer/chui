@@ -14,7 +14,7 @@ use super::piece::Color;
 /// Example:
 ///
 /// ```
-/// use chui::{Color, Player};
+/// use chui_core::{Color, Player};
 ///
 /// let player = Player::new(
 ///     Color::White,

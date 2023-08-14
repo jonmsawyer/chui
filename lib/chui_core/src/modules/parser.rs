@@ -26,15 +26,15 @@ pub mod algebraic;
 /// Example:
 ///
 /// ```
-/// use chui::{
+/// use chui_core::{
 ///     Move, Color, Piece, parser::Parser,
-///     ChuiResult, ChuiError, Engine
+///     ChuiResult, ChuiError, Game, Coord
 /// };
 ///
 /// pub struct MyParser;
 ///
 /// impl Parser for MyParser {
-///     fn parse(&mut self, _the_move: &str, _color: Color)
+///     fn parse(&mut self, _the_move: String, _color: Color)
 ///     -> ChuiResult<Move>
 ///     {
 ///         Err(
@@ -50,6 +50,15 @@ pub mod algebraic;
 ///
 ///     fn eg(&self) -> String {
 ///         "My Parser example moves".to_string()
+///     }
+///
+///     fn generate_move_from_board_coordinates(
+///         &self,
+///         engine: &Game,
+///         from_coord: Coord,
+///         to_coord: Coord,
+///     ) -> ChuiResult<String> {
+///         Ok("E.g., `Ba1`".to_string())
 ///     }
 /// }
 /// ```
@@ -227,7 +236,7 @@ pub enum ParserEngine {
 /// Example:
 ///
 /// ```
-/// use chui::{Engine, Player, Color, parser::{self, ParserEngine}};
+/// use chui_core::{Game, Player, Color, parser::{self, ParserEngine}};
 ///
 /// let white = Player::new(
 ///     Color::White,
@@ -245,8 +254,8 @@ pub enum ParserEngine {
 ///
 /// let mut parser_engine = parser::new(ParserEngine::Algebraic);
 ///
-/// if let Ok(engine) = Engine::new(white, black, ParserEngine::Algebraic) {
-///     println!("the move: {:?}", parser_engine.parse("P-K4", Color::White));
+/// if let Ok(game) = Game::new(white, black, ParserEngine::Algebraic) {
+///     println!("the move: {:?}", parser_engine.parse("P-K4".to_string(), Color::White));
 /// };
 /// ```
 pub fn new(parser: ParserEngine) -> Box<dyn Parser + Send + Sync> {

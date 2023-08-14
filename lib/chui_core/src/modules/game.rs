@@ -74,7 +74,7 @@ pub enum DrawCondition {
 /// Example:
 ///
 /// ```
-/// use chui::{Player, Color, Game, ParserEngine};
+/// use chui_core::{Player, Color, Game, ParserEngine};
 ///
 /// let white = Player::new(
 ///     Color::White,

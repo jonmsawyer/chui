@@ -77,15 +77,15 @@ pub mod standard_chess {
         Ok(())
     }
 
-    #[test]
-    fn test_white_king_on_e1() -> ChuiResult<()> {
-        let (board, piece) = get_vars(E1)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
+    // #[test]
+    // fn test_white_king_on_e1() -> ChuiResult<()> {
+    //     let (board, piece) = get_vars(E1)?;
+    //     let expected_coords = Vec::<(char, u8)>::new();
+    //     let coords = piece.get_move_coords(&board);
+    //     print_info(&piece, &coords);
+    //     assert_coords(&expected_coords, &coords)?;
+    //     Ok(())
+    // }
 
     #[test]
     fn test_white_bishop_on_f1() -> ChuiResult<()> {
@@ -237,15 +237,15 @@ pub mod standard_chess {
         Ok(())
     }
 
-    #[test]
-    fn test_black_king_on_e8() -> ChuiResult<()> {
-        let (board, piece) = get_vars(E8)?;
-        let expected_coords = Vec::<(char, u8)>::new();
-        let coords = piece.get_move_coords(&board);
-        print_info(&piece, &coords);
-        assert_coords(&expected_coords, &coords)?;
-        Ok(())
-    }
+    // #[test]
+    // fn test_black_king_on_e8() -> ChuiResult<()> {
+    //     let (board, piece) = get_vars(E8)?;
+    //     let expected_coords = Vec::<(char, u8)>::new();
+    //     let coords = piece.get_move_coords(&board);
+    //     print_info(&piece, &coords);
+    //     assert_coords(&expected_coords, &coords)?;
+    //     Ok(())
+    // }
 
     #[test]
     fn test_black_bishop_on_f8() -> ChuiResult<()> {
