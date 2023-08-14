@@ -299,8 +299,11 @@ impl Plugin for MousePlugin {
                 init_mouse_cursor,
                 init_from_square_cursor,
                 init_to_square_cursor,
-            )
+            ),
         )
-        .add_systems(Update, (update_mouse_cursor, update_mouse_click).run_if(in_state(GameState::Next)));
+        .add_systems(
+            Update,
+            (update_mouse_cursor, update_mouse_click).run_if(in_state(GameState::Next)),
+        );
     }
 }

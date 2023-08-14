@@ -37,7 +37,7 @@ impl Ui {
                 plugins::MousePlugin,
                 plugins::EguiPanelsPlugin,
                 plugins::BoardPlugin,
-                plugins::PiecesPlugin
+                plugins::PiecesPlugin,
             ))
             // Chui's custom events
             .add_event::<events::ResizeBoardEvent>()
