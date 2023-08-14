@@ -46,7 +46,7 @@ pub mod piece_coords {
     fn test_white_rook_on_e4() -> ChuiResult<()> {
         let (board, piece) = get_vars(PieceKind::Rook, Color::White, E4)?;
         let expected_coords = vec![E5, E6, E7, E8, F4, G4, H4, E3, E2, E1, D4, C4, B4, A4];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -56,7 +56,7 @@ pub mod piece_coords {
     fn test_white_knight_on_e4() -> ChuiResult<()> {
         let (board, piece) = get_vars(PieceKind::Knight, Color::White, E4)?;
         let expected_coords = vec![D6, D2, C5, C3, F6, F2, G5, G3];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -66,7 +66,7 @@ pub mod piece_coords {
     fn test_white_bishop_on_e4() -> ChuiResult<()> {
         let (board, piece) = get_vars(PieceKind::Bishop, Color::White, E4)?;
         let expected_coords = vec![D5, C6, B7, A8, F3, G2, H1, F5, G6, H7, D3, C2, B1];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -80,7 +80,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook1), rook1.get_coord());
         board.put_piece(Some(rook2), rook2.get_coord());
         let expected_coords = vec![D1, C1, F1, G1, D2, E2, F2];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -98,7 +98,7 @@ pub mod piece_coords {
         let expected_coords = vec![
             B1, C1, D1, F1, G1, E2, E3, E4, E5, E6, E7, D2, C3, B4, A5, F2, G3, H4,
         ];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -114,7 +114,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook2), rook2.get_coord());
         board.put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![D1, C1, D2, F2];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -130,7 +130,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook2), rook2.get_coord());
         board.put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![D1, E2, F1, F2, G1];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -146,7 +146,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook2), rook2.get_coord());
         board.put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![D4, C3, B2, A1, F6, G7];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -162,7 +162,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook2), rook2.get_coord());
         board.put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![C7, C5, B4];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -178,7 +178,7 @@ pub mod piece_coords {
         board.put_piece(Some(knight), knight.get_coord());
         board.put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![B7, A7, D7, E7, F7, G7, C6, C5, C4];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -191,7 +191,7 @@ pub mod piece_coords {
         board.put_piece(Some(black_pawn), black_pawn.get_coord());
         board.set_en_passant(Some(Coord::try_from(B6)?), Some(black_pawn));
         let expected_coords = vec![A6, B6];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -203,7 +203,7 @@ pub mod piece_coords {
         let black_pawn = Piece::black_pawn(F5)?;
         board.put_piece(Some(black_pawn), black_pawn.get_coord());
         let expected_coords = vec![G6];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -213,7 +213,7 @@ pub mod piece_coords {
     fn test_black_rook_on_e4() -> ChuiResult<()> {
         let (board, piece) = get_vars(PieceKind::Rook, Color::Black, E4)?;
         let expected_coords = vec![E5, E6, E7, E8, F4, G4, H4, E3, E2, E1, D4, C4, B4, A4];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -223,7 +223,7 @@ pub mod piece_coords {
     fn test_black_knight_on_e4() -> ChuiResult<()> {
         let (board, piece) = get_vars(PieceKind::Knight, Color::Black, E4)?;
         let expected_coords = vec![D6, D2, C5, C3, F6, F2, G5, G3];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -233,7 +233,7 @@ pub mod piece_coords {
     fn test_black_bishop_on_e4() -> ChuiResult<()> {
         let (board, piece) = get_vars(PieceKind::Bishop, Color::Black, E4)?;
         let expected_coords = vec![D5, C6, B7, A8, F3, G2, H1, F5, G6, H7, D3, C2, B1];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -247,7 +247,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook1), rook1.get_coord());
         board.put_piece(Some(rook2), rook2.get_coord());
         let expected_coords = vec![D8, C8, F8, G8, D7, E7, F7];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -265,7 +265,7 @@ pub mod piece_coords {
         let expected_coords = vec![
             B8, C8, D8, F8, G8, E7, E6, E5, E4, E3, E2, D7, C6, B5, A4, F7, G6, H5,
         ];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -281,7 +281,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook2), rook2.get_coord());
         board.put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![D8, G8, F8, F7, D7, E7];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -297,7 +297,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook2), rook2.get_coord());
         board.put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![D8, F7, D7, E7, C8];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -313,7 +313,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook2), rook2.get_coord());
         board.put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![D4, C3, B2, A1, F6, G7];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -329,7 +329,7 @@ pub mod piece_coords {
         board.put_piece(Some(rook2), rook2.get_coord());
         board.put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![C7, C5, B4];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -345,7 +345,7 @@ pub mod piece_coords {
         board.put_piece(Some(knight), knight.get_coord());
         board.put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![B7, A7, D7, E7, F7, G7, C6, C5, C4];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -358,7 +358,7 @@ pub mod piece_coords {
         board.put_piece(Some(white_pawn), white_pawn.get_coord());
         board.set_en_passant(Some(Coord::try_from(B3)?), Some(white_pawn));
         let expected_coords = vec![A3, B3];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())
@@ -370,7 +370,7 @@ pub mod piece_coords {
         let white_pawn = Piece::black_pawn(F4)?;
         board.put_piece(Some(white_pawn), white_pawn.get_coord());
         let expected_coords = vec![G3];
-        let coords = piece.get_move_coords(&board);
+        let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
         assert_coords(&expected_coords, &coords)?;
         Ok(())

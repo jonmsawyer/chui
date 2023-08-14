@@ -2,6 +2,7 @@
 
 use std::convert::TryFrom;
 use std::fmt;
+use std::hash::{Hash, Hasher};
 
 use colored::{ColoredString, Colorize};
 
@@ -117,7 +118,7 @@ impl PieceKind {
 /// println!("{}: {:?}", white_pawn.get_text(), white_pawn);
 /// println!("{}: {:?}", black_queen.get_text(), black_queen);
 /// ```
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialOrd, Ord)]
 pub struct Piece {
     /// The kind of piece.
     kind: PieceKind,
@@ -132,6 +133,42 @@ pub struct Piece {
     on_initial_square: bool,
 }
 
+/// Implement `PartialEq` on `PieceKind` for `Piece`
+impl PartialEq<PieceKind> for Piece {
+    fn eq(&self, other: &PieceKind) -> bool {
+        self.kind == *other
+    }
+}
+
+/// Implement `PartialEq` on `Color` for `Piece`
+impl PartialEq<Color> for Piece {
+    fn eq(&self, other: &Color) -> bool {
+        self.color == *other
+    }
+}
+
+/// Implement `PartialEq` on `Coord` for `Piece`
+impl PartialEq<Coord> for Piece {
+    fn eq(&self, other: &Coord) -> bool {
+        self.coord == *other
+    }
+}
+
+/// Implement `PartialEq` on `Coord` for `Piece`
+impl PartialEq<Piece> for Piece {
+    fn eq(&self, other: &Piece) -> bool {
+        self.kind == other.kind && self.color == other.color && self.coord == other.coord
+    }
+}
+
+/// Implement `Hash` for `Piece`
+impl Hash for Piece {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.kind.hash(state);
+        self.color.hash(state);
+        self.coord.hash(state);
+    }
+}
 impl Piece {
     //
     // Constructors.
@@ -357,9 +394,14 @@ impl Piece {
         self.get_kind() == piece.get_kind()
     }
 
+    /// Do the pieces have the same coordinate?
+    pub fn is_same_coord(&self, piece: Piece) -> bool {
+        self.get_coord() == piece.get_coord()
+    }
+
     /// Are the pieces the same according to their kind and color?
     pub fn is_same_piece(&self, piece: Piece) -> bool {
-        self.is_same_kind(piece) && self.is_same_color(piece)
+        self.is_same_kind(piece) && self.is_same_color(piece) && self.is_same_coord(piece)
     }
 
     //
@@ -393,7 +435,10 @@ impl Piece {
     }
 
     /// Get move Coords for piece.
-    pub fn get_move_coords(&self, board: &Board) -> Vec<Coord> {
+    pub fn get_move_coords(&self, board: &Board, friendly_piece: Option<Piece>) -> Vec<Coord> {
+        if friendly_piece.is_some() {
+            return Vec::<Coord>::new();
+        }
         match self.kind {
             PieceKind::King => board.get_king_move_coords(self),
             PieceKind::Queen => board.get_queen_move_coords(self),

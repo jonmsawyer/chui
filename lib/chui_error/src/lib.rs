@@ -1,7 +1,7 @@
 //! Chui: Result and Error
 
 #![warn(missing_docs)]
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 use std::convert::Infallible;
 use std::fmt;

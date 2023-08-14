@@ -8,8 +8,8 @@ pub use nonmax::NonMaxU8;
 use crate::{traits::Coordinate, ChuiError, ChuiResult};
 
 /// Main [`Coord`] struct used to represent chess piece and board position. We use non-max
-/// u8 values because indicies are 0-indexed and values of 8 are invalid for an iterable
-/// of size 7.
+/// u8 values because indicies are 0-indexed and values of >= 8 are invalid for an iterable
+/// of size 8.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Coordinate)]
 pub struct Coord {
     /// The file index of the board, restricted to values between 0..=7.
@@ -152,16 +152,8 @@ impl Coord {
     }
 
     /// Return true if the given coordinate is equal to this coordinate.
-    ///
-    /// # Panics
-    ///
-    /// Panics when a [`Coord`] could not be constructed from the `coord` parameter.
-    ///
-    /// # TODO
-    ///
-    /// Mitigate a panic scenario.
     pub fn is_eq(&self, coord: (char, u8)) -> bool {
-        *self == Coord::try_from(coord).unwrap()
+        Coord::try_from(coord).map_or(false, |new_coord| *self == new_coord)
     }
 }
 

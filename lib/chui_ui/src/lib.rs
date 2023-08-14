@@ -1,7 +1,7 @@
 //! Chui: UI
 
 #![warn(missing_docs)]
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 #[macro_use]
 mod macros;

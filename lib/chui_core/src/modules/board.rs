@@ -220,7 +220,7 @@ impl Board {
         let mut pieces_can_move = Vec::<Piece>::new();
 
         for piece in pieces.iter() {
-            if piece.get_move_coords(self).iter().any(|&coord| {
+            if piece.get_move_coords(self, None).iter().any(|&coord| {
                 coord.get_file() == move_obj.to_coord.get_file()
                     && coord.get_rank() == move_obj.to_coord.get_rank()
             }) {
@@ -349,7 +349,12 @@ impl Board {
     /// already.
     pub fn put_piece(&mut self, piece: Option<Piece>, coord: Coord) -> Option<Piece> {
         let return_piece = self.get_piece(coord);
-        self.board[coord.get_rank() as usize][coord.get_file() as usize] = piece;
+        if let Some(mut piece) = piece {
+            piece.set_coord(coord);
+            self.board[coord.get_rank() as usize][coord.get_file() as usize] = Some(piece);
+        } else {
+            self.board[coord.get_rank() as usize][coord.get_file() as usize] = None;
+        }
         return_piece
     }
 
@@ -378,10 +383,7 @@ impl Board {
         // Trim the move coordinates which are attacking the King.
         let mut coords: Vec<Coord> = coords
             .into_iter()
-            .filter(|&c| {
-                self.get_pieces_attacking_coord(piece.get_color(), c)
-                    .is_empty()
-            })
+            .filter(|&coord| self.get_pieces_attacking_coord(*piece, coord).is_empty())
             .collect();
 
         // Add any valid castling coordinates
@@ -390,22 +392,28 @@ impl Board {
                 if self.white_can_castle_kingside {
                     let d1 = Coord::try_from(D1).unwrap();
                     let c1 = Coord::try_from(C1).unwrap();
-                    let d1_pieces = self.get_pieces_attacking_coord(piece.get_color(), d1);
-                    let c1_pieces = self.get_pieces_attacking_coord(piece.get_color(), c1);
 
-                    if d1_pieces.is_empty() && c1_pieces.is_empty() {
-                        coords.extend(vec![c1]);
+                    if self.get_piece(d1).is_none() && self.get_piece(c1).is_none() {
+                        let d1_pieces = self.get_pieces_attacking_coord(*piece, d1);
+                        let c1_pieces = self.get_pieces_attacking_coord(*piece, c1);
+
+                        if d1_pieces.is_empty() && c1_pieces.is_empty() {
+                            coords.extend(vec![c1]);
+                        }
                     }
                 }
 
                 if self.white_can_castle_queenside {
                     let f1 = Coord::try_from(F1).unwrap();
                     let g1 = Coord::try_from(G1).unwrap();
-                    let f1_pieces = self.get_pieces_attacking_coord(piece.get_color(), f1);
-                    let g1_pieces = self.get_pieces_attacking_coord(piece.get_color(), g1);
 
-                    if f1_pieces.is_empty() && g1_pieces.is_empty() {
-                        coords.extend(vec![g1]);
+                    if self.get_piece(f1).is_none() && self.get_piece(g1).is_none() {
+                        let f1_pieces = self.get_pieces_attacking_coord(*piece, f1);
+                        let g1_pieces = self.get_pieces_attacking_coord(*piece, g1);
+
+                        if f1_pieces.is_empty() && g1_pieces.is_empty() {
+                            coords.extend(vec![g1]);
+                        }
                     }
                 }
             }
@@ -413,22 +421,28 @@ impl Board {
                 if self.black_can_castle_kingside {
                     let d8 = Coord::try_from(D8).unwrap();
                     let c8 = Coord::try_from(C8).unwrap();
-                    let d8_pieces = self.get_pieces_attacking_coord(piece.get_color(), d8);
-                    let c8_pieces = self.get_pieces_attacking_coord(piece.get_color(), c8);
 
-                    if d8_pieces.is_empty() && c8_pieces.is_empty() {
-                        coords.extend(vec![c8]);
+                    if self.get_piece(d8).is_none() && self.get_piece(c8).is_none() {
+                        let d8_pieces = self.get_pieces_attacking_coord(*piece, d8);
+                        let c8_pieces = self.get_pieces_attacking_coord(*piece, c8);
+
+                        if d8_pieces.is_empty() && c8_pieces.is_empty() {
+                            coords.extend(vec![c8]);
+                        }
                     }
                 }
 
                 if self.black_can_castle_queenside {
                     let f8 = Coord::try_from(F8).unwrap();
                     let g8 = Coord::try_from(G8).unwrap();
-                    let f8_pieces = self.get_pieces_attacking_coord(piece.get_color(), f8);
-                    let g8_pieces = self.get_pieces_attacking_coord(piece.get_color(), g8);
 
-                    if f8_pieces.is_empty() && g8_pieces.is_empty() {
-                        coords.extend(vec![g8]);
+                    if self.get_piece(f8).is_none() && self.get_piece(g8).is_none() {
+                        let f8_pieces = self.get_pieces_attacking_coord(*piece, f8);
+                        let g8_pieces = self.get_pieces_attacking_coord(*piece, g8);
+
+                        if f8_pieces.is_empty() && g8_pieces.is_empty() {
+                            coords.extend(vec![g8]);
+                        }
                     }
                 }
             }
@@ -910,12 +924,13 @@ impl Board {
     }
 
     /// Get all [`Piece`]s attacking a given coordinate.
-    pub fn get_pieces_attacking_coord(&self, color: Color, coord: Coord) -> Vec<Piece> {
+    pub fn get_pieces_attacking_coord(&self, piece: Piece, coord: Coord) -> Vec<Piece> {
         self.board
             .iter()
             .flatten()
             .filter_map(|o_p| {
-                o_p.filter(|p| p.get_color() != color && p.get_move_coords(self).contains(&coord))
+                // o_p.filter(|p| p.get_color() != color && p.get_move_coords(self).contains(&coord))
+                o_p.filter(|p| p.get_move_coords(self, Some(piece)).contains(&coord))
             })
             .collect()
     }

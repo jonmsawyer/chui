@@ -3,7 +3,7 @@
 //! Thanks to this guide: <https://github.com/imbolc/rust-derive-macro-guide> (2023-05-24)
 
 #![warn(missing_docs)]
-#![deny(broken_intra_doc_links)]
+#![deny(rustdoc::broken_intra_doc_links)]
 
 use darling::FromDeriveInput;
 use proc_macro::{self, TokenStream};
