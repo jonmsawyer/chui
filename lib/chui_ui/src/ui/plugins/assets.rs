@@ -40,7 +40,7 @@ pub struct AssetsPlugin;
 
 impl Plugin for AssetsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(init_collection.in_schedule(OnEnter(GameState::AssetLoading)))
-            .add_system(check_assets_ready.in_set(OnUpdate(GameState::AssetLoading)));
+        app.add_systems(OnEnter(GameState::AssetLoading), init_collection)
+            .add_systems(Update, check_assets_ready.run_if(in_state(GameState::AssetLoading)));
     }
 }

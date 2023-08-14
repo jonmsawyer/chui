@@ -22,21 +22,23 @@ impl Ui {
     /// The main function to run the User Interface.
     pub fn run() {
         App::new()
-            .add_plugin(plugins::WindowDescriptorPlugin) // Must be first
-            //.add_plugin(WorldInspectorPlugin::new()) // bevy_inspector_egui plugin
-            .add_plugin(EguiPlugin) // Default Egui plugins
-            //.add_plugin(EditorPlugin) // Wait til this is in crates.io
+            .add_plugins(plugins::WindowDescriptorPlugin) // Must be first
+            //.add_plugins(WorldInspectorPlugin::new()) // bevy_inspector_egui plugin
+            .add_plugins(EguiPlugin) // Default Egui plugins
+            //.add_plugins(EditorPlugin) // Wait til this is in crates.io
             // Chui's resources
             .init_resource::<resources::Game>()
             // Chui's plugins
-            .add_plugin(plugins::CameraControllerPlugin)
-            .add_plugin(plugins::GameStatePlugin)
-            .add_plugin(plugins::UiStatePlugin)
-            .add_plugin(plugins::AssetsPlugin)
-            .add_plugin(plugins::MousePlugin)
-            .add_plugin(plugins::EguiPanelsPlugin)
-            .add_plugin(plugins::BoardPlugin)
-            .add_plugin(plugins::PiecesPlugin)
+            .add_plugins((
+                plugins::CameraControllerPlugin,
+                plugins::GameStatePlugin,
+                plugins::UiStatePlugin,
+                plugins::AssetsPlugin,
+                plugins::MousePlugin,
+                plugins::EguiPanelsPlugin,
+                plugins::BoardPlugin,
+                plugins::PiecesPlugin
+            ))
             // Chui's custom events
             .add_event::<events::ResizeBoardEvent>()
             // Run it

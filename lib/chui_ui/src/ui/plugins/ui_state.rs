@@ -53,7 +53,7 @@ fn scale_factor(
     mut ui_state: ResMut<UiResource>,
     mut resize_board_event: EventWriter<ResizeBoardEvent>,
 ) {
-    if keyboard_input.pressed(KeyCode::LControl)
+    if keyboard_input.pressed(KeyCode::ControlLeft)
         && (keyboard_input.just_pressed(KeyCode::Equals)
             || keyboard_input.just_pressed(KeyCode::NumpadAdd))
     {
@@ -66,7 +66,7 @@ fn scale_factor(
         resize_board_event.send_default();
     }
 
-    if keyboard_input.pressed(KeyCode::LControl)
+    if keyboard_input.pressed(KeyCode::ControlLeft)
         && (keyboard_input.just_pressed(KeyCode::Minus)
             || keyboard_input.just_pressed(KeyCode::NumpadSubtract))
     {
@@ -79,7 +79,7 @@ fn scale_factor(
         resize_board_event.send_default();
     }
 
-    if keyboard_input.pressed(KeyCode::LControl)
+    if keyboard_input.pressed(KeyCode::ControlLeft)
         && (keyboard_input.just_pressed(KeyCode::Key0)
             || keyboard_input.just_pressed(KeyCode::Numpad0))
     {
@@ -100,8 +100,7 @@ impl Plugin for UiStatePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiResource>()
             .insert_resource(ClearColor(Color::BLACK))
-            .add_startup_system(configure_state)
-            .add_startup_system(configure_visuals)
-            .add_system(scale_factor);
+            .add_systems(Startup, (configure_state, configure_visuals))
+            .add_systems(Update, scale_factor);
     }
 }

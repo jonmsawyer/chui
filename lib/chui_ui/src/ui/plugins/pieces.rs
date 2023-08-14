@@ -110,7 +110,7 @@ pub struct PiecesPlugin;
 
 impl Plugin for PiecesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(init_pieces.in_schedule(OnEnter(GameState::Next)))
-            .add_system(resize_pieces.in_set(OnUpdate(GameState::Next)));
+        app.add_systems(OnEnter(GameState::Next), init_pieces)
+            .add_systems(Update, resize_pieces.run_if(in_state(GameState::Next)));
     }
 }

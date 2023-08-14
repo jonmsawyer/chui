@@ -126,11 +126,8 @@ fn init_coordinates(
                 .with_style(Style {
                     align_self: AlignSelf::FlexStart,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        bottom: Val::Px(y),
-                        left: Val::Px(x),
-                        ..Default::default()
-                    },
+                    bottom: Val::Px(y),
+                    left: Val::Px(x),
                     ..default()
                 }),
             )
@@ -169,11 +166,8 @@ fn init_coordinates(
                 .with_style(Style {
                     align_self: AlignSelf::FlexStart,
                     position_type: PositionType::Absolute,
-                    position: UiRect {
-                        bottom: Val::Px(y),
-                        left: Val::Px(x),
-                        ..Default::default()
-                    },
+                    bottom: Val::Px(y),
+                    left: Val::Px(x),
                     ..default()
                 }),
             )
@@ -257,11 +251,8 @@ fn update_coordinates(
                 y -= 24_f32;
             }
         }
-        style.position = UiRect {
-            bottom: Val::Px(y),
-            left: Val::Px(x),
-            ..Default::default()
-        };
+        style.bottom = Val::Px(y);
+        style.left = Val::Px(x);
     }
 }
 
@@ -319,12 +310,12 @@ pub struct BoardPlugin;
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            (init_board_background, init_board, init_coordinates)
-                .in_schedule(OnEnter(GameState::Next)),
+            OnEnter(GameState::Next),
+            (init_board_background, init_board, init_coordinates),
         )
         .add_systems(
-            (resize_board_background, resize_board, update_coordinates)
-                .in_set(OnUpdate(GameState::Next)),
+            Update,
+            (resize_board_background, resize_board, update_coordinates),
         );
     }
 }

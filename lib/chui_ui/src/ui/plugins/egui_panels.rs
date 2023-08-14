@@ -113,7 +113,7 @@ pub struct EguiPanelsPlugin;
 
 impl Plugin for EguiPanelsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(egui_panels)
+        app.add_systems(Update, egui_panels)
             // Set multi-sample anti-aliasing (WGPU only supports 1 or 4)
             .insert_resource(Msaa::Sample4);
     }

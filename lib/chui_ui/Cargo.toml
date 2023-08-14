@@ -19,7 +19,7 @@ publish = false
 chui_core.workspace = true
 chui_error.workspace = true
 rand = { version = "0.8", features = ["small_rng"] }
-bevy_egui = "0.20"
+bevy_egui = "0.21"
 #bevy-inspector-egui = "0.12"
 # Wait til bevy_editor_pls is in crates.io
 #bevy_editor_pls = { git = "https://github.com/jakobhellermann/bevy_editor_pls" }
@@ -28,7 +28,7 @@ bevy_egui = "0.20"
 
 # See https://bevy-cheatbook.github.io/setup/bevy-config.html
 [dependencies.bevy]
-version = "0.10"
+version = "0.11"
 # Disable the default features if there are any that you do not want
 default-features = false
 features = [

@@ -69,6 +69,6 @@ impl Plugin for WindowDescriptorPlugin {
                     },
                 }),
         )
-        .add_system(resize_notificator);
+        .add_systems(Update, resize_notificator);
     }
 }

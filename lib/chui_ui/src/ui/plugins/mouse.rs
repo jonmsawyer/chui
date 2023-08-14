@@ -294,13 +294,13 @@ pub struct MousePlugin;
 impl Plugin for MousePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
+            OnEnter(GameState::Next),
             (
                 init_mouse_cursor,
                 init_from_square_cursor,
                 init_to_square_cursor,
             )
-                .in_schedule(OnEnter(GameState::Next)),
         )
-        .add_systems((update_mouse_cursor, update_mouse_click).in_set(OnUpdate(GameState::Next)));
+        .add_systems(Update, (update_mouse_cursor, update_mouse_click).run_if(in_state(GameState::Next)));
     }
 }

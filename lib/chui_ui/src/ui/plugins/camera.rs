@@ -10,7 +10,7 @@ use super::super::resources::UiResource;
 use super::super::states::GameState;
 
 /// Event when we pan the camera, containing the delta of the move
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Event, Debug, Default, Copy, Clone)]
 pub struct CameraPanned(Vec2);
 
 /// Set up our 2D orthographic camera
@@ -85,7 +85,7 @@ pub struct CameraControllerPlugin;
 impl Plugin for CameraControllerPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CameraPanned>()
-            .add_startup_systems((setup_camera, fire_pan_camera))
-            .add_system(pan_camera.in_set(OnUpdate(GameState::Next)));
+            .add_systems(Startup, (setup_camera, fire_pan_camera))
+            .add_systems(Update, pan_camera.run_if(in_state(GameState::Next)));
     }
 }
