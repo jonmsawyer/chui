@@ -7,7 +7,7 @@
 
 use std::fmt;
 
-use crate::{constants::coord::E1, ChuiError, ChuiResult, Color, Coord, Game, Piece};
+use crate::prelude::{coord::*, *};
 
 /// Represents the type of move to be performed.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

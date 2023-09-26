@@ -1,6 +1,6 @@
 //! BitPosition struct.
 
-use crate::{traits::Position, Coord, EasyBoard, Piece, Variant};
+use crate::prelude::*;
 
 /// Position of the chessboard represented by u64 bitmasks. Each piece kind has a mask and finally
 /// a mask for each color. This is the smallest pre-allocated data structure possible to represent

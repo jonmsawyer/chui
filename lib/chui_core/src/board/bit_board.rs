@@ -7,7 +7,7 @@
 // #[allow(clippy::wildcard_imports)]
 // use crate::constants::bitmask::{FILES, RANKS};
 
-use crate::{BitPosition, Coord, Piece, Variant};
+use crate::prelude::*;
 
 /// This struct represents the chessboard. Has a field called `board` which
 /// references an 8x8 board. Has a field called `en_passant` which represents the en passant

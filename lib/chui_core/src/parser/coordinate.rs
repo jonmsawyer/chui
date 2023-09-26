@@ -2,9 +2,7 @@
 
 #![allow(clippy::new_ret_no_self)]
 
-//use std::fmt;
-
-use crate::{ChuiError, ChuiResult, Color, Coord, Engine, Move};
+use crate::prelude::*;
 
 use super::Parser;
 

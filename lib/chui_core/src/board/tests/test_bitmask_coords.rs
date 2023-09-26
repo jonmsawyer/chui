@@ -1,6 +1,6 @@
-#[allow(unused_imports)]
-use crate::constants::{bitmask, coord};
-use crate::{ChuiResult, Coord};
+//! Test bitmask coords.
+
+use crate::prelude::*;
 
 pub mod bitmask_coords {
     use super::*;

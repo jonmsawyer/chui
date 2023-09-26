@@ -5,14 +5,9 @@
 
 #![allow(clippy::new_ret_no_self)]
 
-//use std::fmt;
 use std::convert::TryFrom;
-// use std::collections::HashMap;
 
-use crate::{
-    parser::Parser, ChuiError, ChuiResult, Color, Coord, Game, Move, MoveGenerator, Piece,
-    PieceKind,
-};
+use crate::prelude::*;
 
 /// A parser that will parse algebraic chess notation.
 /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
@@ -1178,9 +1173,7 @@ impl<'a> AlgebraicParser<'a> {
 
 // #[cfg(test)]
 // mod test {
-//     use crate::{
-//         parser, ChuiError, ChuiResult, Color, Move, MoveType, ParserEngine, Piece, PieceKind,
-//     };
+//     use crate::prelude::*;
 
 //     fn parse_the_move(the_move: String) -> ChuiResult<Move> {
 //         let mut parser = parser::new(ParserEngine::Algebraic);

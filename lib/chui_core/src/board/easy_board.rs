@@ -2,7 +2,7 @@
 
 #![allow(clippy::similar_names)]
 
-use crate::{traits::Position, ChuiError, ChuiResult, Coord, EasyPosition, Move, Piece, Variant};
+use crate::prelude::*;
 
 /// This struct represents the chessboard. Has a field called `board` which
 /// references an 8x8 board. Has a field called `en_passant` which represents the en passant

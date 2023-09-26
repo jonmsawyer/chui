@@ -2,11 +2,7 @@
 
 #![allow(clippy::new_ret_no_self)]
 
-//use std::fmt;
-
-use super::super::{Color, Engine, Move};
-use super::Parser;
-use crate::{ChuiError, ChuiResult};
+use crate::prelude::*;
 
 /// A parser that will parse long algebraic chess notation.
 /// Example moves: `e2e4`, `e7e5`, `d2d3`, `Bf8b4+`, `Bb5xc6`, etc.
