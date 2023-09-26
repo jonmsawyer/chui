@@ -17,6 +17,6 @@ publish = false
 
 [dependencies]
 chui_macros.workspace = true
-chui_error.workspace = true
+thiserror = "1.0"
 nonmax.workspace = true
 colored = "2"

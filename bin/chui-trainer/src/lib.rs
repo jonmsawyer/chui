@@ -4,7 +4,6 @@ use std::io::{self, Write};
 use std::time::{Duration, SystemTime};
 
 use chui_core::prelude::*;
-use chui_error as _;
 
 pub mod trait_defs;
 use trait_defs::Trainer;

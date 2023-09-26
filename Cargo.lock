@@ -1069,7 +1069,6 @@ name = "chui-console"
 version = "0.1.0"
 dependencies = [
  "chui_core",
- "chui_error",
 ]
 
 [[package]]
@@ -1077,8 +1076,6 @@ name = "chui-dev"
 version = "0.1.0"
 dependencies = [
  "chui_core",
- "chui_error",
- "chui_macros",
 ]
 
 [[package]]
@@ -1086,7 +1083,6 @@ name = "chui-trainer"
 version = "0.1.0"
 dependencies = [
  "chui_core",
- "chui_error",
  "chui_macros",
  "rand",
 ]
@@ -1095,7 +1091,6 @@ dependencies = [
 name = "chui-ui"
 version = "0.1.0"
 dependencies = [
- "chui_error",
  "chui_ui",
 ]
 
@@ -1103,10 +1098,10 @@ dependencies = [
 name = "chui_core"
 version = "0.1.0"
 dependencies = [
- "chui_error",
  "chui_macros",
  "colored",
  "nonmax",
+ "thiserror",
 ]
 
 [[package]]

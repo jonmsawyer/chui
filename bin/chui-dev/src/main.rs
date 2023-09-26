@@ -5,8 +5,6 @@
 use std::mem::{size_of, size_of_val};
 
 use chui_core::prelude::*;
-use chui_error as _;
-use chui_macros as _;
 
 fn main() {
     let coord = Coord::try_from(bitmask::G6).unwrap();

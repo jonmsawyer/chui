@@ -2,7 +2,7 @@
 //!
 //! Console application.
 
-use chui_error::ChuiResult;
+use chui_core::prelude::*;
 
 mod console;
 

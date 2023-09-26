@@ -7,5 +7,4 @@ edition = "2021"
 
 [dependencies]
 chui_core.workspace = true
-chui_macros.workspace = true
-chui_error.workspace = true
+# chui_macros.workspace = true
