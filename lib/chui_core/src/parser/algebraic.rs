@@ -194,7 +194,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
     ) -> ChuiResult<String> {
         let mut _move_string = String::new();
         let mut the_move = Move::new();
-        let piece = match engine.board.get_board()[from_coord.get_rank() as usize]
+        let piece = match engine.board.get_position()[from_coord.get_rank() as usize]
             [from_coord.get_file() as usize]
         {
             Some(piece) => piece,
@@ -218,7 +218,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
             }
         }
         let _to_square =
-            engine.board.get_board()[to_coord.get_rank() as usize][to_coord.get_file() as usize];
+            engine.board.get_position()[to_coord.get_rank() as usize][to_coord.get_file() as usize];
         let piece_move_coords = piece.get_move_coords(&(engine.board), None);
         for coord in piece_move_coords.iter() {
             if &to_coord == coord {

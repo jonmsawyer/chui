@@ -4,68 +4,10 @@ use std::collections::HashMap;
 use std::fmt;
 use std::io;
 
-use crate::{
-    parser::{self, Parser, ParserEngine},
-    Board, ChessVariant, ChuiError, ChuiResult, Color, Command, Coord, Move, Piece, Player,
-};
-//use super::Fen;
+use crate::prelude::*;
 
 mod commands;
 mod fen;
-
-/// The win condition.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum WinCondition {
-    /// Checkmate.
-    #[default]
-    Checkmate,
-
-    /// White resigns.
-    WhiteResigns,
-
-    /// Black resigns.
-    BlackResigns,
-}
-
-/// The draw condition.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum DrawCondition {
-    /// Both players agree to a draw.
-    #[default]
-    AgreeToDraw,
-
-    /// The one to move cannot make any valid moves.
-    Stalemate,
-
-    /// The board's position has repeated itself three times.
-    ///
-    /// According to FIDE rules, just because a position has repeated itself three times,
-    /// doesn't mean the game is automatically a draw. A player must flag this condition after
-    /// the position has repeated itself for the third time.
-    ///
-    /// Also note this has nothing to do with move order. This is a repetition of position, not
-    /// moves.
-    ThirdRepitition,
-
-    /// The board's position has repeated itself five times.
-    ///
-    /// According to FIDE rules, a game is automatically drawn after the position has repeated
-    /// itself five times. A player is not needed to flag this condition.
-    FifthRepetition,
-
-    /// 50 moves have been made with no piece capture or pawn move.
-    FiftyMoveRule,
-
-    /// Both players have insufficient material to check mate. Do note that it is still possible
-    /// to checkmate an opponent King with just a bishop or a knight provided that the opponent
-    /// has a blocking piece to make this possible.
-    InsufficientMaterial,
-
-    /// Both players agree to that there will be perpetual check. This draw condition is
-    /// technically not needed because a perpectual check will often result in a position
-    /// repetition or vai the Fifty Move Rule.
-    PerpetualCheck,
-}
 
 /// Represents the engine of the chess game. Moves will be input
 /// and output from this object. `Engine` captures and changes
@@ -208,7 +150,7 @@ impl Game {
         Ok(Game {
             white,
             black,
-            board: Board::new(ChessVariant::StandardChess),
+            board: Board::new(Variant::StandardChess),
             captured_pieces: Vec::<Piece>::new(),
             to_move: Color::White,
             position_record: HashMap::new(),
@@ -219,7 +161,7 @@ impl Game {
             half_move_clock: 0,
             move_counter: 1,
             //move_generator: MoveGenerator::generate_move_list(),
-            parser: parser::new(parser_engine),
+            parser: ParserEngine::new(parser_engine),
             move_list: Vec::<Move>::new(),
             current_move: None,
             win_condition: None,
@@ -245,10 +187,14 @@ impl Game {
 
     /// Set a new parser based on `ParserEngine`.
     pub fn set_parser(&mut self, parser_engine: ParserEngine) {
-        self.parser = parser::new(parser_engine);
+        self.parser = ParserEngine::new(parser_engine);
     }
 
     /// Get input string from `io::stdin()`.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the program could not get a line of input for whatever reason.
     pub fn get_input() -> String {
         let mut input = String::new();
 
@@ -349,6 +295,7 @@ impl Game {
             for j in col_vec.iter() {
                 output = self
                     .board
+                    .get_position()
                     .get_piece(Coord::try_from((*j, *i)).unwrap())
                     .map_or_else(
                         || format!("{} ·", output),

@@ -10,10 +10,10 @@ pub use chui_core;
 
 /// Resource to engage the core Engine
 #[derive(Debug, Resource, Default)]
-pub struct Game(chui_core::Game);
+pub struct Game(chui_core::prelude::Game);
 
 impl Deref for Game {
-    type Target = chui_core::Game;
+    type Target = chui_core::prelude::Game;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -21,7 +21,7 @@ impl Deref for Game {
 }
 
 impl DerefMut for Game {
-    fn deref_mut(&mut self) -> &mut chui_core::Game {
+    fn deref_mut(&mut self) -> &mut chui_core::prelude::Game {
         &mut self.0
     }
 }

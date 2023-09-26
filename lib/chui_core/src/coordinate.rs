@@ -5,7 +5,7 @@ use std::fmt;
 
 pub use nonmax::NonMaxU8;
 
-use crate::{traits::Coordinate, ChuiError, ChuiResult};
+use crate::prelude::*;
 
 /// Main [`Coord`] struct used to represent chess piece and board position. We use non-max
 /// u8 values because indicies are 0-indexed and values of >= 8 are invalid for an iterable
@@ -50,25 +50,6 @@ impl Coord {
         })?;
 
         Ok(Coord { file, rank })
-    }
-
-    /// Create a new [`Coord`] from an index that in the range of (0..64).
-    ///
-    /// # Errors
-    ///
-    /// Returns a [`ChuiError`] result if the `idx` (index) is out of range.
-    pub fn new_from_idx(idx: u8) -> ChuiResult<Coord> {
-        if idx >= 64 {
-            return Err(ChuiError::IndexOutOfRange(format!(
-                "{} is out of range (0..=63) (Coord::new_from_idx)",
-                idx
-            )));
-        }
-
-        let file_idx = idx % 8;
-        let rank_idx = idx / 8;
-
-        Coord::new(file_idx, rank_idx)
     }
 
     /// Create a new [`Coord`] with values set to zero.
@@ -254,6 +235,53 @@ impl TryFrom<(char, char)> for Coord {
 
     fn try_from(coord: (char, char)) -> ChuiResult<Coord> {
         Coord::try_from((coord.0, (coord.1 as u8).wrapping_sub(b'0')))
+    }
+}
+
+impl TryFrom<u8> for Coord {
+    type Error = ChuiError;
+
+    fn try_from(index: u8) -> ChuiResult<Coord> {
+        if index >= 64 {
+            return Err(ChuiError::IndexOutOfRange(format!(
+                "{} is out of range (0..=63) (Coord::try_from<u8>)",
+                index
+            )));
+        }
+
+        let file_idx = index % 8;
+        let rank_idx = index / 8;
+
+        Coord::new(file_idx, rank_idx)
+    }
+}
+
+impl From<u64> for Coord {
+    fn from(bitmask: u64) -> Coord {
+        let mut file_idx: u8 = 0;
+        let mut rank_idx: u8 = 0;
+
+        for (idx, file_bitmask) in bitmask::FILES.into_iter().enumerate() {
+            if bitmask & file_bitmask > 1 {
+                file_idx = idx as u8;
+                break;
+            }
+        }
+
+        for (idx, rank_bitmask) in bitmask::RANKS.into_iter().enumerate() {
+            if bitmask & rank_bitmask > 1 {
+                rank_idx = idx as u8;
+                break;
+            }
+        }
+
+        Coord::new(file_idx, rank_idx).unwrap()
+    }
+}
+
+impl From<Coord> for u64 {
+    fn from(coord: Coord) -> u64 {
+        bitmask::FILES[coord.file.get() as usize] & bitmask::RANKS[coord.rank.get() as usize]
     }
 }
 

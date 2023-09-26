@@ -22,7 +22,7 @@ fn init_pieces(
 
     engine
         .board
-        .get_board()
+        .get_position()
         .iter()
         .enumerate()
         .for_each(|(_, rank)| {

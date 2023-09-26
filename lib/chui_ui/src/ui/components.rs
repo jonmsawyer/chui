@@ -8,17 +8,17 @@ use chui_core;
 
 /// Component to attach to the rendering of the pieces.
 #[derive(Debug, Component, Copy, Clone, Hash)]
-pub struct Piece(chui_core::Piece);
+pub struct Piece(chui_core::prelude::Piece);
 
 impl Piece {
     /// Return a new [`Piece`].
-    pub const fn new(piece: chui_core::Piece) -> Piece {
+    pub const fn new(piece: chui_core::prelude::Piece) -> Piece {
         Piece(piece)
     }
 }
 
 impl Deref for Piece {
-    type Target = chui_core::Piece;
+    type Target = chui_core::prelude::Piece;
 
     fn deref(&self) -> &Self::Target {
         &self.0

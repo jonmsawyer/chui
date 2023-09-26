@@ -1073,6 +1073,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "chui-dev"
+version = "0.1.0"
+dependencies = [
+ "chui_core",
+ "chui_error",
+ "chui_macros",
+]
+
+[[package]]
 name = "chui-trainer"
 version = "0.1.0"
 dependencies = [

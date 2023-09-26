@@ -1,12 +1,12 @@
-#[allow(unused_imports)]
-use crate::constants::*;
-use crate::{Board, ChessVariant, ChuiError, ChuiResult, Color, Coord, Piece, PieceKind};
+//! Test Piece coordinates.
+
+use crate::prelude::{coord::*, *};
 
 pub mod piece_coords {
     use super::*;
 
     fn new_board() -> Board {
-        Board::new(ChessVariant::Empty)
+        Board::new(Variant::Empty)
     }
 
     fn print_info(piece: &Piece, coords: &Vec<Coord>) {
@@ -16,6 +16,7 @@ pub mod piece_coords {
 
     fn get_piece(board: &Board, coord: Coord) -> ChuiResult<Piece> {
         board
+            .get_position()
             .get_piece(coord)
             .ok_or(ChuiError::InvalidPiece(format!(
                 "Invalid piece on {}",
@@ -29,7 +30,9 @@ pub mod piece_coords {
         coord: (char, u8),
     ) -> ChuiResult<(Board, Piece)> {
         let (mut board, coord) = (new_board(), Coord::try_from(coord)?);
-        board.put_piece(Some(Piece::new(piece_kind, color, coord)), coord);
+        board
+            .get_position_mut()
+            .put_piece(Some(Piece::new(piece_kind, color, coord)), coord);
         Ok((board, get_piece(&board, coord)?))
     }
 
@@ -77,8 +80,12 @@ pub mod piece_coords {
         let (mut board, piece) = get_vars(PieceKind::King, Color::White, E1)?;
         let rook1 = Piece::white_rook(A1)?;
         let rook2 = Piece::white_rook(H1)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
         let expected_coords = vec![D1, C1, F1, G1, D2, E2, F2];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -92,9 +99,15 @@ pub mod piece_coords {
         let rook1 = Piece::white_rook(A1)?;
         let rook2 = Piece::white_rook(H1)?;
         let black_pawn = Piece::black_pawn(E7)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(black_pawn), black_pawn.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(black_pawn), black_pawn.get_coord());
         let expected_coords = vec![
             B1, C1, D1, F1, G1, E2, E3, E4, E5, E6, E7, D2, C3, B4, A5, F2, G3, H4,
         ];
@@ -110,9 +123,15 @@ pub mod piece_coords {
         let rook1 = Piece::white_rook(A1)?;
         let rook2 = Piece::white_rook(H1)?;
         let black_queen = Piece::black_queen(A6)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(black_queen), black_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![D1, C1, D2, F2];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -126,9 +145,15 @@ pub mod piece_coords {
         let rook1 = Piece::white_rook(A1)?;
         let rook2 = Piece::white_rook(H1)?;
         let black_queen = Piece::black_queen(H6)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(black_queen), black_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![D1, E2, F1, F2, G1];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -142,9 +167,15 @@ pub mod piece_coords {
         let rook1 = Piece::white_rook(F4)?;
         let rook2 = Piece::white_rook(D6)?;
         let black_queen = Piece::black_queen(G7)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(black_queen), black_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![D4, C3, B2, A1, F6, G7];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -158,9 +189,15 @@ pub mod piece_coords {
         let rook1 = Piece::white_rook(B8)?;
         let rook2 = Piece::white_rook(D6)?;
         let black_queen = Piece::black_queen(B4)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(black_queen), black_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![C7, C5, B4];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -174,9 +211,15 @@ pub mod piece_coords {
         let rook = Piece::white_rook(C8)?;
         let knight = Piece::white_knight(C3)?;
         let black_queen = Piece::black_queen(G7)?;
-        board.put_piece(Some(rook), rook.get_coord());
-        board.put_piece(Some(knight), knight.get_coord());
-        board.put_piece(Some(black_queen), black_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook), rook.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(knight), knight.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(black_queen), black_queen.get_coord());
         let expected_coords = vec![B7, A7, D7, E7, F7, G7, C6, C5, C4];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -188,7 +231,9 @@ pub mod piece_coords {
     fn test_white_pawn_on_a5_en_passant() -> ChuiResult<()> {
         let (mut board, piece) = get_vars(PieceKind::Pawn, Color::White, A5)?;
         let black_pawn = Piece::black_pawn(B5)?;
-        board.put_piece(Some(black_pawn), black_pawn.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(black_pawn), black_pawn.get_coord());
         board.set_en_passant(Some(Coord::try_from(B6)?), Some(black_pawn));
         let expected_coords = vec![A6, B6];
         let coords = piece.get_move_coords(&board, None);
@@ -201,7 +246,9 @@ pub mod piece_coords {
     fn test_white_pawn_on_g5_no_en_passant() -> ChuiResult<()> {
         let (mut board, piece) = get_vars(PieceKind::Pawn, Color::White, G5)?;
         let black_pawn = Piece::black_pawn(F5)?;
-        board.put_piece(Some(black_pawn), black_pawn.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(black_pawn), black_pawn.get_coord());
         let expected_coords = vec![G6];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -244,8 +291,12 @@ pub mod piece_coords {
         let (mut board, piece) = get_vars(PieceKind::King, Color::Black, E8)?;
         let rook1 = Piece::black_rook(A8)?;
         let rook2 = Piece::black_rook(H8)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
         let expected_coords = vec![D8, C8, F8, G8, D7, E7, F7];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -259,9 +310,15 @@ pub mod piece_coords {
         let rook1 = Piece::black_rook(A8)?;
         let rook2 = Piece::black_rook(H8)?;
         let white_pawn = Piece::white_pawn(E2)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(white_pawn), white_pawn.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(white_pawn), white_pawn.get_coord());
         let expected_coords = vec![
             B8, C8, D8, F8, G8, E7, E6, E5, E4, E3, E2, D7, C6, B5, A4, F7, G6, H5,
         ];
@@ -277,9 +334,15 @@ pub mod piece_coords {
         let rook1 = Piece::black_rook(A8)?;
         let rook2 = Piece::black_rook(H8)?;
         let white_queen = Piece::white_queen(A6)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(white_queen), white_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![D8, G8, F8, F7, D7, E7];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -293,9 +356,15 @@ pub mod piece_coords {
         let rook1 = Piece::black_rook(A8)?;
         let rook2 = Piece::black_rook(H8)?;
         let white_queen = Piece::white_queen(H6)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(white_queen), white_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![D8, F7, D7, E7, C8];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -309,9 +378,15 @@ pub mod piece_coords {
         let rook1 = Piece::black_rook(F4)?;
         let rook2 = Piece::black_rook(D6)?;
         let white_queen = Piece::white_queen(G7)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(white_queen), white_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![D4, C3, B2, A1, F6, G7];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -325,9 +400,15 @@ pub mod piece_coords {
         let rook1 = Piece::black_rook(B8)?;
         let rook2 = Piece::black_rook(D6)?;
         let white_queen = Piece::white_queen(B4)?;
-        board.put_piece(Some(rook1), rook1.get_coord());
-        board.put_piece(Some(rook2), rook2.get_coord());
-        board.put_piece(Some(white_queen), white_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook1), rook1.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook2), rook2.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![C7, C5, B4];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -341,9 +422,15 @@ pub mod piece_coords {
         let rook = Piece::black_rook(C8)?;
         let knight = Piece::black_knight(C3)?;
         let white_queen = Piece::white_queen(G7)?;
-        board.put_piece(Some(rook), rook.get_coord());
-        board.put_piece(Some(knight), knight.get_coord());
-        board.put_piece(Some(white_queen), white_queen.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(rook), rook.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(knight), knight.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(white_queen), white_queen.get_coord());
         let expected_coords = vec![B7, A7, D7, E7, F7, G7, C6, C5, C4];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);
@@ -355,7 +442,9 @@ pub mod piece_coords {
     fn test_black_pawn_on_a4_en_passant() -> ChuiResult<()> {
         let (mut board, piece) = get_vars(PieceKind::Pawn, Color::Black, A4)?;
         let white_pawn = Piece::white_pawn(B4)?;
-        board.put_piece(Some(white_pawn), white_pawn.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(white_pawn), white_pawn.get_coord());
         board.set_en_passant(Some(Coord::try_from(B3)?), Some(white_pawn));
         let expected_coords = vec![A3, B3];
         let coords = piece.get_move_coords(&board, None);
@@ -368,7 +457,9 @@ pub mod piece_coords {
     fn test_black_pawn_on_g4_no_en_passant() -> ChuiResult<()> {
         let (mut board, piece) = get_vars(PieceKind::Pawn, Color::Black, G4)?;
         let white_pawn = Piece::black_pawn(F4)?;
-        board.put_piece(Some(white_pawn), white_pawn.get_coord());
+        board
+            .get_position_mut()
+            .put_piece(Some(white_pawn), white_pawn.get_coord());
         let expected_coords = vec![G3];
         let coords = piece.get_move_coords(&board, None);
         print_info(&piece, &coords);

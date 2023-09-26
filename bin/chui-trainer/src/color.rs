@@ -7,7 +7,7 @@ use rand::Rng;
 
 use super::{trait_defs::Trainer, CommandType};
 
-use chui_core::{STR_FILES, STR_RANKS};
+use chui_core::prelude::*;
 
 #[derive(Debug, Trainer, Clone)]
 #[trainer(base = true)]

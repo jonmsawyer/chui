@@ -2,15 +2,13 @@
 
 use bevy::input::mouse::MouseButtonInput;
 use bevy::input::ButtonState;
-use bevy::prelude::*;
+use bevy::prelude::{Color, *};
 use bevy::sprite::Anchor;
 use bevy::window::PrimaryWindow;
 //use bevy::render::camera::RenderTarget;
 
 use rand::rngs::SmallRng;
 use rand::{Rng, SeedableRng};
-
-use crate::Coord;
 
 use super::super::components::{FromSquareCursor, MainCamera, MouseCursor, Piece, ToSquareCursor};
 use super::super::constants::{SPRITE_WIDTH, START_X_COORD, START_Y_COORD};
@@ -21,7 +19,7 @@ use super::super::utils::{
     hide_from_and_to_square, transform_from_square, transform_to_square,
 };
 use crate::ui::utils::compute_world_coords;
-use chui_core::{Move, MoveType, PieceKind};
+use chui_core::prelude::*;
 
 /// ECS System. Run once. Initialize the on-board mouse cursor.
 fn init_mouse_cursor(mut commands: Commands) {
@@ -220,8 +218,8 @@ pub fn update_mouse_click(
                                 .unwrap();
                         chess_move.to_coord =
                             Coord::try_from((to_coord.get_file(), to_coord.get_rank())).unwrap();
-                        let from_piece = game.board.get_piece(from_coord);
-                        let to_piece = game.board.get_piece(to_coord);
+                        let from_piece = game.board.get_position().get_piece(from_coord);
+                        let to_piece = game.board.get_position().get_piece(to_coord);
                         chess_move.piece = from_piece;
 
                         if from_piece.is_none() {

@@ -6,7 +6,7 @@
 #[macro_use]
 mod macros;
 
-pub use chui_core::Coord;
+pub use chui_core::prelude::Coord;
 pub use chui_error::{ChuiError, ChuiResult};
 
 pub mod ui;

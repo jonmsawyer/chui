@@ -1,6 +1,6 @@
-#[allow(unused_imports)]
-use crate::constants::*;
-use crate::{Board, ChuiError, ChuiResult, Coord, Piece};
+//! Test standard chess positions.
+
+use crate::prelude::{coord::*, *};
 
 pub mod standard_chess {
     use super::*;
@@ -16,6 +16,7 @@ pub mod standard_chess {
 
     fn get_piece(board: &Board, coord: Coord) -> ChuiResult<Piece> {
         board
+            .get_position()
             .get_piece(coord)
             .ok_or(ChuiError::InvalidPiece(format!(
                 "Invalid piece on {}",
@@ -362,7 +363,10 @@ pub mod standard_chess {
         let board = new_board();
         for i in 2..6 {
             for j in 0..8 {
-                assert_eq!(None, board.get_piece(Coord::try_from((j, i))?));
+                assert_eq!(
+                    None,
+                    board.get_position().get_piece(Coord::try_from((j, i))?)
+                );
             }
         }
         Ok(())

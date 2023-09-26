@@ -7,11 +7,15 @@
 
 use std::fmt;
 
-use crate::{constants::E1, ChuiError, ChuiResult, Color, Coord, Game, Piece};
+use crate::{constants::coord::E1, ChuiError, ChuiResult, Color, Coord, Game, Piece};
 
 /// Represents the type of move to be performed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum MoveType {
+    /// Move is invalid.
+    #[default]
+    Invalid,
+
     /// This move is a pawn move.
     PawnMove,
 
@@ -527,6 +531,9 @@ impl Move {
             }
             Some(MoveType::PieceMove) => {
                 println!("Move Type is Piece Move.");
+            }
+            Some(MoveType::Invalid) => {
+                println!("Move Type is Invalid.");
             }
             None => {
                 println!("Move Type is None.");

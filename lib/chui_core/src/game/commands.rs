@@ -1,7 +1,6 @@
 //! Commands module.
 
-use super::super::{Command, CommandContext, CommandKind, Game};
-use super::parser::ParserEngine;
+use crate::prelude::*;
 
 /// Switch the current move parser based on a `CommandKind`.
 pub fn switch_parser(game: &mut Game, command: &Command) {

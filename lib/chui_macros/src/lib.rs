@@ -19,6 +19,12 @@ struct Opts {
 }
 
 /// Derive Trainer trait.
+///
+/// # Panics
+///
+/// Not sure where this can panic.
+///
+/// TODO: Find out where this can panic.
 #[proc_macro_derive(Trainer, attributes(trainer))]
 pub fn derive_trainer(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input);
@@ -166,7 +172,7 @@ pub fn derive_trainer(input: TokenStream) -> TokenStream {
     output.into()
 }
 
-/// Dervice Coordinate trait.
+/// Derive Coordinate trait.
 #[proc_macro_derive(Coordinate)]
 pub fn derive_coordinate(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input);

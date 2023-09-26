@@ -86,7 +86,7 @@ impl Fen {
         let mut empty_squares = 0;
 
         // Get board layout.
-        for rank in engine.board.get_board().iter().rev() {
+        for rank in engine.board.get_position().iter().rev() {
             for piece in rank.iter() {
                 if piece.is_some() {
                     if empty_squares > 0 {

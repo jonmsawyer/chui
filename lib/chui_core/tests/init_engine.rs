@@ -5,7 +5,7 @@ use chui_macros as _;
 use colored as _;
 use nonmax as _;
 
-use chui_core::{Color, Game, ParserEngine, Player};
+use chui_core::prelude::*;
 
 // #[test]
 fn _init_engine() {

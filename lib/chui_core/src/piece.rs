@@ -6,8 +6,7 @@ use std::hash::{Hash, Hasher};
 
 use colored::{ColoredString, Colorize};
 
-#[allow(clippy::wildcard_imports)]
-use crate::{constants::*, Board, ChuiError, ChuiResult, Coord};
+use crate::prelude::{coord::*, *};
 
 /// Piece color. Either `White` or `Black` variants.
 #[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
@@ -102,8 +101,7 @@ impl PieceKind {
     }
 }
 
-/// Represents a piece on the chessboard. Each chess piece has
-/// a `PieceKind` and `Color`.
+/// Represents a piece on the chessboard. Each chess piece has a `PieceKind` and `Color`.
 ///
 /// Example:
 ///
@@ -440,12 +438,12 @@ impl Piece {
             return Vec::<Coord>::new();
         }
         match self.kind {
-            PieceKind::King => board.get_king_move_coords(self),
-            PieceKind::Queen => board.get_queen_move_coords(self),
-            PieceKind::Rook => board.get_rook_move_coords(self),
-            PieceKind::Bishop => board.get_bishop_move_coords(self),
-            PieceKind::Knight => board.get_knight_move_coords(self),
-            PieceKind::Pawn => board.get_pawn_move_coords(self),
+            PieceKind::King => board.get_position().get_king_move_coords(board, self),
+            PieceKind::Queen => board.get_position().get_queen_move_coords(self),
+            PieceKind::Rook => board.get_position().get_rook_move_coords(self),
+            PieceKind::Bishop => board.get_position().get_bishop_move_coords(self),
+            PieceKind::Knight => board.get_position().get_knight_move_coords(self),
+            PieceKind::Pawn => board.get_position().get_pawn_move_coords(board, self),
         }
     }
 

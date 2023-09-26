@@ -3,8 +3,8 @@
 use std::io::{self, Write};
 use std::time::{Duration, SystemTime};
 
-use chui_core::{INT_FILES, STR_FILES, STR_RANKS, VERSION};
-use chui_error::ChuiResult;
+use chui_core::prelude::*;
+use chui_error as _;
 
 pub mod trait_defs;
 use trait_defs::Trainer;
