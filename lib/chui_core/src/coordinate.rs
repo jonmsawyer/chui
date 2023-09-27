@@ -136,6 +136,16 @@ impl Coord {
     pub fn is_eq(&self, coord: (char, u8)) -> bool {
         Coord::try_from(coord).map_or(false, |new_coord| *self == new_coord)
     }
+
+    /// Get a zero-based index in the range of (0..=63).
+    pub fn get_index(&self) -> u8 {
+        let mut idx = self.get_file();
+        let rank = self.get_rank();
+        for _ in 0..rank {
+            idx += 8;
+        }
+        idx
+    }
 }
 
 /// Formats the position for a coordinate in Algebraic notation.

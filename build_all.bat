@@ -1,6 +1,5 @@
 rem Build libs
 cargo build -p chui_core
-cargo build -p chui_error
 cargo build -p chui_macros
 cargo build -p chui_ui
 

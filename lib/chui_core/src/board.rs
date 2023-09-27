@@ -10,7 +10,7 @@ use crate::prelude::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Board {
     /// Represents an 8x8 chessboard using nested arrays.
-    position: EasyPosition,
+    position: ArrayBitPosition,
 
     /// Can white castle on the king side?
     pub white_can_castle_kingside: bool,
@@ -46,7 +46,7 @@ impl Board {
     /// Return a new [`Board`] given a [`ChessVariant`].
     pub fn new(variant: Variant) -> Board {
         Board {
-            position: EasyPosition::new(variant),
+            position: ArrayBitPosition::new(variant),
             white_can_castle_kingside: true,
             white_can_castle_queenside: true,
             black_can_castle_kingside: true,
@@ -61,69 +61,69 @@ impl Board {
     // Conditionals.
     //
 
-    /// Apply the passed in move onto the chessboard.
-    ///
-    /// # Errors
-    ///
-    /// Errors if the piece we're moving is `None`.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the `move_obj`'s piece is None after checking that it is Some.
-    pub fn apply_move(&mut self, move_obj: &Move) -> ChuiResult<Option<Piece>> {
-        if move_obj.get_piece().is_none() {
-            return Err(ChuiError::InvalidMove(
-                "No piece to apply move.".to_string(),
-            ));
-        }
+    // /// Apply the passed in move onto the chessboard.
+    // ///
+    // /// # Errors
+    // ///
+    // /// Errors if the piece we're moving is `None`.
+    // ///
+    // /// # Panics
+    // ///
+    // /// Panics when the `move_obj`'s piece is None after checking that it is Some.
+    // pub fn apply_move(&mut self, move_obj: &Move) -> ChuiResult<Option<Piece>> {
+    //     if move_obj.get_piece().is_none() {
+    //         return Err(ChuiError::InvalidMove(
+    //             "No piece to apply move.".to_string(),
+    //         ));
+    //     }
 
-        let pieces = self.position.get_pieces(move_obj.get_piece().unwrap());
+    //     let pieces = self.position.get_pieces(move_obj.get_piece().unwrap());
 
-        // println!("Pieces: {:?}", pieces);
+    //     // println!("Pieces: {:?}", pieces);
 
-        let mut pieces_can_move = Vec::<Piece>::new();
+    //     let mut pieces_can_move = Vec::<Piece>::new();
 
-        for piece in pieces.iter() {
-            if piece.get_move_coords(self, None).iter().any(|&coord| {
-                coord.get_file() == move_obj.to_coord.get_file()
-                    && coord.get_rank() == move_obj.to_coord.get_rank()
-            }) {
-                pieces_can_move.push(*piece);
-            }
-        }
+    //     for piece in pieces.iter() {
+    //         if piece.get_move_coords(self, None).iter().any(|&coord| {
+    //             coord.get_file() == move_obj.to_coord.get_file()
+    //                 && coord.get_rank() == move_obj.to_coord.get_rank()
+    //         }) {
+    //             pieces_can_move.push(*piece);
+    //         }
+    //     }
 
-        // println!("Pieces can move: {:?}", pieces_can_move);
+    //     // println!("Pieces can move: {:?}", pieces_can_move);
 
-        let (file, rank) = move_obj.to_coord.to_u8_index();
+    //     let (file, rank) = move_obj.to_coord.to_u8_index();
 
-        if pieces_can_move.is_empty() {
-            Err(ChuiError::InvalidMove(format!(
-                "No {} can move to target square {}",
-                move_obj.get_piece().unwrap(),
-                move_obj.to_coord
-            )))
-        } else if pieces_can_move.len() == 1 {
-            let piece = pieces_can_move.get(0).unwrap();
-            self.get_position_mut().replace_piece(*piece, move_obj)
-        } else {
-            Err(ChuiError::InvalidMove(format!(
-                "Ambiguous move. More than one piece can move to target square {}{}",
-                file, rank
-            )))
-        }
-    }
+    //     if pieces_can_move.is_empty() {
+    //         Err(ChuiError::InvalidMove(format!(
+    //             "No {} can move to target square {}",
+    //             move_obj.get_piece().unwrap(),
+    //             move_obj.to_coord
+    //         )))
+    //     } else if pieces_can_move.len() == 1 {
+    //         let piece = pieces_can_move.get(0).unwrap();
+    //         self.get_position_mut().replace_piece(*piece, move_obj)
+    //     } else {
+    //         Err(ChuiError::InvalidMove(format!(
+    //             "Ambiguous move. More than one piece can move to target square {}{}",
+    //             file, rank
+    //         )))
+    //     }
+    // }
 
     //
     // Getters.
     //
 
     /// Get a reference to the position.
-    pub const fn get_position(&self) -> EasyPosition {
+    pub const fn get_position(&self) -> ArrayBitPosition {
         self.position
     }
 
     /// Get a mutable reference to the position.
-    pub fn get_position_mut(&mut self) -> &mut EasyPosition {
+    pub fn get_position_mut(&mut self) -> &mut ArrayBitPosition {
         &mut self.position
     }
 

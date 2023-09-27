@@ -1,4 +1,6 @@
-//! BitPosition struct.
+//! `BitPosition` struct.
+
+use std::fmt;
 
 use crate::prelude::*;
 
@@ -77,7 +79,7 @@ impl BitPosition {
             Variant::Empty => BitPosition::default(),
             Variant::StandardChess => BitPosition {
                 kings: 0x1000000000000010,
-                queens: 0x2000000000000020,
+                queens: 0x800000000000008,
                 rooks: 0x8100000000000081,
                 bishops: 0x2400000000000024,
                 knights: 0x4200000000000042,
@@ -92,27 +94,162 @@ impl BitPosition {
 impl Position for BitPosition {
     /// Get the piece at the given coordinate.
     fn get_piece(&self, coord: Coord) -> Option<Piece> {
-        None
+        let piece_kind: PieceKind;
+        let color: Color;
+        let idx = coord.get_index();
+        let mut bitmask: u64 = 1;
+
+        // Adjust the bitmask according to the zero-based index given in `coord.get_index()`.
+        // If the index is zero, shift nothing.
+        bitmask <<= idx;
+
+        // Calculate the `PieceKind`.
+        if bitmask & self.kings > 0 {
+            piece_kind = PieceKind::King;
+        } else if bitmask & self.queens > 0 {
+            piece_kind = PieceKind::Queen;
+        } else if bitmask & self.rooks > 0 {
+            piece_kind = PieceKind::Rook;
+        } else if bitmask & self.bishops > 0 {
+            piece_kind = PieceKind::Bishop;
+        } else if bitmask & self.knights > 0 {
+            piece_kind = PieceKind::Knight;
+        } else if bitmask & self.pawns > 0 {
+            piece_kind = PieceKind::Pawn;
+        } else {
+            return None;
+        }
+
+        // Calculate the `Color`.
+        if bitmask & self.white > 0 {
+            color = Color::White;
+        } else if bitmask & self.black > 0 {
+            color = Color::Black;
+        } else {
+            return None;
+        }
+
+        // We have a valid piece that can be constructed.
+        Some(Piece::new(piece_kind, color, coord))
     }
 
-    /// Get the available [`Piece`]s for a [`Color`].
-    fn get_pieces(&self, piece: Piece) -> Vec<Piece> {
-        Vec::<Piece>::new()
-    }
+    // /// Get the available [`Piece`]s for a [`Color`].
+    // fn get_pieces(&self, piece: Piece) -> Vec<Piece> {
+    //     let mut pieces = Vec::<Piece>::new();
+    //     let mut bitmask: u64 = 1;
+    //     let mut idx: u8 = 0;
+
+    //     match piece.get_color() {
+    //         Color::White => {
+    //             //
+    //         },
+    //         Color::Black => {
+    //             //
+    //         }
+    //     }
+    //     pieces
+    // }
 
     /// Put a piece onto the board. Return any piece on the given square if it's occupied
     /// already.
     fn put_piece(&mut self, piece: Option<Piece>, coord: Coord) -> Option<Piece> {
-        None
+        let ret_piece = self.get_piece(coord);
+        let idx = coord.get_index();
+        let bitmask: u64 = 1 << idx;
+
+        if let Some(piece) = piece {
+            match piece.get_kind() {
+                PieceKind::King => {
+                    if bitmask & self.kings == 0 {
+                        self.kings |= bitmask;
+                    }
+                }
+                PieceKind::Queen => {
+                    if bitmask & self.queens == 0 {
+                        self.queens |= bitmask;
+                    }
+                }
+                PieceKind::Rook => {
+                    if bitmask & self.rooks == 0 {
+                        self.rooks |= bitmask;
+                    }
+                }
+                PieceKind::Bishop => {
+                    if bitmask & self.bishops == 0 {
+                        self.kings |= bitmask;
+                    }
+                }
+                PieceKind::Knight => {
+                    if bitmask & self.knights == 0 {
+                        self.knights |= bitmask;
+                    }
+                }
+                PieceKind::Pawn => {
+                    if bitmask & self.pawns == 0 {
+                        self.pawns |= bitmask;
+                    }
+                }
+            }
+
+            match piece.get_color() {
+                Color::White => {
+                    if bitmask & self.white == 0 {
+                        self.white |= bitmask;
+                    }
+
+                    if bitmask & self.black > 0 {
+                        self.black ^= bitmask;
+                    }
+                }
+                Color::Black => {
+                    if bitmask & self.black == 0 {
+                        self.black |= bitmask;
+                    }
+
+                    if bitmask & self.white > 0 {
+                        self.white ^= bitmask;
+                    }
+                }
+            }
+        } else {
+            if bitmask & self.kings > 0 {
+                self.kings ^= bitmask;
+            } else if bitmask & self.queens > 0 {
+                self.queens ^= bitmask;
+            } else if bitmask & self.rooks > 0 {
+                self.rooks ^= bitmask;
+            } else if bitmask & self.bishops > 0 {
+                self.bishops ^= bitmask;
+            } else if bitmask & self.knights > 0 {
+                self.knights ^= bitmask;
+            } else if bitmask & self.pawns > 0 {
+                self.pawns ^= bitmask;
+            }
+
+            if bitmask & self.white > 0 {
+                self.white ^= bitmask;
+            } else if bitmask & self.black > 0 {
+                self.black ^= bitmask;
+            }
+        }
+
+        ret_piece
     }
 
     /// Get all [`Piece`]s attacking a given coordinate.
     fn get_pieces_attacking_coord(
         &self,
-        board: &EasyBoard,
-        piece: Piece,
-        coord: Coord,
+        _board: &Board,
+        _piece: Piece,
+        _coord: Coord,
     ) -> Vec<Piece> {
         Vec::<Piece>::new()
+    }
+}
+
+/// Displays the position for White.
+impl fmt::Display for BitPosition {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.white_to_string())
     }
 }

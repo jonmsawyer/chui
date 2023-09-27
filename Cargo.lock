@@ -1059,7 +1059,6 @@ name = "chui"
 version = "0.1.0"
 dependencies = [
  "chui_core",
- "chui_error",
  "chui_macros",
  "chui_ui",
 ]
@@ -1105,14 +1104,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "chui_error"
-version = "0.1.0"
-dependencies = [
- "nonmax",
- "thiserror",
-]
-
-[[package]]
 name = "chui_macros"
 version = "0.1.0"
 dependencies = [
@@ -1128,7 +1119,6 @@ dependencies = [
  "bevy",
  "bevy_egui",
  "chui_core",
- "chui_error",
  "rand",
 ]
 

@@ -37,7 +37,7 @@ pub mod prelude {
     pub use parser::ParserEngine;
     pub use piece::{Color, Piece, PieceKind};
     pub use player::Player;
-    pub use position::{Array2D, EasyPosition};
+    pub use position::{Array2D, ArrayBitPosition, BitPosition, BitmaskArray, EasyPosition};
     pub use result::{ChuiError, ChuiResult};
     pub use traits::{Coordinate, Parser, Position};
     pub use variant::Variant;

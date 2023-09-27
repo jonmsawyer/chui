@@ -115,7 +115,7 @@ impl Default for Game {
     }
 }
 
-/// Formats the position for white.
+/// Displays the position for white.
 impl fmt::Display for Game {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.white_to_string())
@@ -360,24 +360,25 @@ impl Game {
     ///
     /// * Errors if the piece we're moving is `None`.
     pub fn apply_move(&mut self) -> ChuiResult<()> {
-        let current_move = self.process_move()?;
-        if let Some(current_move) = current_move {
-            println!("Apply Move: {:?}", current_move);
-            println!("{}", current_move.get_move_text());
-            println!();
-            let apply = self.board.apply_move(&current_move);
+        // let current_move = self.process_move()?;
+        // if let Some(current_move) = current_move {
+        //     println!("Apply Move: {:?}", current_move);
+        //     println!("{}", current_move.get_move_text());
+        //     println!();
+        //     let apply = self.board.apply_move(&current_move);
 
-            if let Ok(captured_piece) = apply {
-                if let Some(captured_piece) = captured_piece {
-                    self.captured_pieces.push(captured_piece);
-                }
-                self.toggle_to_move();
-            }
+        //     if let Ok(captured_piece) = apply {
+        //         if let Some(captured_piece) = captured_piece {
+        //             self.captured_pieces.push(captured_piece);
+        //         }
+        //         self.toggle_to_move();
+        //     }
 
-            Ok(())
-        } else {
-            Err(ChuiError::InvalidMove("No move to apply".to_string()))
-        }
+        //     Ok(())
+        // } else {
+        //     Err(ChuiError::InvalidMove("No move to apply".to_string()))
+        // }
+        Ok(())
     }
 
     /// Process the chess move.

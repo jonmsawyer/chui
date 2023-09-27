@@ -1,5 +1,6 @@
 //! `EasyPosition` struct.
 
+use std::fmt;
 use std::ops::{Deref, DerefMut};
 
 use crate::prelude::{coord::*, *};
@@ -199,13 +200,13 @@ impl Position for EasyPosition {
         self[coord.get_rank() as usize][coord.get_file() as usize]
     }
 
-    /// Get the available [`Piece`]s for a [`Color`].
-    fn get_pieces(&self, piece: Piece) -> Vec<Piece> {
-        self.iter()
-            .flatten()
-            .filter_map(|o_p| o_p.filter(|p| p.is_same_piece(piece)))
-            .collect()
-    }
+    // /// Get the available [`Piece`]s for a [`Color`].
+    // fn get_pieces(&self, piece: Piece) -> Vec<Piece> {
+    //     self.iter()
+    //         .flatten()
+    //         .filter_map(|o_p| o_p.filter(|p| p.is_same_piece(piece)))
+    //         .collect()
+    // }
 
     /// Put a piece onto the board. Return any piece on the given square if it's occupied
     /// already.
@@ -245,5 +246,21 @@ impl Deref for EasyPosition {
 impl DerefMut for EasyPosition {
     fn deref_mut(&mut self) -> &mut Array2D {
         &mut self.0
+    }
+}
+
+impl Iterator for EasyPosition {
+    type Item = Piece;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // self.0.iter().flatten().next().unwrap_or_default(None).to_owned()
+        None
+    }
+}
+
+/// Displays the position for White.
+impl fmt::Display for EasyPosition {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.white_to_string())
     }
 }

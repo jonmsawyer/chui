@@ -2,10 +2,10 @@
 //!
 //! FEN stands for Forsyth-Edwards Notation.
 
-use super::Game;
+use crate::prelude::*;
 
 /// Represents the FEN notation of a chess position.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Fen;
 
 impl Fen {
@@ -81,44 +81,45 @@ impl Fen {
     /// # Panics
     ///
     /// * Panics if `piece` is None after checking that it is Some.
-    pub fn get_board_fen(engine: &Game) -> String {
-        let mut fen = String::new();
-        let mut empty_squares = 0;
+    pub fn get_board_fen(_engine: &Game) -> String {
+        // let mut fen = String::new();
+        // let mut empty_squares = 0;
 
-        // Get board layout.
-        for rank in engine.board.get_position().iter().rev() {
-            for piece in rank.iter() {
-                if piece.is_some() {
-                    if empty_squares > 0 {
-                        fen = format!(
-                            "{}{}{}",
-                            fen,
-                            empty_squares,
-                            piece.expect("Piece cannot be None.")
-                        );
-                        empty_squares = 0;
-                    } else {
-                        fen = format!("{}{}", fen, piece.expect("Piece cannot be None."));
-                    }
-                } else {
-                    empty_squares += 1;
-                }
-            }
+        // // Get board layout.
+        // for rank in engine.board.get_position().iter().rev() {
+        //     for piece in rank.iter() {
+        //         if piece.is_some() {
+        //             if empty_squares > 0 {
+        //                 fen = format!(
+        //                     "{}{}{}",
+        //                     fen,
+        //                     empty_squares,
+        //                     piece.expect("Piece cannot be None.")
+        //                 );
+        //                 empty_squares = 0;
+        //             } else {
+        //                 fen = format!("{}{}", fen, piece.expect("Piece cannot be None."));
+        //             }
+        //         } else {
+        //             empty_squares += 1;
+        //         }
+        //     }
 
-            // Write out the number of empty squares between
-            // pieces on the same rank.
-            if empty_squares > 0 {
-                fen = format!("{}{}", fen, empty_squares);
-            }
+        //     // Write out the number of empty squares between
+        //     // pieces on the same rank.
+        //     if empty_squares > 0 {
+        //         fen = format!("{}{}", fen, empty_squares);
+        //     }
 
-            // Separate ranks by '/'.
-            fen = format!("{}/", fen);
-            empty_squares = 0;
-        }
+        //     // Separate ranks by '/'.
+        //     fen = format!("{}/", fen);
+        //     empty_squares = 0;
+        // }
 
-        // Remove trailing '/'.
-        fen.pop();
+        // // Remove trailing '/'.
+        // fen.pop();
 
-        fen
+        // fen
+        String::from("get_board_fen() is not implemented")
     }
 }
