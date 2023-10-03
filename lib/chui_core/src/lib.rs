@@ -34,15 +34,15 @@ pub mod prelude {
     pub use piece::{Color, Piece, PieceKind};
     pub use player::Player;
     pub use position::{
-        Array1D, Array2D, ArrayBitPosition, BitPosition, BitmaskArray, Easy1DPosition,
-        Easy2DPosition, EnumArray, EnumPosition, PieceEnum,
+        Array1D, Array2D, ArrayBitPosition, BitPosition, BitSetPosition, BitmaskArray,
+        Easy1DPosition, Easy2DPosition, EnumArray, EnumPosition, PieceEnum,
     };
     pub use rand;
     pub use result::{ChuiError, ChuiResult};
     pub use traits::{Coordinate, Parser, Position};
     pub use util::{
-        array_bit_position_copy, bit_position_copy, easy_1d_position_copy, easy_2d_position_copy,
-        enum_position_copy, gen_coords, num_sep, piece_operation,
+        array_bit_position_copy, bit_position_copy, bitset_position_copy, easy_1d_position_copy,
+        easy_2d_position_copy, enum_position_copy, gen_coords, num_sep, piece_operation,
     };
     pub use variant::Variant;
 }

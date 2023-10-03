@@ -9,6 +9,9 @@ pub use easy_1d_position::{Array1D, Easy1DPosition};
 mod bit_position;
 pub use bit_position::BitPosition;
 
+mod bitset_position;
+pub use bitset_position::BitSetPosition;
+
 mod array_bit_position;
 pub use array_bit_position::{ArrayBitPosition, BitmaskArray};
 

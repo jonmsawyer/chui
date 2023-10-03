@@ -109,6 +109,15 @@ pub const fn bit_position_copy(position: &BitPosition) -> ChuiResult<BitPosition
     Ok(*position)
 }
 
+/// `BitSetPosition` copies.
+///
+/// # Errors
+///
+/// This function will not error.
+pub const fn bitset_position_copy(position: &BitSetPosition) -> ChuiResult<BitSetPosition> {
+    Ok(*position)
+}
+
 /// `EasyPosition` copies.
 ///
 /// # Errors
