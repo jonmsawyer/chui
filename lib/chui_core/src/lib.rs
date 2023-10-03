@@ -15,6 +15,7 @@ mod player;
 mod position;
 mod result;
 mod traits;
+mod util;
 mod variant;
 
 /// Chui Core Prelude
@@ -39,6 +40,10 @@ pub mod prelude {
     pub use rand;
     pub use result::{ChuiError, ChuiResult};
     pub use traits::{Coordinate, Parser, Position};
+    pub use util::{
+        array_bit_position_copy, bit_position_copy, easy_position_copy, enum_position_copy,
+        gen_coords, num_sep, piece_operation,
+    };
     pub use variant::Variant;
 }
 
