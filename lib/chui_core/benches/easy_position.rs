@@ -64,7 +64,7 @@ fn position_tree(c: &mut Criterion) {
     group.throughput(Throughput::Elements(coords_vec.len() as u64));
     group.measurement_time(duration);
     group.bench_with_input(
-        BenchmarkId::from_parameter(format!("(Copy then Operate = {})", formatted_len)),
+        BenchmarkId::from_parameter(format!("Copy then Operate ({})", formatted_len)),
         &coords_vec,
         |b, coords| {
             b.iter(|| {

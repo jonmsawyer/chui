@@ -18,7 +18,7 @@ fn piece_operations(c: &mut Criterion) {
     group.throughput(Throughput::Elements(coords_vec.len() as u64));
     group.measurement_time(duration);
     group.bench_with_input(
-        BenchmarkId::from_parameter(format!("(Piece Operations = {})", formatted_len)),
+        BenchmarkId::from_parameter(format!("Piece Operations = ({})", formatted_len)),
         &coords_vec,
         |b, coords| {
             b.iter(|| {
@@ -43,7 +43,7 @@ fn position_copies(c: &mut Criterion) {
     group.throughput(Throughput::Elements(num_copies));
     group.measurement_time(duration);
     group.bench_with_input(
-        BenchmarkId::from_parameter(format!("(Position Copies = {})", formatted_len)),
+        BenchmarkId::from_parameter(format!("Position Copies = ({})", formatted_len)),
         &num_copies,
         |b, _| {
             b.iter(|| enum_position_copy(enum_position));
@@ -64,7 +64,7 @@ fn position_tree(c: &mut Criterion) {
     group.throughput(Throughput::Elements(coords_vec.len() as u64));
     group.measurement_time(duration);
     group.bench_with_input(
-        BenchmarkId::from_parameter(format!("(Copy then Operate = {})", formatted_len)),
+        BenchmarkId::from_parameter(format!("Copy then Operate ({})", formatted_len)),
         &coords_vec,
         |b, coords| {
             b.iter(|| {
