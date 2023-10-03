@@ -1074,7 +1074,7 @@ checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
 name = "chui"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chui_core",
  "chui_macros",
@@ -1083,21 +1083,21 @@ dependencies = [
 
 [[package]]
 name = "chui-console"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chui_core",
 ]
 
 [[package]]
 name = "chui-dev"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chui_core",
 ]
 
 [[package]]
 name = "chui-trainer"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chui_core",
  "chui_macros",
@@ -1106,14 +1106,14 @@ dependencies = [
 
 [[package]]
 name = "chui-ui"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chui_ui",
 ]
 
 [[package]]
 name = "chui_core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chui_macros",
  "colored",
@@ -1125,7 +1125,7 @@ dependencies = [
 
 [[package]]
 name = "chui_macros"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "darling",
  "quote",
@@ -1134,7 +1134,7 @@ dependencies = [
 
 [[package]]
 name = "chui_ui"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bevy",
  "bevy_egui",
