@@ -64,13 +64,85 @@ pub fn num_sep(s: &str, separator: Option<char>) -> Option<String> {
     Some(out)
 }
 
+/// Generate a vector of `Coordinate` pairs.
+///
+/// # Panics
+///
+/// This function will not panic.
+pub fn gen_coords(num_coords: u64) -> Vec<(Coord, Coord)> {
+    let mut rng = rand::thread_rng();
+    let coord = Uniform::from(0..8);
+    let mut coords: Vec<(Coord, Coord)> = Vec::new();
+
+    for _ in 0..num_coords {
+        coords.push((
+            Coord::try_from((coord.sample(&mut rng), coord.sample(&mut rng))).unwrap(),
+            Coord::try_from((coord.sample(&mut rng), coord.sample(&mut rng))).unwrap(),
+        ));
+    }
+
+    coords
+}
+
+/// Benchmark the input Position.
+pub fn piece_operation(position: &mut dyn Position, coords: &(Coord, Coord)) {
+    let p1 = position.get_piece(coords.0);
+    let p2 = position.put_piece(p1, coords.1);
+    position.put_piece(p2, coords.0);
+}
+
+/// `ArrayBitPosition` copies.
+///
+/// # Errors
+///
+/// This function will not error.
+pub const fn array_bit_position_copy(position: &ArrayBitPosition) -> ChuiResult<ArrayBitPosition> {
+    Ok(*position)
+}
+
+/// `BitPosition` copies.
+///
+/// # Errors
+///
+/// This function will not error.
+pub const fn bit_position_copy(position: &BitPosition) -> ChuiResult<BitPosition> {
+    Ok(*position)
+}
+
+/// `EasyPosition` copies.
+///
+/// # Errors
+///
+/// This function will not error.
+pub const fn easy_2d_position_copy(position: &Easy2DPosition) -> ChuiResult<Easy2DPosition> {
+    Ok(*position)
+}
+
+/// `Easy1DPosition` copies.
+///
+/// # Errors
+///
+/// This function will not error.
+pub const fn easy_1d_position_copy(position: &Easy1DPosition) -> ChuiResult<Easy1DPosition> {
+    Ok(*position)
+}
+
+/// `EnumPosition` copies.
+///
+/// # Errors
+///
+/// This function will not error.
+pub const fn enum_position_copy(position: &EnumPosition) -> ChuiResult<EnumPosition> {
+    Ok(*position)
+}
+
 #[cfg(test)]
 mod test {
     use super::num_sep;
 
     #[test]
     #[allow(clippy::cognitive_complexity)]
-    fn basic() {
+    fn number_separator() {
         //
         // With default separator.
         //
@@ -155,71 +227,4 @@ mod test {
         assert_eq!(num_sep("01.a", Some('_')).as_deref(), None);
         assert_eq!(num_sep(".0.", Some('_')).as_deref(), None);
     }
-}
-
-/// Generate a vector of `Coordinate` pairs.
-///
-/// # Panics
-///
-/// This function will not panic.
-pub fn gen_coords(num_coords: u64) -> Vec<(Coord, Coord)> {
-    let mut rng = rand::thread_rng();
-    let coord = Uniform::from(0..8);
-    let mut coords: Vec<(Coord, Coord)> = Vec::new();
-
-    for _ in 0..num_coords {
-        coords.push((
-            Coord::try_from((coord.sample(&mut rng), coord.sample(&mut rng))).unwrap(),
-            Coord::try_from((coord.sample(&mut rng), coord.sample(&mut rng))).unwrap(),
-        ));
-    }
-
-    coords
-}
-
-/// Benchmark the input Position.
-pub fn piece_operation(position: &mut dyn Position, coords: &(Coord, Coord)) {
-    let p1 = position.get_piece(coords.0);
-    let p2 = position.put_piece(p1, coords.1);
-    position.put_piece(p2, coords.0);
-}
-
-/// `ArrayBitPosition` copies.
-///
-/// # Errors
-///
-/// This function will not error.
-pub const fn array_bit_position_copy(position: ArrayBitPosition) -> ChuiResult<ArrayBitPosition> {
-    let pos = position;
-    Ok(pos)
-}
-
-/// `BitPosition` copies.
-///
-/// # Errors
-///
-/// This function will not error.
-pub const fn bit_position_copy(position: BitPosition) -> ChuiResult<BitPosition> {
-    let pos = position;
-    Ok(pos)
-}
-
-/// `BitPosition` copies.
-///
-/// # Errors
-///
-/// This function will not error.
-pub const fn easy_position_copy(position: EasyPosition) -> ChuiResult<EasyPosition> {
-    let pos = position;
-    Ok(pos)
-}
-
-/// `BitPosition` copies.
-///
-/// # Errors
-///
-/// This function will not error.
-pub const fn enum_position_copy(position: EnumPosition) -> ChuiResult<EnumPosition> {
-    let pos = position;
-    Ok(pos)
 }

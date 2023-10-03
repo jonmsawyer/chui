@@ -11,14 +11,14 @@ pub type Array2D = [[Option<Piece>; FILES as usize]; RANKS as usize];
 
 /// Position of the chessboard represented by a 2D array of `Option<Piece>`s.
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct EasyPosition(Array2D);
+pub struct Easy2DPosition(Array2D);
 
-impl EasyPosition {
+impl Easy2DPosition {
     /// New `EasyPosition` given a chess Variant.
-    pub fn new(chess_variant: Variant) -> EasyPosition {
+    pub fn new(chess_variant: Variant) -> Easy2DPosition {
         match chess_variant {
-            Variant::Empty => EasyPosition::default(),
-            Variant::StandardChess => EasyPosition::new_standard_chess(),
+            Variant::Empty => Easy2DPosition::default(),
+            Variant::StandardChess => Easy2DPosition::new_standard_chess(),
         }
     }
 
@@ -27,10 +27,10 @@ impl EasyPosition {
     /// # Panics
     ///
     /// This method does not panic because of the use of known constants.
-    pub fn new_standard_chess() -> EasyPosition {
-        EasyPosition([
+    pub fn new_standard_chess() -> Easy2DPosition {
+        Easy2DPosition([
             // rank 1
-            EasyPosition::standard_row_of_pieces(Color::White, 0).unwrap(),
+            Easy2DPosition::standard_row_of_pieces(Color::White, 0).unwrap(),
             // rank 2
             [
                 Some(Piece::new(
@@ -122,7 +122,7 @@ impl EasyPosition {
                 )),
             ],
             // rank 8
-            EasyPosition::standard_row_of_pieces(Color::Black, 7).unwrap(),
+            Easy2DPosition::standard_row_of_pieces(Color::Black, 7).unwrap(),
         ])
     }
 
@@ -194,7 +194,7 @@ impl EasyPosition {
     }
 }
 
-impl Position for EasyPosition {
+impl Position for Easy2DPosition {
     /// Get the piece at the given coordinate.
     fn get_piece(&self, coord: Coord) -> Option<Piece> {
         self[coord.get_rank() as usize][coord.get_file() as usize]
@@ -235,7 +235,7 @@ impl Position for EasyPosition {
     }
 }
 
-impl Deref for EasyPosition {
+impl Deref for Easy2DPosition {
     type Target = Array2D;
 
     fn deref(&self) -> &Array2D {
@@ -243,13 +243,13 @@ impl Deref for EasyPosition {
     }
 }
 
-impl DerefMut for EasyPosition {
+impl DerefMut for Easy2DPosition {
     fn deref_mut(&mut self) -> &mut Array2D {
         &mut self.0
     }
 }
 
-impl Iterator for EasyPosition {
+impl Iterator for Easy2DPosition {
     type Item = Piece;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -259,7 +259,7 @@ impl Iterator for EasyPosition {
 }
 
 /// Displays the position for White.
-impl fmt::Display for EasyPosition {
+impl fmt::Display for Easy2DPosition {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.white_to_string())
     }

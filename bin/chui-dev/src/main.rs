@@ -98,15 +98,17 @@ fn do_position(name: String, position: &mut dyn Position) -> ChuiResult<()> {
 }
 
 fn main() -> ChuiResult<()> {
-    let mut easy_position = EasyPosition::new(Variant::StandardChess);
+    let mut easy_2d_position = Easy2DPosition::new(Variant::StandardChess);
     let mut bit_position = BitPosition::new(Variant::StandardChess);
     let mut array_bit_position = ArrayBitPosition::new(Variant::StandardChess);
     let mut enum_position = EnumPosition::new(Variant::StandardChess);
+    let mut easy_1d_position = Easy1DPosition::new(Variant::StandardChess);
 
-    do_position("EasyPosition".to_string(), &mut easy_position).ok();
+    do_position("Easy2DPosition".to_string(), &mut easy_2d_position).ok();
     do_position("BitPosition".to_string(), &mut bit_position).ok();
     do_position("ArrayBitPosition".to_string(), &mut array_bit_position).ok();
     do_position("EnumPosition".to_string(), &mut enum_position).ok();
+    do_position("Easy1DPosition".to_string(), &mut easy_1d_position).ok();
 
     Ok(())
 }
