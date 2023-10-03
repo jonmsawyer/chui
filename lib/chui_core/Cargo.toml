@@ -29,4 +29,3 @@ criterion = { version = "0.5.1", features = ["html_reports"] }
 [[bench]]
 name = "position"
 harness = false
-chui_macros.workspace = true
