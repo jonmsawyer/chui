@@ -18,6 +18,7 @@ mod grid;
 use grid::GridTrainer;
 
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
+/// Command type.
 pub enum CommandType {
     /// The default state of the application as a type of command.
     #[default]
@@ -40,6 +41,7 @@ pub enum CommandType {
 
 #[derive(Debug, Trainer, Clone)]
 #[trainer(base = true)]
+/// Coordinate trainer.
 pub struct CoordinateTrainer {
     /// Verbose name.
     name_verbose: String,

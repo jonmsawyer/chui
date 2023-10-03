@@ -1,10 +1,5 @@
 //! Chui Core
 
-#![warn(missing_docs)]
-#![deny(rustdoc::broken_intra_doc_links)]
-#![allow(clippy::mod_module_files)]
-#![allow(clippy::wildcard_imports)]
-
 mod board;
 mod chess_move;
 mod command;
@@ -37,7 +32,11 @@ pub mod prelude {
     pub use parser::ParserEngine;
     pub use piece::{Color, Piece, PieceKind};
     pub use player::Player;
-    pub use position::{Array2D, ArrayBitPosition, BitPosition, BitmaskArray, EasyPosition};
+    pub use position::{
+        Array2D, ArrayBitPosition, BitPosition, BitmaskArray, EasyPosition, EnumArray,
+        EnumPosition, PieceEnum,
+    };
+    pub use rand;
     pub use result::{ChuiError, ChuiResult};
     pub use traits::{Coordinate, Parser, Position};
     pub use variant::Variant;

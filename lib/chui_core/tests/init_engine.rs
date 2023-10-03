@@ -1,10 +1,5 @@
 //! Chui Core Tests
 
-use chui_macros as _;
-use colored as _;
-use nonmax as _;
-use thiserror as _;
-
 use chui_core::prelude::*;
 
 // #[test]

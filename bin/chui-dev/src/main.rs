@@ -1,6 +1,7 @@
 //! Main dev.
 
 #![allow(unused_imports)]
+#![allow(dead_code)]
 #![allow(clippy::shadow_unrelated)]
 
 use std::mem::{size_of, size_of_val};
@@ -43,8 +44,10 @@ fn put_piece(position: &mut dyn Position, piece: Piece) {
 }
 
 /// Do stuff to `position`.
-fn do_position(position: &mut dyn Position) -> ChuiResult<()> {
-    println!("=====================================");
+fn do_position(name: String, position: &mut dyn Position) -> ChuiResult<()> {
+    println!("== {name} ===================================");
+
+    println!("{}", position);
 
     get_piece(position, Coord::try_from(A1)?);
     get_piece(position, Coord::try_from(A8)?);
@@ -98,35 +101,12 @@ fn main() -> ChuiResult<()> {
     let mut easy_position = EasyPosition::new(Variant::StandardChess);
     let mut bit_position = BitPosition::new(Variant::StandardChess);
     let mut array_bit_position = ArrayBitPosition::new(Variant::StandardChess);
+    let mut enum_position = EnumPosition::new(Variant::StandardChess);
 
-    do_position(&mut easy_position).ok();
-    do_position(&mut bit_position).ok();
-    do_position(&mut array_bit_position).ok();
-
-    println!(
-        "Size of EasyPosition: {} bytes.",
-        size_of_val(&easy_position)
-    );
-    println!("Size of BitPosition: {} bytes.", size_of_val(&bit_position));
-    println!(
-        "Size of ArrayBitPosition: {} bytes.",
-        size_of_val(&array_bit_position)
-    );
-
-    let o_piece: Option<Piece> = None;
-    println!(
-        "Size of Option<Piece> = None: {} bytes.",
-        size_of_val(&o_piece)
-    );
-    let o_piece: Option<Piece> = Some(Piece::new(
-        PieceKind::King,
-        Color::White,
-        Coord::try_from(A1)?,
-    ));
-    println!(
-        "Size of Option<Piece> = White King at a3: {} bytes.",
-        size_of_val(&o_piece)
-    );
+    do_position("EasyPosition".to_string(), &mut easy_position).ok();
+    do_position("BitPosition".to_string(), &mut bit_position).ok();
+    do_position("ArrayBitPosition".to_string(), &mut array_bit_position).ok();
+    do_position("EnumPosition".to_string(), &mut enum_position).ok();
 
     Ok(())
 }

@@ -374,7 +374,6 @@ impl<'a> MoveGenerator<'a> {
             return true;
         }
 
-        #[allow(clippy::nonminimal_bool)] // Because readability is better than optimization.
         // If within knight move, move is valid.
         if file_a_idx + 1 == file_b_idx && rank_a_idx + 2 == rank_b_idx
             || file_a_idx + 1 == file_b_idx && rank_a_idx - 2 == rank_b_idx
@@ -427,7 +426,6 @@ impl<'a> MoveGenerator<'a> {
             return false;
         }
 
-        #[allow(clippy::nonminimal_bool)] // Because readability is better than optimization.
         // Ending file cannot be more than one apart from
         // starting file.
         //

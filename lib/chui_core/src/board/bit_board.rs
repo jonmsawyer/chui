@@ -4,7 +4,6 @@
 
 // use nonmax::NonMaxU8;
 
-// #[allow(clippy::wildcard_imports)]
 // use crate::constants::bitmask::{FILES, RANKS};
 
 use crate::prelude::*;

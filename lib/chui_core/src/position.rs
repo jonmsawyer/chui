@@ -8,3 +8,6 @@ pub use bit_position::BitPosition;
 
 mod array_bit_position;
 pub use array_bit_position::{ArrayBitPosition, BitmaskArray};
+
+mod enum_position;
+pub use enum_position::{EnumArray, EnumPosition, PieceEnum};

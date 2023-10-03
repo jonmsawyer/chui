@@ -6,5 +6,4 @@
 //! here.
 
 pub use chui_core::prelude::*;
-use chui_macros as _;
 pub use chui_ui::Ui;
