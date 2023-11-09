@@ -10,9 +10,9 @@ use crate::prelude::*;
 pub struct DescriptiveParser;
 
 impl Parser for DescriptiveParser {
-    /// Parse the chess move, return `Ok(Move)` on success,
+    /// Parse the chess move, return `Ok(ChessMove)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, _the_move: String, _to_move: Color) -> ChuiResult<Move> {
+    fn parse(&mut self, _the_move: String, _to_move: Color) -> ChuiResult<ChessMove> {
         Err(ChuiError::InvalidMove(
             "DescriptiveParser not implemented".to_string(),
         ))

@@ -10,9 +10,9 @@ use crate::prelude::*;
 pub struct ReversibleAlgebraicParser;
 
 impl Parser for ReversibleAlgebraicParser {
-    /// Parse the chess move, return `Ok(Move)` on success,
+    /// Parse the chess move, return `Ok(ChessMove)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, _the_move: String, _to_move: Color) -> ChuiResult<Move> {
+    fn parse(&mut self, _the_move: String, _to_move: Color) -> ChuiResult<ChessMove> {
         Err(ChuiError::InvalidMove(
             "ReversibleAlgebraicParser not implemented".to_string(),
         ))

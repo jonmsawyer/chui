@@ -748,20 +748,20 @@ impl ChessMove {
     pub fn process_move(&mut self, game: &mut Game) -> ChuiResult<()> {
         self.set_color(game.to_move);
         match self.move_type {
-            Some(MoveType::Castle) => {
-                println!("Move Type is Castle.");
+            Some(MoveType::PawnMove) => {
+                println!("Move Type is Pawn Move");
             }
             Some(MoveType::PawnCapture) => {
                 println!("Move Type is Pawn Capture.");
             }
-            Some(MoveType::PawnMove) => {
-                println!("Move Type is Pawn Move");
+            Some(MoveType::PieceMove) => {
+                println!("Move Type is Piece Move.");
             }
             Some(MoveType::PieceCapture) => {
                 println!("Move Type is Piece Capture.");
             }
-            Some(MoveType::PieceMove) => {
-                println!("Move Type is Piece Move.");
+            Some(MoveType::Castle) => {
+                println!("Move Type is Castle.");
             }
             None => {
                 println!("Move Type is Invalid.");

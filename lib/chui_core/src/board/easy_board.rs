@@ -70,7 +70,7 @@ impl Board {
     /// # Panics
     ///
     /// Panics when the `move_obj`'s piece is None after checking that it is Some.
-    pub fn apply_move(&mut self, move_obj: &Move) -> ChuiResult<Option<Piece>> {
+    pub fn apply_move(&mut self, move_obj: &ChessMove) -> ChuiResult<Option<Piece>> {
         if move_obj.get_piece().is_none() {
             return Err(ChuiError::InvalidMove(
                 "No piece to apply move.".to_string(),

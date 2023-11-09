@@ -13,20 +13,20 @@ pub struct ICCFParser {
 }
 
 impl Parser for ICCFParser {
-    /// Parse the chess move, return `Ok(Move)` on success,
+    /// Parse the chess move, return `Ok(ChessMove)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
     fn parse(&mut self, move_string: String, to_move: Color) -> ChuiResult<ChessMove> {
         self.to_move = to_move;
-        let char_list: Vec<char> = vec!['1', '2', '3', '4', '5', '6', '7', '8'];
         let mut the_move: String = self.trim_and_check_whitespace(&move_string)?;
-        the_move.retain(|c: char| char_list.contains(&c));
+        the_move.retain(|c: char| CHAR_RANKS.contains(&c));
         if the_move.len() != 4 {
             self.invalid_input(
                 format!(
-                "{} is an invalid move: invalid length (move length is {} but it needs to be 4)",
-                the_move,
-                the_move.len(),
-            )
+                    "{} is an invalid move: invalid length (move length is {} but it needs \
+                    to be 4)",
+                    the_move,
+                    the_move.len(),
+                )
                 .as_str(),
             )?;
         }

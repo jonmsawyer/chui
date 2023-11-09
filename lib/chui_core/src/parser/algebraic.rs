@@ -21,7 +21,7 @@ pub struct AlgebraicParser<'a> {
 }
 
 impl<'a> Parser for AlgebraicParser<'a> {
-    /// Parse the chess move, return `Ok(Move)` on success,
+    /// Parse the chess move, return `Ok(ChessMove)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
     ///
     /// Examples:
@@ -1169,7 +1169,7 @@ impl<'a> AlgebraicParser<'a> {
 // mod test {
 //     use crate::prelude::*;
 
-//     fn parse_the_move(the_move: String) -> ChuiResult<Move> {
+//     fn parse_the_move(the_move: String) -> ChuiResult<ChessMove> {
 //         let mut parser = parser::new(ParserEngine::Algebraic);
 //         // If parsing won't work for White, it won't work for Black.
 //         parser.parse(the_move, Color::White)
@@ -1197,7 +1197,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 4)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1226,7 +1226,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 4)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1255,7 +1255,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 4)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1284,7 +1284,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1313,7 +1313,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 4)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1342,7 +1342,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1371,7 +1371,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1400,7 +1400,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1429,7 +1429,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1458,7 +1458,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1487,7 +1487,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1516,7 +1516,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1545,7 +1545,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1574,7 +1574,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1603,7 +1603,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1632,7 +1632,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('e', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1661,7 +1661,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1690,7 +1690,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1719,7 +1719,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1748,7 +1748,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1777,7 +1777,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1806,7 +1806,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1835,7 +1835,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1864,7 +1864,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('e', 9),
 //                     to_coord: Coord::try_from(('f', 8)),
 //                     piece: Some(Piece::new(PieceKind::Pawn, Color::White)),
@@ -1893,7 +1893,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
@@ -1922,7 +1922,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
@@ -1951,7 +1951,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
@@ -1980,7 +1980,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
@@ -2009,7 +2009,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
@@ -2038,7 +2038,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
@@ -2067,7 +2067,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
@@ -2096,7 +2096,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: Coord::try_from(('f', 4)),
 //                     piece: Some(Piece::new(PieceKind::Bishop, Color::White)),
@@ -2125,7 +2125,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: None,
 //                     piece: Some(Piece::new(PieceKind::King, Color::White)),
@@ -2154,7 +2154,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: None,
 //                     piece: Some(Piece::new(PieceKind::King, Color::White)),
@@ -2183,7 +2183,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: None,
 //                     piece: Some(Piece::new(PieceKind::King, Color::White)),
@@ -2212,7 +2212,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: None,
 //                     piece: Some(Piece::new(PieceKind::King, Color::White)),
@@ -2241,7 +2241,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: None,
 //                     piece: Some(Piece::new(PieceKind::King, Color::White)),
@@ -2270,7 +2270,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: None,
 //                     piece: Some(Piece::new(PieceKind::King, Color::White)),
@@ -2299,7 +2299,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: None,
 //                     piece: Some(Piece::new(PieceKind::King, Color::White)),
@@ -2328,7 +2328,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: None,
 //                     to_coord: None,
 //                     piece: Some(Piece::new(PieceKind::King, Color::White)),
@@ -2357,7 +2357,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 9),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2386,7 +2386,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 9),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2415,7 +2415,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 9),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2444,7 +2444,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 9),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2473,7 +2473,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 9),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2502,7 +2502,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 9),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2531,7 +2531,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 9),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2560,7 +2560,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 9),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2589,7 +2589,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('-', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2618,7 +2618,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('-', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2647,7 +2647,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('-', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2676,7 +2676,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('-', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2705,7 +2705,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('-', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2734,7 +2734,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('-', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2763,7 +2763,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('-', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2792,7 +2792,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('-', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2821,7 +2821,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2850,7 +2850,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2879,7 +2879,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2908,7 +2908,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2937,7 +2937,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2966,7 +2966,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -2995,7 +2995,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),
@@ -3024,7 +3024,7 @@ impl<'a> AlgebraicParser<'a> {
 //         if let Ok(the_parsed_move) = parse_the_move(the_move) {
 //             assert_eq!(
 //                 the_parsed_move,
-//                 Move {
+//                 ChessMove {
 //                     from_coord: ('a', 1),
 //                     to_coord: Coord::try_from(('e', 1)),
 //                     piece: Some(Piece::new(PieceKind::Rook, Color::White)),

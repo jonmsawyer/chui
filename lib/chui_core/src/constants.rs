@@ -11,6 +11,9 @@ pub const FILES: u8 = 8;
 /// An array of chessboard files as usize format 8 elements long.
 pub const INT_FILES: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
 
+/// An array of chessboard ranks as usize format 8 elements long.
+pub const INT_RANKS: [u8; 8] = [1, 2, 3, 4, 5, 6, 7, 8];
+
 /// An array of chessboard files as &str format 8 elements long, representing alpha.
 pub const STR_FILES: [&str; 8] = ["a", "b", "c", "d", "e", "f", "g", "h"];
 

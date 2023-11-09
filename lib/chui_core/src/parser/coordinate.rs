@@ -12,9 +12,9 @@ use super::Parser;
 pub struct CoordinateParser;
 
 impl Parser for CoordinateParser {
-    /// Parse the chess move, return `Ok(Move)` on success,
+    /// Parse the chess move, return `Ok(ChessMove)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
-    fn parse(&mut self, _the_move: String, _to_move: Color) -> ChuiResult<Move> {
+    fn parse(&mut self, _the_move: String, _to_move: Color) -> ChuiResult<ChessMove> {
         Err(ChuiError::InvalidMove(
             "CoordinateParser not implemented".to_string(),
         ))

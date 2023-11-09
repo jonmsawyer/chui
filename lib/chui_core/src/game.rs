@@ -175,7 +175,7 @@ impl Game {
         commands::switch_parser(self, command);
     }
 
-    /// Parse the move. Returns an Ok(Move) if the parsing of the
+    /// Parse the move. Returns an Ok(ChessMove) if the parsing of the
     /// move is successful, otherwise a `ChuiError` will result.
     ///
     /// # Errors

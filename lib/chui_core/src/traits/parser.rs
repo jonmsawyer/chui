@@ -16,7 +16,7 @@ use crate::prelude::*;
 /// pub struct MyParser;
 ///
 /// impl Parser for MyParser {
-///     fn parse(&mut self, _the_move: String, _color: Color) -> ChuiResult<Move> {
+///     fn parse(&mut self, _the_move: String, _color: Color) -> ChuiResult<ChessMove> {
 ///         Err(
 ///             ChuiError::InvalidMove(
 ///                 "MyParser not implemented.".to_string()
@@ -43,7 +43,7 @@ use crate::prelude::*;
 /// }
 /// ```
 pub trait Parser: Send + Sync {
-    /// Parse the chess move, return `Ok(Move)` on success,
+    /// Parse the chess move, return `Ok(ChessMove)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
     ///
     /// # Errors
