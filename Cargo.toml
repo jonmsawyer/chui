@@ -1,6 +1,6 @@
 [package]
 name = "chui"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Jonathan Sawyer <jonmsawyer@gmail.com>"]
 edition = "2021"
 rust-version = "1.73.0"
