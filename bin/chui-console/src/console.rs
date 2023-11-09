@@ -2,33 +2,53 @@
 
 use chui_core::prelude::*;
 
+/// Log a blank line to the console.
+pub fn log() {
+    println!();
+}
+
+/// Log output to the console.
+pub fn log_ln(text: String) {
+    println!("{}", text);
+}
+
+/// Log output to the console.
+pub fn log_str(text: &str) {
+    println!("{}", text);
+}
+
+/// Log output to the console with a given line ending.
+pub fn _log_ending(text: String, ending: &str) {
+    print!("{}{}", text, ending);
+}
+
 /// Run the engine.
 ///
 /// # Errors
 ///
 /// * Errors when...
 pub fn run() -> ChuiResult<()> {
-    let mut game = Game::default();
-    let mut command = Command::new(&game);
-    let context = CommandContext::Main;
-    let mut break_loop = false;
-    let mut display_board = true;
+    let mut game: Game = Game::default();
+    let mut command: Command = Command::new(&game);
+    let context: CommandContext = CommandContext::Main;
+    let mut break_loop: bool = false;
+    let mut display_board: bool = true;
 
     loop {
         if display_board {
-            println!("{}", game.to_move_to_string());
+            log_ln(game.to_move_to_string());
         } else {
             display_board = true;
         }
-        println!();
-        println!("Please input move(s) or command. (q to quit, h for help)");
+        log();
+        log_str("Please input move(s) or command. (q to quit, h for help)");
 
-        let move_input = Game::get_input();
+        let move_input: String = Game::get_input();
 
         for move_str in move_input.split_whitespace() {
-            let the_move = String::from(move_str);
-            let command_move = the_move.clone();
-            match command.process_command(context, command_move) {
+            let mut move_string: String = String::from(move_str);
+            let input_command: String = move_string.clone();
+            match command.process_command(context, input_command) {
                 Some(CommandKind::Quit) => {
                     break_loop = true;
                 }
@@ -46,59 +66,59 @@ pub fn run() -> ChuiResult<()> {
                 }
 
                 Some(CommandKind::DisplayToMove) => {
-                    println!();
-                    println!("{}", game.to_move_to_string());
+                    log();
+                    log_ln(game.to_move_to_string());
                     display_board = false;
                     continue;
                 }
 
                 Some(CommandKind::DisplayForWhite) => {
-                    println!();
-                    println!("{}", game.white_to_string());
+                    log();
+                    log_ln(game.white_to_string());
                     display_board = false;
                     continue;
                 }
 
                 Some(CommandKind::DisplayForBlack) => {
-                    println!();
-                    println!("{}", game.black_to_string());
+                    log();
+                    log_ln(game.black_to_string());
                     display_board = false;
                     continue;
                 }
 
                 Some(CommandKind::DisplayFEN) => {
-                    println!();
-                    println!("{}", game.get_fen());
+                    log();
+                    log_ln(game.get_fen());
                     display_board = false;
                     continue;
                 }
 
                 Some(CommandKind::WhiteResigns) => {
-                    println!();
-                    println!("White resigns.");
+                    log();
+                    log_str("White resigns.");
                     game.win_condition = Some(WinCondition::WhiteResigns);
                     game.draw_condition = None;
                     continue;
                 }
 
                 Some(CommandKind::BlackResigns) => {
-                    println!();
-                    println!("Black resigns.");
+                    log();
+                    log_str("Black resigns.");
                     game.win_condition = Some(WinCondition::BlackResigns);
                     game.draw_condition = None;
                     continue;
                 }
 
                 Some(CommandKind::DisplayForWhiteEachMove) => {
-                    println!();
-                    println!("Display for White after each move.");
+                    log();
+                    log_str("Display for White after each move.");
                     game.display_for = Some(Color::White);
                     continue;
                 }
 
                 Some(CommandKind::DisplayForBlackEachMove) => {
-                    println!();
-                    println!("Display for Black after each move.");
+                    log();
+                    log_str("Display for Black after each move.");
                     game.display_for = Some(Color::Black);
                     continue;
                 }
@@ -106,7 +126,7 @@ pub fn run() -> ChuiResult<()> {
                 Some(CommandKind::DisplayMoveList) => {
                     let mut output = String::new();
 
-                    println!();
+                    log();
 
                     for (move_idx, move_obj) in game.move_list.iter().enumerate() {
                         let numeral = if move_idx % 2 == 0 {
@@ -124,14 +144,14 @@ pub fn run() -> ChuiResult<()> {
 
                     display_board = false;
 
-                    println!("Move List Notation:\n{}", output.trim());
+                    log_ln(format!("Move List Notation:\n{}", output.trim()));
                 }
 
                 Some(CommandKind::DisplayCaptures) => {
                     let mut white_output = String::new();
                     let mut black_output = String::new();
 
-                    println!();
+                    log();
 
                     for piece in game.captured_pieces.iter() {
                         match piece.get_color() {
@@ -147,49 +167,58 @@ pub fn run() -> ChuiResult<()> {
 
                     display_board = false;
 
-                    println!("Captures:");
-                    println!("White: {}", white_output);
-                    println!("Black: {}", black_output);
+                    log_str("Captures:");
+                    log_ln(format!("White: {}", white_output));
+                    log_ln(format!("Black: {}", black_output));
                 }
 
                 _ => {
-                    println!();
-                    println!("Input move or command: {}", the_move);
+                    log();
+                    log_ln(format!("Input move or command: {}", move_string));
 
-                    // Ignore any moves or commands with a '.' in it.
-                    // Eg., "1."
-                    if the_move.contains('.') {
-                        continue;
+                    let move_string_vec: Vec<&str> = move_str.split('.').collect::<Vec<_>>();
+                    log_ln(format!("Move string parts: {:?}", move_string_vec));
+                    if move_string_vec.len() > 1 {
+                        move_string = move_string_vec[1].to_string();
+                        log_ln(format!("Move string is now: {}", move_string));
                     }
 
-                    if the_move.eq("1-0") {
+                    if move_string.eq("1-0") {
                         game.win_condition = Some(WinCondition::BlackResigns);
                         game.draw_condition = None;
-                    } else if the_move.eq("0-1") {
+                        break;
+                    } else if move_string.eq("0-1") {
                         game.win_condition = Some(WinCondition::WhiteResigns);
                         game.draw_condition = None;
-                    } else if the_move.eq("1/2-1/2") || the_move.eq("½-½") {
+                        break;
+                    } else if move_string.eq("1/2-1/2") || move_string.eq("½-½") {
                         game.win_condition = None;
                         game.draw_condition = None; // TODO: ?
+                        break;
                     }
 
-                    match game.parse(the_move, game.to_move).as_ref() {
-                        Ok(move_obj) => {
-                            game.set_current_move(Some(move_obj.clone()));
+                    match game.parse(move_string, game.to_move).as_mut() {
+                        Ok(chess_move) => {
+                            if let Err(result) = chess_move.validate_move_for_board(&game.board) {
+                                log_ln(result.to_string());
+                                log_str("Move was found to be invalid by the validation function. Move not applied.");
+                                continue;
+                            }
+                            game.set_current_move(Some(chess_move.clone()));
                             if game.apply_move().is_ok() {
-                                game.move_list.push(move_obj.clone());
+                                game.move_list.push(chess_move.clone());
 
                                 game.half_move_counter += 1;
                                 if game.half_move_counter % 2 == 0 {
                                     game.move_counter += 1;
                                 }
                             } else {
-                                println!("Move not applied.");
-                                break;
+                                log_str("Move not applied.");
+                                continue;
                             }
                         }
 
-                        Err(error) => println!("{}", error),
+                        Err(error) => log_ln(format!("{}", error)),
                     }
                 }
             }

@@ -9,8 +9,8 @@ use crate::prelude::*;
 /// target square.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Board {
-    /// Represents an 8x8 chessboard using nested arrays.
-    position: ArrayBitPosition,
+    /// Represents an 8x8 chessboard.
+    position: BitPosition,
 
     /// Can white castle on the king side?
     pub white_can_castle_kingside: bool,
@@ -46,7 +46,7 @@ impl Board {
     /// Return a new [`Board`] given a [`ChessVariant`].
     pub fn new(variant: Variant) -> Board {
         Board {
-            position: ArrayBitPosition::new(variant),
+            position: BitPosition::new(variant),
             white_can_castle_kingside: true,
             white_can_castle_queenside: true,
             black_can_castle_kingside: true,
@@ -118,12 +118,12 @@ impl Board {
     //
 
     /// Get a reference to the position.
-    pub const fn get_position(&self) -> ArrayBitPosition {
+    pub const fn get_position(&self) -> BitPosition {
         self.position
     }
 
     /// Get a mutable reference to the position.
-    pub fn get_position_mut(&mut self) -> &mut ArrayBitPosition {
+    pub fn get_position_mut(&mut self) -> &mut BitPosition {
         &mut self.position
     }
 

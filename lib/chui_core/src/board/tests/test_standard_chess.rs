@@ -14,18 +14,18 @@ pub mod standard_chess {
         Board::print_coords(coords);
     }
 
-    fn get_piece(board: &Board, coord: Coord) -> ChuiResult<Piece> {
+    fn get_piece(board: &Board, coord: Option<Coord>) -> ChuiResult<Piece> {
         board
             .get_position()
             .get_piece(coord)
             .ok_or(ChuiError::InvalidPiece(format!(
                 "Invalid piece on {}",
-                coord
+                coord.unwrap()
             )))
     }
 
     fn get_vars(coord: (char, u8)) -> ChuiResult<(Board, Piece)> {
-        let (board, coord) = (new_board(), Coord::try_from(coord)?);
+        let (board, coord) = (new_board(), Coord::try_from(coord).ok());
         Ok((board, get_piece(&board, coord)?))
     }
 
@@ -365,7 +365,7 @@ pub mod standard_chess {
             for j in 0..8 {
                 assert_eq!(
                     None,
-                    board.get_position().get_piece(Coord::try_from((j, i))?)
+                    board.get_position().get_piece(Coord::try_from((j, i)).ok())
                 );
             }
         }

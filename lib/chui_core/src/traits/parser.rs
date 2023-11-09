@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 /// Implement this trait to define the `parse()` method on a parser.
 /// Any struct implementing this trait should parse a chess move
-/// in an expected notation and return a `Move` object, representing
+/// in an expected notation and return a `ChessMove` object, representing
 /// the validty or invalidity of the requested move for the given
 /// chessboard.
 ///
@@ -49,7 +49,7 @@ pub trait Parser: Send + Sync {
     /// # Errors
     ///
     /// * Errors when the parser cannot parse a move.
-    fn parse(&mut self, the_move: String, to_move: Color) -> ChuiResult<Move>;
+    fn parse(&mut self, move_string: String, to_move: Color) -> ChuiResult<ChessMove>;
 
     /// The name of the parser. Used in help messages and debug.
     fn name(&self) -> String;
@@ -64,7 +64,7 @@ pub trait Parser: Send + Sync {
     /// * Errors when the parser cannot generate a move from the board Coordinates.
     fn generate_move_from_board_coordinates(
         &self,
-        engine: &Game,
+        game: &Game,
         from_coord: Coord,
         to_coord: Coord,
     ) -> ChuiResult<String>;
@@ -76,8 +76,8 @@ pub trait Parser: Send + Sync {
     ///
     /// * Errors when the input move is empty.
     /// * Errors when the input move contains whitespace.
-    fn trim_and_check_whitespace(&self, the_move: String) -> ChuiResult<String> {
-        let the_move = the_move.trim().to_string();
+    fn trim_and_check_whitespace(&self, move_string: &str) -> ChuiResult<String> {
+        let the_move: String = move_string.trim().to_string();
 
         if the_move.eq("") {
             self.invalid_input("Input move cannot be empty")?;

@@ -402,6 +402,51 @@ impl Piece {
         self.is_same_kind(piece) && self.is_same_color(piece) && self.is_same_coord(piece)
     }
 
+    /// Is the piece a Pawn?
+    pub const fn is_pawn(&self) -> bool {
+        matches!(self.get_kind(), PieceKind::Pawn)
+    }
+
+    /// Is the piece a Knight?
+    pub const fn is_knight(&self) -> bool {
+        matches!(self.get_kind(), PieceKind::Knight)
+    }
+
+    /// Is the piece a Bishop?
+    pub const fn is_bishop(&self) -> bool {
+        matches!(self.get_kind(), PieceKind::Bishop)
+    }
+
+    /// Is the piece a Rook?
+    pub const fn is_rook(&self) -> bool {
+        matches!(self.get_kind(), PieceKind::Rook)
+    }
+
+    /// Is the piece a Queen?
+    pub const fn is_queen(&self) -> bool {
+        matches!(self.get_kind(), PieceKind::Queen)
+    }
+
+    /// Is the piece a King?
+    pub const fn is_king(&self) -> bool {
+        matches!(self.get_kind(), PieceKind::King)
+    }
+
+    /// Is the piece White?
+    pub const fn is_white(&self) -> bool {
+        matches!(self.get_color(), Color::White)
+    }
+
+    /// Is the piece Black?
+    pub const fn is_black(&self) -> bool {
+        matches!(self.get_color(), Color::Black)
+    }
+
+    /// Is the color of this piece the opposite color?
+    pub fn is_opposite_color(&self, color: Color) -> bool {
+        self.get_color() != color
+    }
+
     //
     // Setters.
     //
@@ -417,8 +462,10 @@ impl Piece {
     }
 
     /// Set the piece Coordinates.
-    pub fn set_coord(&mut self, coord: Coord) {
-        self.coord = coord;
+    pub fn set_coord(&mut self, coord: Option<Coord>) {
+        if let Some(coord) = coord {
+            self.coord = coord;
+        }
     }
 
     /// Set to true if the piece has moved.

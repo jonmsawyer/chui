@@ -146,6 +146,49 @@ impl Coord {
         }
         idx
     }
+
+    /// Check to see if the from coord and to coord are on the same orthogonal.
+    pub const fn is_orthogonal(&self, to_coord: Coord) -> bool {
+        self.get_file() == to_coord.get_file() || self.get_rank() == to_coord.get_rank()
+    }
+
+    /// Check to see if the from coord and to coord are on the same diagonal.
+    pub const fn is_diagonal(&self, to_coord: Coord) -> bool {
+        let file_diff: i8 = (to_coord.get_file() as i8 - self.get_file() as i8).abs();
+        let rank_diff: i8 = (to_coord.get_rank() as i8 - self.get_rank() as i8).abs();
+        file_diff == rank_diff
+    }
+
+    /// Check to see if the from coord and to coord are at a Knight's move away.
+    pub const fn is_knight_move(&self, to_coord: Coord) -> bool {
+        let file_diff: i8 = (to_coord.get_file() as i8 - self.get_file() as i8).abs();
+        let rank_diff: i8 = (to_coord.get_rank() as i8 - self.get_rank() as i8).abs();
+        file_diff == 1 && rank_diff == 2 || file_diff == 2 && rank_diff == 1
+    }
+
+    /// Validate if the `from_coord` `Coordinate` can move to `to_coord` `Coordinate`.
+    ///
+    /// # Errors
+    ///
+    /// When a move from and to the desired coord is just not possible.
+    pub fn validate_possible_move(&self, to_coord: Coord) -> ChuiResult<()> {
+        // Check if same coordinate.
+        if *self == to_coord {
+            return Err(ChuiError::InvalidInput(
+                "Move cannot be from and to the same square".to_string(),
+            ));
+        }
+        // Check if move is possible at all.
+        if !self.is_orthogonal(to_coord)
+            && !self.is_diagonal(to_coord)
+            && !self.is_knight_move(to_coord)
+        {
+            return Err(ChuiError::InvalidInput(
+                "Move is not possible with any piece".to_string(),
+            ));
+        }
+        Ok(())
+    }
 }
 
 /// Formats the position for a coordinate in Algebraic notation.

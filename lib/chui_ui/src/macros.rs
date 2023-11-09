@@ -114,7 +114,6 @@ macro_rules! asset_collection_impl {
                 let mut $ctx = Self::default();
                 $($init)*
 
-
                 $ctx
             }
 
@@ -127,7 +126,6 @@ macro_rules! asset_collection_impl {
                 let mut $ctx = LoadState::Loaded;
                 $($status)*
 
-
                 $ctx
             }
         }
@@ -139,9 +137,9 @@ macro_rules! asset_collection_impl {
         )(
             $($status)*
             match $server.get_load_state($self.$asset.clone()) {
-                LoadState::Loaded => {},
-                LoadState::Loading => $ctx = LoadState::Loading,
-                state => return state,
+                Some(LoadState::Loaded) => {},
+                Some(LoadState::Loading) => $ctx = LoadState::Loading,
+                state => return state.unwrap(),
             }
         ));
     };
@@ -161,9 +159,9 @@ macro_rules! asset_collection_impl {
             $($status)*
             let img = &$atlases.get(&$self.$asset).unwrap().texture;
             match $server.get_load_state(img) {
-                LoadState::Loaded => {},
-                LoadState::Loading => $ctx = LoadState::Loading,
-                state => return state,
+                Some(LoadState::Loaded) => {},
+                Some(LoadState::Loading) => $ctx = LoadState::Loading,
+                state => return state.unwrap(),
             }
         ));
     };

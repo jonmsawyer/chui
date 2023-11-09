@@ -262,7 +262,7 @@ fn resize_board_background(
     mut resize_event: EventReader<ResizeBoardEvent>,
     mut query: Query<&mut Transform, With<BoardBackground>>,
 ) {
-    for _ in resize_event.iter() {
+    for _ in resize_event.read() {
         let x = START_X_COORD * ui_state.square_pixels - 25_f32;
         let y = x;
         let scale = (ui_state.square_pixels * 8_f32 + 50_f32) / BOARD_BACKGROUND_SPRITE_WIDTH;
@@ -280,7 +280,7 @@ fn resize_board(
     mut resize_event: EventReader<ResizeBoardEvent>,
     mut query: Query<(&Square, &mut Transform)>,
 ) {
-    for _ in resize_event.iter() {
+    for _ in resize_event.read() {
         let (scale, start_x, start_y) = compute_coords(ui_state.square_pixels);
 
         let mut x = start_x;

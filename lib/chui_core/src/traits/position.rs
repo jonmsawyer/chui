@@ -7,19 +7,19 @@ use crate::prelude::{coord::*, *};
 /// trait Position.
 pub trait Position: fmt::Display {
     /// Get the piece at the given coordinate.
-    fn get_piece(&self, coord: Coord) -> Option<Piece>;
+    fn get_piece(&self, coord: Option<Coord>) -> Option<Piece>;
 
     // /// Get the available [`Piece`]s for a [`Color`].
     // fn get_pieces(&self, piece: Piece) -> Vec<Piece>;
 
     /// Take a piece off of the board.
-    fn take_piece(&mut self, coord: Coord) -> Option<Piece> {
+    fn take_piece(&mut self, coord: Option<Coord>) -> Option<Piece> {
         self.put_piece(None, coord)
     }
 
     /// Put a piece onto the board. Return any piece on the given square if it's occupied
     /// already.
-    fn put_piece(&mut self, piece: Option<Piece>, coord: Coord) -> Option<Piece>;
+    fn put_piece(&mut self, piece: Option<Piece>, coord: Option<Coord>) -> Option<Piece>;
 
     /// Replace the given piece from one square to another.
     ///
@@ -29,9 +29,9 @@ pub trait Position: fmt::Display {
     fn replace_piece(
         &mut self,
         mut piece_from: Piece,
-        move_obj: &Move,
+        move_obj: &ChessMove,
     ) -> ChuiResult<Option<Piece>> {
-        self.take_piece(piece_from.get_coord());
+        self.take_piece(Some(piece_from.get_coord()));
         piece_from.set_coord(move_obj.to_coord);
         Ok(self.put_piece(Some(piece_from), move_obj.to_coord))
     }
@@ -41,7 +41,7 @@ pub trait Position: fmt::Display {
         &self,
         _board: &Board,
         _piece: Piece,
-        _coord: Coord,
+        _coord: Option<Coord>,
     ) -> Vec<Piece> {
         Vec::<Piece>::new()
     }
@@ -72,7 +72,7 @@ pub trait Position: fmt::Display {
         let mut coords: Vec<Coord> = coords
             .into_iter()
             .filter(|&coord| {
-                self.get_pieces_attacking_coord(board, *piece, coord)
+                self.get_pieces_attacking_coord(board, *piece, Some(coord))
                     .is_empty()
             })
             .collect();
@@ -81,58 +81,58 @@ pub trait Position: fmt::Display {
         match piece.get_color() {
             Color::White => {
                 if board.white_can_castle_kingside {
-                    let d1 = Coord::try_from(D1).unwrap();
-                    let c1 = Coord::try_from(C1).unwrap();
+                    let d1 = Coord::try_from(D1).ok();
+                    let c1 = Coord::try_from(C1).ok();
 
                     if self.get_piece(d1).is_none() && self.get_piece(c1).is_none() {
                         let d1_pieces = self.get_pieces_attacking_coord(board, *piece, d1);
                         let c1_pieces = self.get_pieces_attacking_coord(board, *piece, c1);
 
                         if d1_pieces.is_empty() && c1_pieces.is_empty() {
-                            coords.extend(vec![c1]);
+                            coords.extend(vec![c1.unwrap()]);
                         }
                     }
                 }
 
                 if board.white_can_castle_queenside {
-                    let f1 = Coord::try_from(F1).unwrap();
-                    let g1 = Coord::try_from(G1).unwrap();
+                    let f1 = Coord::try_from(F1).ok();
+                    let g1 = Coord::try_from(G1).ok();
 
                     if self.get_piece(f1).is_none() && self.get_piece(g1).is_none() {
                         let f1_pieces = self.get_pieces_attacking_coord(board, *piece, f1);
                         let g1_pieces = self.get_pieces_attacking_coord(board, *piece, g1);
 
                         if f1_pieces.is_empty() && g1_pieces.is_empty() {
-                            coords.extend(vec![g1]);
+                            coords.extend(vec![g1.unwrap()]);
                         }
                     }
                 }
             }
             Color::Black => {
                 if board.black_can_castle_kingside {
-                    let d8 = Coord::try_from(D8).unwrap();
-                    let c8 = Coord::try_from(C8).unwrap();
+                    let d8 = Coord::try_from(D8).ok();
+                    let c8 = Coord::try_from(C8).ok();
 
                     if self.get_piece(d8).is_none() && self.get_piece(c8).is_none() {
                         let d8_pieces = self.get_pieces_attacking_coord(board, *piece, d8);
                         let c8_pieces = self.get_pieces_attacking_coord(board, *piece, c8);
 
                         if d8_pieces.is_empty() && c8_pieces.is_empty() {
-                            coords.extend(vec![c8]);
+                            coords.extend(vec![c8.unwrap()]);
                         }
                     }
                 }
 
                 if board.black_can_castle_queenside {
-                    let f8 = Coord::try_from(F8).unwrap();
-                    let g8 = Coord::try_from(G8).unwrap();
+                    let f8 = Coord::try_from(F8).ok();
+                    let g8 = Coord::try_from(G8).ok();
 
                     if self.get_piece(f8).is_none() && self.get_piece(g8).is_none() {
                         let f8_pieces = self.get_pieces_attacking_coord(board, *piece, f8);
                         let g8_pieces = self.get_pieces_attacking_coord(board, *piece, g8);
 
                         if f8_pieces.is_empty() && g8_pieces.is_empty() {
-                            coords.extend(vec![g8]);
+                            coords.extend(vec![g8.unwrap()]);
                         }
                     }
                 }
@@ -189,7 +189,7 @@ pub trait Position: fmt::Display {
         let rank_idx = piece.get_rank();
 
         if let Ok(n_coord) = Coord::new(file_idx + 1, rank_idx + 2) {
-            if let Some(n_piece) = self.get_piece(n_coord) {
+            if let Some(n_piece) = self.get_piece(Some(n_coord)) {
                 if n_piece.get_color() != piece.get_color() {
                     coords.push(n_coord);
                 }
@@ -199,7 +199,7 @@ pub trait Position: fmt::Display {
         }
 
         if let Ok(n_coord) = Coord::new(file_idx + 1, rank_idx.wrapping_sub(2)) {
-            if let Some(n_piece) = self.get_piece(n_coord) {
+            if let Some(n_piece) = self.get_piece(Some(n_coord)) {
                 if n_piece.get_color() != piece.get_color() {
                     coords.push(n_coord);
                 }
@@ -209,7 +209,7 @@ pub trait Position: fmt::Display {
         }
 
         if let Ok(n_coord) = Coord::new(file_idx.wrapping_sub(1), rank_idx + 2) {
-            if let Some(n_piece) = self.get_piece(n_coord) {
+            if let Some(n_piece) = self.get_piece(Some(n_coord)) {
                 if n_piece.get_color() != piece.get_color() {
                     coords.push(n_coord);
                 }
@@ -219,7 +219,7 @@ pub trait Position: fmt::Display {
         }
 
         if let Ok(n_coord) = Coord::new(file_idx.wrapping_sub(1), rank_idx.wrapping_sub(2)) {
-            if let Some(n_piece) = self.get_piece(n_coord) {
+            if let Some(n_piece) = self.get_piece(Some(n_coord)) {
                 if n_piece.get_color() != piece.get_color() {
                     coords.push(n_coord);
                 }
@@ -229,7 +229,7 @@ pub trait Position: fmt::Display {
         }
 
         if let Ok(n_coord) = Coord::new(file_idx + 2, rank_idx + 1) {
-            if let Some(n_piece) = self.get_piece(n_coord) {
+            if let Some(n_piece) = self.get_piece(Some(n_coord)) {
                 if n_piece.get_color() != piece.get_color() {
                     coords.push(n_coord);
                 }
@@ -239,7 +239,7 @@ pub trait Position: fmt::Display {
         }
 
         if let Ok(n_coord) = Coord::new(file_idx + 2, rank_idx.wrapping_sub(1)) {
-            if let Some(n_piece) = self.get_piece(n_coord) {
+            if let Some(n_piece) = self.get_piece(Some(n_coord)) {
                 if n_piece.get_color() != piece.get_color() {
                     coords.push(n_coord);
                 }
@@ -249,7 +249,7 @@ pub trait Position: fmt::Display {
         }
 
         if let Ok(n_coord) = Coord::new(file_idx.wrapping_sub(2), rank_idx + 1) {
-            if let Some(n_piece) = self.get_piece(n_coord) {
+            if let Some(n_piece) = self.get_piece(Some(n_coord)) {
                 if n_piece.get_color() != piece.get_color() {
                     coords.push(n_coord);
                 }
@@ -259,7 +259,7 @@ pub trait Position: fmt::Display {
         }
 
         if let Ok(n_coord) = Coord::new(file_idx.wrapping_sub(2), rank_idx.wrapping_sub(1)) {
-            if let Some(n_piece) = self.get_piece(n_coord) {
+            if let Some(n_piece) = self.get_piece(Some(n_coord)) {
                 if n_piece.get_color() != piece.get_color() {
                     coords.push(n_coord);
                 }
@@ -283,7 +283,7 @@ pub trait Position: fmt::Display {
             let new_coord_2 = Coord::new(file_idx, rank_idx + 2);
 
             if let Ok(new_coord) = new_coord_1 {
-                if self.get_piece(new_coord).is_none() {
+                if self.get_piece(Some(new_coord)).is_none() {
                     coords.push(new_coord);
                 }
             }
@@ -292,8 +292,8 @@ pub trait Position: fmt::Display {
             if let Ok(new_coord) = new_coord_1 {
                 if let Ok(new_coord2) = new_coord_2 {
                     if rank_idx == 1
-                        && self.get_piece(new_coord).is_none()
-                        && self.get_piece(new_coord2).is_none()
+                        && self.get_piece(Some(new_coord)).is_none()
+                        && self.get_piece(Some(new_coord2)).is_none()
                     {
                         coords.push(new_coord2);
                     }
@@ -304,7 +304,7 @@ pub trait Position: fmt::Display {
             let capture_2 = Coord::new(file_idx + 1, rank_idx + 1);
 
             if let Ok(capture_1) = capture_1 {
-                if let Some(o_piece) = self.get_piece(capture_1) {
+                if let Some(o_piece) = self.get_piece(Some(capture_1)) {
                     if o_piece.get_color() == Color::Black {
                         coords.push(capture_1);
                     }
@@ -318,7 +318,7 @@ pub trait Position: fmt::Display {
             }
 
             if let Ok(capture_2) = capture_2 {
-                if let Some(o_piece) = self.get_piece(capture_2) {
+                if let Some(o_piece) = self.get_piece(Some(capture_2)) {
                     if o_piece.get_color() == Color::Black {
                         coords.push(capture_2);
                     }
@@ -335,7 +335,7 @@ pub trait Position: fmt::Display {
             let new_coord2 = Coord::new(file_idx, rank_idx.wrapping_sub(2));
 
             if let Ok(new_coord) = new_coord {
-                if self.get_piece(new_coord).is_none() {
+                if self.get_piece(Some(new_coord)).is_none() {
                     coords.push(new_coord);
                 }
             }
@@ -344,8 +344,8 @@ pub trait Position: fmt::Display {
             if let Ok(new_coord) = new_coord {
                 if let Ok(new_coord2) = new_coord2 {
                     if rank_idx == 6
-                        && self.get_piece(new_coord).is_none()
-                        && self.get_piece(new_coord2).is_none()
+                        && self.get_piece(Some(new_coord)).is_none()
+                        && self.get_piece(Some(new_coord2)).is_none()
                     {
                         coords.push(new_coord2);
                     }
@@ -356,7 +356,7 @@ pub trait Position: fmt::Display {
             let capture_2 = Coord::new(file_idx + 1, rank_idx.wrapping_sub(1));
 
             if let Ok(capture_1) = capture_1 {
-                if let Some(o_piece) = self.get_piece(capture_1) {
+                if let Some(o_piece) = self.get_piece(Some(capture_1)) {
                     if o_piece.get_color() == Color::White {
                         coords.push(capture_1);
                     }
@@ -370,7 +370,7 @@ pub trait Position: fmt::Display {
             }
 
             if let Ok(capture_2) = capture_2 {
-                if let Some(o_piece) = self.get_piece(capture_2) {
+                if let Some(o_piece) = self.get_piece(Some(capture_2)) {
                     if o_piece.get_color() == Color::White {
                         coords.push(capture_2);
                     }
@@ -398,7 +398,7 @@ pub trait Position: fmt::Display {
 
         for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(piece.get_file(), rank_idx) {
-                if let Some(o_piece) = self.get_piece(new_coord) {
+                if let Some(o_piece) = self.get_piece(Some(new_coord)) {
                     if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
@@ -425,7 +425,7 @@ pub trait Position: fmt::Display {
 
         for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, piece.get_rank()) {
-                if let Some(o_piece) = self.get_piece(new_coord) {
+                if let Some(o_piece) = self.get_piece(Some(new_coord)) {
                     if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
@@ -452,7 +452,7 @@ pub trait Position: fmt::Display {
 
         for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(piece.get_file(), rank_idx) {
-                if let Some(o_piece) = self.get_piece(new_coord) {
+                if let Some(o_piece) = self.get_piece(Some(new_coord)) {
                     if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
@@ -479,7 +479,7 @@ pub trait Position: fmt::Display {
 
         for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, piece.get_rank()) {
-                if let Some(o_piece) = self.get_piece(new_coord) {
+                if let Some(o_piece) = self.get_piece(Some(new_coord)) {
                     if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
@@ -507,7 +507,7 @@ pub trait Position: fmt::Display {
 
         for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
-                if let Some(o_piece) = self.get_piece(new_coord) {
+                if let Some(o_piece) = self.get_piece(Some(new_coord)) {
                     if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
@@ -536,7 +536,7 @@ pub trait Position: fmt::Display {
 
         for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
-                if let Some(o_piece) = self.get_piece(new_coord) {
+                if let Some(o_piece) = self.get_piece(Some(new_coord)) {
                     if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
@@ -565,7 +565,7 @@ pub trait Position: fmt::Display {
 
         for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
-                if let Some(o_piece) = self.get_piece(new_coord) {
+                if let Some(o_piece) = self.get_piece(Some(new_coord)) {
                     if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
@@ -594,7 +594,7 @@ pub trait Position: fmt::Display {
 
         for _ in 0..piece.get_move_max() {
             if let Ok(new_coord) = Coord::new(file_idx, rank_idx) {
-                if let Some(o_piece) = self.get_piece(new_coord) {
+                if let Some(o_piece) = self.get_piece(Some(new_coord)) {
                     if !o_piece.is_same_color(*piece) {
                         coords.push(new_coord);
                     }
@@ -651,12 +651,10 @@ pub trait Position: fmt::Display {
         for i in row_vec.iter() {
             output = format!("{}║ {} │", output, numeric_coords[*i as usize]);
             for j in col_vec.iter() {
-                output = self
-                    .get_piece(Coord::try_from((*j, *i)).unwrap())
-                    .map_or_else(
-                        || format!("{} ·", output),
-                        |piece| format!("{} {}", output, piece),
-                    );
+                output = self.get_piece(Coord::try_from((*j, *i)).ok()).map_or_else(
+                    || format!("{} ·", output),
+                    |piece| format!("{} {}", output, piece),
+                );
             }
             output = format!("{} │ {} ║\n", output.trim(), numeric_coords[*i as usize]);
         }

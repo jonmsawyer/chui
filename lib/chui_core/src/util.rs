@@ -86,9 +86,9 @@ pub fn gen_coords(num_coords: u64) -> Vec<(Coord, Coord)> {
 
 /// Benchmark the input Position.
 pub fn piece_operation(position: &mut dyn Position, coords: &(Coord, Coord)) {
-    let p1 = position.get_piece(coords.0);
-    let p2 = position.put_piece(p1, coords.1);
-    position.put_piece(p2, coords.0);
+    let p1 = position.get_piece(Some(coords.0));
+    let p2 = position.put_piece(p1, Some(coords.1));
+    position.put_piece(p2, Some(coords.0));
 }
 
 /// `ArrayBitPosition` copies.

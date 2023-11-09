@@ -90,10 +90,10 @@ pub struct Game {
     /*
     pub move_generator: MoveGenerator<'a>,
     */
-    pub move_list: Vec<Move>,
+    pub move_list: Vec<ChessMove>,
 
     /// The current move.
-    current_move: Option<Move>,
+    current_move: Option<ChessMove>,
 
     /// The win condition.
     pub win_condition: Option<WinCondition>,
@@ -111,7 +111,7 @@ impl Default for Game {
 
         let black = Player::new(Color::Black, Some("Klaes Ashford"), Some(72), Some(1500));
 
-        Game::new(white, black, ParserEngine::Algebraic).expect("Failed to initialize engine")
+        Game::new(white, black, ParserEngine::ICCF).expect("Failed to initialize engine")
     }
 }
 
@@ -162,7 +162,7 @@ impl Game {
             move_counter: 1,
             //move_generator: MoveGenerator::generate_move_list(),
             parser: ParserEngine::new(parser_engine),
-            move_list: Vec::<Move>::new(),
+            move_list: Vec::<ChessMove>::new(),
             current_move: None,
             win_condition: None,
             draw_condition: None,
@@ -181,7 +181,7 @@ impl Game {
     /// # Errors
     ///
     /// * Errors when the parser cannot parse the move.
-    pub fn parse(&mut self, the_move: String, to_move: Color) -> ChuiResult<Move> {
+    pub fn parse(&mut self, the_move: String, to_move: Color) -> ChuiResult<ChessMove> {
         self.parser.parse(the_move, to_move)
     }
 
@@ -296,7 +296,7 @@ impl Game {
                 output = self
                     .board
                     .get_position()
-                    .get_piece(Coord::try_from((*j, *i)).unwrap())
+                    .get_piece(Coord::try_from((*j, *i)).ok())
                     .map_or_else(
                         || format!("{} ·", output),
                         |piece| format!("{} {}", output, piece),
@@ -386,7 +386,7 @@ impl Game {
     /// # Errors
     ///
     /// Returns a [`ChuiError`] result if the chess move could not be processed.
-    pub fn process_move(&mut self) -> ChuiResult<Option<Move>> {
+    pub fn process_move(&mut self) -> ChuiResult<Option<ChessMove>> {
         if let Some(mut chess_move) = self.current_move.clone() {
             chess_move.process_move(self)?;
             return Ok(Some(chess_move));
@@ -405,7 +405,7 @@ impl Game {
     }
 
     /// Set the current move.
-    pub fn set_current_move(&mut self, current_move: Option<Move>) {
+    pub fn set_current_move(&mut self, current_move: Option<ChessMove>) {
         self.current_move = current_move;
     }
 }
@@ -421,7 +421,7 @@ mod tests {
 
         let white_2 = Player::new(Color::White, Some("Fred Johnson"), None, Some(2483));
 
-        if let Err(error) = Game::new(white, white_2, ParserEngine::Algebraic) {
+        if let Err(error) = Game::new(white, white_2, ParserEngine::ICCF) {
             panic!("{}", error);
         }
     }
@@ -432,7 +432,7 @@ mod tests {
 
         let black = Player::new(Color::Black, Some("Fred Johnson"), None, Some(2483));
 
-        if let Err(error) = Game::new(black, white, ParserEngine::Algebraic) {
+        if let Err(error) = Game::new(black, white, ParserEngine::ICCF) {
             panic!("{}", error);
         }
     }

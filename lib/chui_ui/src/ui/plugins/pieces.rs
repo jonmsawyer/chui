@@ -65,7 +65,7 @@ fn resize_pieces(
     mut resize_event: EventReader<ResizeBoardEvent>,
     mut query: Query<(&Piece, &mut Transform)>,
 ) {
-    for _ in resize_event.iter() {
+    for _ in resize_event.read() {
         let (scale, _, _) = compute_coords(ui_state.square_pixels);
 
         match ui_state.draw_for_white {

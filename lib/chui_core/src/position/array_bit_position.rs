@@ -211,10 +211,12 @@ impl ArrayBitPosition {
 
 impl Position for ArrayBitPosition {
     /// Get the piece at the given coordinate.
-    fn get_piece(&self, coord: Coord) -> Option<Piece> {
+    fn get_piece(&self, coord: Option<Coord>) -> Option<Piece> {
+        // If there's no coordinate, there's no piece.
+        coord?;
         let piece_kind: PieceKind;
         let piece_color: Color;
-        let idx = coord.get_index();
+        let idx: u8 = coord.unwrap().get_index();
         let bitmask: u64 = 1 << idx;
 
         if let Ok(kind) = self.get_piece_kind_from_bitmask(bitmask) {
@@ -230,7 +232,7 @@ impl Position for ArrayBitPosition {
         }
 
         // We have a valid piece that can be constructed.
-        Some(Piece::new(piece_kind, piece_color, coord))
+        Some(Piece::new(piece_kind, piece_color, coord.unwrap()))
     }
 
     // /// Get the available [`Piece`]s for a [`Color`].
@@ -252,9 +254,11 @@ impl Position for ArrayBitPosition {
 
     /// Put a piece onto the board. Return any piece on the given square if it's occupied
     /// already.
-    fn put_piece(&mut self, piece: Option<Piece>, coord: Coord) -> Option<Piece> {
-        let ret_piece = self.get_piece(coord);
-        let idx = coord.get_index();
+    fn put_piece(&mut self, piece: Option<Piece>, coord: Option<Coord>) -> Option<Piece> {
+        // If there's no coordinate, the piece cannot be placed.
+        coord?;
+        let ret_piece: Option<Piece> = self.get_piece(coord);
+        let idx: u8 = coord.unwrap().get_index();
         let bitmask: u64 = 1 << idx;
 
         self.set_piece_from_bitmask(piece, bitmask).ok();
@@ -267,7 +271,7 @@ impl Position for ArrayBitPosition {
         &self,
         _board: &Board,
         _piece: Piece,
-        _coord: Coord,
+        _coord: Option<Coord>,
     ) -> Vec<Piece> {
         Vec::<Piece>::new()
     }

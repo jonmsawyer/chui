@@ -10,7 +10,7 @@ use chui_core::prelude::{coord::*, *};
 
 /// Get a piece from the position.
 fn get_piece(position: &dyn Position, coord: Coord) {
-    let piece = position.get_piece(coord);
+    let piece = position.get_piece(Some(coord));
     piece.map_or_else(
         || {
             println!("Piece at {0}: None", coord);
@@ -23,11 +23,11 @@ fn get_piece(position: &dyn Position, coord: Coord) {
 
 /// Put a piece into the position.
 fn put_piece(position: &mut dyn Position, piece: Piece) {
-    let ret_piece = position.put_piece(Some(piece), piece.get_coord());
+    let ret_piece = position.put_piece(Some(piece), Some(piece.get_coord()));
     println!(
         "Piece at {0}: {1} {1:?}",
         piece.get_coord(),
-        position.get_piece(piece.get_coord()).unwrap()
+        position.get_piece(Some(piece.get_coord())).unwrap()
     );
     ret_piece.map_or_else(
         || {

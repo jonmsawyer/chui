@@ -210,10 +210,12 @@ impl EnumPosition {
 
 impl Position for EnumPosition {
     /// Get the piece at the given coordinate.
-    fn get_piece(&self, coord: Coord) -> Option<Piece> {
-        let idx = coord.get_index() as usize;
+    fn get_piece(&self, coord: Option<Coord>) -> Option<Piece> {
+        // If there's no coordinate, there's no piece.
+        coord?;
+        let idx = coord.unwrap().get_index() as usize;
         let enum_piece = self[idx];
-        enum_piece.map(|e_p| Piece::new(e_p.get_piece(), e_p.get_color(), coord))
+        enum_piece.map(|e_p| Piece::new(e_p.get_piece(), e_p.get_color(), coord.unwrap()))
     }
 
     // /// Get the available [`Piece`]s for a [`Color`].
@@ -226,8 +228,10 @@ impl Position for EnumPosition {
 
     /// Put a piece onto the board. Return any piece on the given square if it's occupied
     /// already.
-    fn put_piece(&mut self, piece: Option<Piece>, coord: Coord) -> Option<Piece> {
-        let idx = coord.get_index() as usize;
+    fn put_piece(&mut self, piece: Option<Piece>, coord: Option<Coord>) -> Option<Piece> {
+        // If there's no coordinate, there's no piece to put.
+        coord?;
+        let idx = coord.unwrap().get_index() as usize;
         let return_piece = self.get_piece(coord);
 
         if let Some(mut piece) = piece {
@@ -245,7 +249,7 @@ impl Position for EnumPosition {
         &self,
         _board: &Board,
         _piece: Piece,
-        _coord: Coord,
+        _coord: Option<Coord>,
     ) -> Vec<Piece> {
         Vec::<Piece>::new()
         // self.iter()

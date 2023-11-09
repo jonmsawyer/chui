@@ -321,56 +321,42 @@ impl Command {
             vec![
                 CommandPart {
                     commands: vec!["1".to_string(), "algebraic".to_string()],
-                    description: "Algebraic Parser".to_string(),
+                    description: "Algebraic Parser (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToAlgebraicParser,
                 },
                 CommandPart {
                     commands: vec!["2".to_string(), "concise reversible".to_string()],
-                    description: "Concise Reversible Parser \
-                                 (Not Implemented)"
-                        .to_string(),
+                    description: "Concise Reversible Parser (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToConciseReversibleParser,
                 },
                 CommandPart {
                     commands: vec!["3".to_string(), "Coordinate".to_string()],
-                    description: "Coordinate Parser \
-                                 (Not Implemented)"
-                        .to_string(),
+                    description: "Coordinate Parser (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToCoordinateParser,
                 },
                 CommandPart {
                     commands: vec!["4".to_string(), "descriptive".to_string()],
-                    description: "Descriptive Parser \
-                                 (Not Implemented)"
-                        .to_string(),
+                    description: "Descriptive Parser (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToDescriptiveParser,
                 },
                 CommandPart {
                     commands: vec!["5".to_string(), "iccf".to_string()],
-                    description: "ICCF Parser \
-                                 (Not Implemented)"
-                        .to_string(),
+                    description: "ICCF Parser".to_string(),
                     command_kind: CommandKind::SwitchToICCFParser,
                 },
                 CommandPart {
                     commands: vec!["6".to_string(), "long algebraic".to_string()],
-                    description: "Long Algebraic Parser \
-                                 (Not Implemented)"
-                        .to_string(),
+                    description: "Long Algebraic Parser (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToLongAlgebraicParser,
                 },
                 CommandPart {
                     commands: vec!["7".to_string(), "reversible algebraic".to_string()],
-                    description: "Reversible Algebraic Parser \
-                                 (Not Implemented)"
-                        .to_string(),
+                    description: "Reversible Algebraic Parser (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToReversibleAlgebraicParser,
                 },
                 CommandPart {
                     commands: vec!["8".to_string(), "smith".to_string()],
-                    description: "Smith Parser \
-                                 (Not Implemented)"
-                        .to_string(),
+                    description: "Smith Parser (Not Implemented)".to_string(),
                     command_kind: CommandKind::SwitchToSmithParser,
                 },
                 CommandPart {

@@ -238,7 +238,7 @@ impl Easy1DPosition {
     pub fn set_coords(&mut self) {
         self.iter_mut().enumerate().for_each(|(idx, piece)| {
             if let Some(piece) = piece {
-                piece.set_coord(Coord::try_from(idx as u8).unwrap()); // .unwrap() should never panic.
+                piece.set_coord(Coord::try_from(idx as u8).ok());
             }
         });
     }
@@ -246,8 +246,10 @@ impl Easy1DPosition {
 
 impl Position for Easy1DPosition {
     /// Get the piece at the given coordinate.
-    fn get_piece(&self, coord: Coord) -> Option<Piece> {
-        self[coord.get_index() as usize]
+    fn get_piece(&self, coord: Option<Coord>) -> Option<Piece> {
+        // If there's no coordinate, there's no piece.
+        coord?;
+        self[coord.unwrap().get_index() as usize]
     }
 
     // /// Get the available [`Piece`]s for a [`Color`].
@@ -260,25 +262,35 @@ impl Position for Easy1DPosition {
 
     /// Put a piece onto the board. Return any piece on the given square if it's occupied
     /// already.
-    fn put_piece(&mut self, piece: Option<Piece>, coord: Coord) -> Option<Piece> {
+    fn put_piece(&mut self, piece: Option<Piece>, coord: Option<Coord>) -> Option<Piece> {
+        // If there's no coordinate, there's no piece to put.
+        coord?;
         let return_piece = self.get_piece(coord);
 
         if let Some(mut piece) = piece {
             piece.set_coord(coord);
-            self[coord.get_index() as usize] = Some(piece);
+            self[coord.unwrap().get_index() as usize] = Some(piece);
         } else {
-            self[coord.get_index() as usize] = None;
+            self[coord.unwrap().get_index() as usize] = None;
         }
 
         return_piece
     }
 
     /// Get all [`Piece`]s attacking a given coordinate.
-    fn get_pieces_attacking_coord(&self, board: &Board, piece: Piece, coord: Coord) -> Vec<Piece> {
+    fn get_pieces_attacking_coord(
+        &self,
+        board: &Board,
+        piece: Piece,
+        coord: Option<Coord>,
+    ) -> Vec<Piece> {
         self.iter()
             .filter_map(|o_p| {
                 // o_p.filter(|p| p.get_color() != color && p.get_move_coords(self).contains(&coord))
-                o_p.filter(|p| p.get_move_coords(board, Some(piece)).contains(&coord))
+                o_p.filter(|p| {
+                    p.get_move_coords(board, Some(piece))
+                        .contains(&coord.unwrap())
+                })
             })
             .collect()
     }

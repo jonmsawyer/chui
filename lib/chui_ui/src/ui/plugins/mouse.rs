@@ -166,7 +166,7 @@ pub fn update_mouse_click(
 
     compute_board_coords(&mut ui_state, camera_query, windows);
 
-    for input in mouse_input.iter() {
+    for input in mouse_input.read() {
         if let (MouseButton::Left, ButtonState::Pressed) = (input.button, input.state) {
             let (mut from_transform, mut from_visibility) = from_square_query.single_mut();
             let (mut to_transform, mut to_visibility) = to_square_query.single_mut();
@@ -212,15 +212,14 @@ pub fn update_mouse_click(
                 {
                     Ok(result) => {
                         ui_state.move_representation = result;
-                        let mut chess_move = Move::new();
+                        let mut chess_move = ChessMove::new();
                         chess_move.from_coord =
-                            Coord::try_from((from_coord.get_file(), from_coord.get_rank()))
-                                .unwrap();
+                            Coord::try_from((from_coord.get_file(), from_coord.get_rank())).ok();
                         chess_move.to_coord =
-                            Coord::try_from((to_coord.get_file(), to_coord.get_rank())).unwrap();
-                        let from_piece = game.board.get_position().get_piece(from_coord);
-                        let to_piece = game.board.get_position().get_piece(to_coord);
-                        chess_move.piece = from_piece;
+                            Coord::try_from((to_coord.get_file(), to_coord.get_rank())).ok();
+                        let from_piece = game.board.get_position().get_piece(Some(from_coord));
+                        let to_piece = game.board.get_position().get_piece(Some(to_coord));
+                        chess_move.from_piece = from_piece;
 
                         if from_piece.is_none() {
                             return;
@@ -249,9 +248,8 @@ pub fn update_mouse_click(
 
                         piece_query.for_each_mut(|(mut piece, mut transform)| {
                             if piece.get_coord() == Coord::try_from(from_index).unwrap() {
-                                piece.set_coord(
-                                    Coord::new(to_index.0 as u8, to_index.1 as u8).unwrap(),
-                                );
+                                piece
+                                    .set_coord(Coord::new(to_index.0 as u8, to_index.1 as u8).ok());
                                 let world_coords = compute_world_coords(
                                     Coord::try_from(to_index).unwrap(),
                                     ui_state.square_pixels,

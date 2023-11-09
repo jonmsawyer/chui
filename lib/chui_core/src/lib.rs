@@ -22,7 +22,7 @@ mod variant;
 pub mod prelude {
     use super::*;
     pub use board::Board;
-    pub use chess_move::{Move, MoveType};
+    pub use chess_move::{Castling, Check, ChessMove, MoveType};
     pub use command::{Command, CommandContext, CommandKind};
     pub use condition::{DrawCondition, WinCondition};
     pub use constants::*;

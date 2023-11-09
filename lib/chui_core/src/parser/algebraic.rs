@@ -17,7 +17,7 @@ pub struct AlgebraicParser<'a> {
     pub move_generator: MoveGenerator<'a>,
 
     /// The chess move to move.
-    pub move_obj: Move,
+    pub move_obj: ChessMove,
 }
 
 impl<'a> Parser for AlgebraicParser<'a> {
@@ -128,10 +128,10 @@ impl<'a> Parser for AlgebraicParser<'a> {
     /// Token 8: + (
     ///     check (mate)
     /// )
-    fn parse(&mut self, the_move: String, to_move: Color) -> ChuiResult<Move> {
+    fn parse(&mut self, move_string: String, to_move: Color) -> ChuiResult<ChessMove> {
         // Check the move to see it's valid. No whitespace allowed. At
         // the same time, trim any surrounding whitespace.
-        let the_move = self.trim_and_check_whitespace(the_move)?;
+        let the_move: String = self.trim_and_check_whitespace(&move_string)?;
 
         if the_move.len() < 2 {
             self.invalid_input("Input move is too small in length (<2)")?;
@@ -161,10 +161,10 @@ impl<'a> Parser for AlgebraicParser<'a> {
 
         // When we're done parsing, return an owned instance of
         // `self.move_obj` and reset `self.move_obj` to a new
-        // instance of `Move`.
+        // instance of `ChessMove`.
         let mut move_obj = self.move_obj.to_owned();
         move_obj.set_color(to_move);
-        self.move_obj = Move::new();
+        self.move_obj = ChessMove::new();
 
         Ok(move_obj)
     }
@@ -188,8 +188,8 @@ impl<'a> Parser for AlgebraicParser<'a> {
         to_coord: Coord,
     ) -> ChuiResult<String> {
         let mut _move_string = String::new();
-        let mut the_move = Move::new();
-        let piece = match engine.board.get_position().get_piece(from_coord) {
+        let mut the_move = ChessMove::new();
+        let piece: Piece = match engine.board.get_position().get_piece(Some(from_coord)) {
             Some(piece) => piece,
             None => {
                 return Err(ChuiError::InvalidMove(format!(
@@ -211,7 +211,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
             }
         }
         // TODO: fix _to_square
-        let _to_square = engine.board.get_position().get_piece(to_coord);
+        let _to_square = engine.board.get_position().get_piece(Some(to_coord));
         let piece_move_coords = piece.get_move_coords(&(engine.board), None);
         for coord in piece_move_coords.iter() {
             if &to_coord == coord {
@@ -233,7 +233,7 @@ impl<'a> AlgebraicParser<'a> {
     pub fn new() -> Box<dyn Parser + Send + Sync> {
         Box::new(AlgebraicParser {
             move_generator: MoveGenerator::new(),
-            move_obj: Move::new(),
+            move_obj: ChessMove::new(),
         })
     }
 
@@ -276,12 +276,9 @@ impl<'a> AlgebraicParser<'a> {
     ///
     /// Returns a [`ChuiError`] result if the `token` is not a correct file.
     fn try_file(&mut self, token: char) -> ChuiResult<()> {
-        if self.match_file_to_index(token).is_some() {
-            self.move_obj.set_to_coord_file(token)?;
-            return Ok(());
-        }
-
-        AlgebraicParser::token_not_satisfied(token)
+        self.move_obj.set_to_coord_file(token)?;
+        Ok(())
+        // AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a capture. Must be
@@ -307,12 +304,9 @@ impl<'a> AlgebraicParser<'a> {
     ///
     /// Returns a [`ChuiError`] result if the matched token has an out of range index.
     fn try_rank(&mut self, token: char) -> ChuiResult<()> {
-        if let Some(idx) = self.match_rank_to_index(token) {
-            self.move_obj.set_to_coord_rank(idx)?;
-            return Ok(());
-        }
-
-        AlgebraicParser::token_not_satisfied(token)
+        self.move_obj.set_to_coord_rank(token)?;
+        Ok(())
+        // AlgebraicParser::token_not_satisfied(token)
     }
 
     /// Try to parse the current token as a valid check. Must
@@ -355,25 +349,25 @@ impl<'a> AlgebraicParser<'a> {
         AlgebraicParser::token_not_satisfied(token)
     }
 
-    /// Try to parse the current token as a valid promotion
-    /// notation. If a valid promotion notation is move, record
-    /// it in the move. Note, we don't yet known what the
-    /// promotion piece is. Next token should be the proper
-    /// promotion piece.
-    ///
-    /// # Errors
-    ///
-    /// Returns a [`ChuiResult`] result if the input token is not satisfied.
-    fn try_promotion_notation(&mut self, token: char) -> ChuiResult<()> {
-        for notation in self.move_generator.promotion_notation.iter() {
-            if notation.starts_with(token) {
-                self.move_obj.set_promotion();
-                return Ok(());
-            }
-        }
+    // /// Try to parse the current token as a valid promotion
+    // /// notation. If a valid promotion notation is move, record
+    // /// it in the move. Note, we don't yet known what the
+    // /// promotion piece is. Next token should be the proper
+    // /// promotion piece.
+    // ///
+    // /// # Errors
+    // ///
+    // /// Returns a [`ChuiResult`] result if the input token is not satisfied.
+    // fn try_promotion_notation(&mut self, token: char) -> ChuiResult<()> {
+    //     for notation in self.move_generator.promotion_notation.iter() {
+    //         if notation.starts_with(token) {
+    //             self.move_obj.set_promotion();
+    //             return Ok(());
+    //         }
+    //     }
 
-        AlgebraicParser::token_not_satisfied(token)
-    }
+    //     AlgebraicParser::token_not_satisfied(token)
+    // }
 
     /// Try to parse the current token as a promotion piece. The
     /// move's promotion flag need not be set. If a valid promotion
@@ -385,7 +379,7 @@ impl<'a> AlgebraicParser<'a> {
     fn try_promotion_piece(&mut self, token: char) -> ChuiResult<()> {
         if let Ok(piece) = Piece::try_from(token) {
             if let Color::White = piece.get_color() {
-                self.move_obj.set_promotion_piece(piece);
+                self.move_obj.set_promotion(piece);
                 return Ok(());
             }
         }
@@ -744,7 +738,7 @@ impl<'a> AlgebraicParser<'a> {
         if self.move_obj.is_pawn_move()
             && (self.try_check(token).is_ok()
                 || self.try_check_mate(token).is_ok()
-                || self.try_promotion_notation(token).is_ok()
+                // || self.try_promotion_notation(token).is_ok()
                 || self.try_promotion_piece(token).is_ok())
         {
             return Ok(());
@@ -943,10 +937,12 @@ impl<'a> AlgebraicParser<'a> {
         // If move is pawn capture, token is either check, check
         // mate, piece promotion, or promotion notation.
         if self.move_obj.is_pawn_capture()
-            && (self.try_check(token).is_ok()
-                || self.try_check_mate(token).is_ok()
-                || self.try_promotion_piece(token).is_ok()
-                || self.try_promotion_notation(token).is_ok())
+            && (
+                self.try_check(token).is_ok()
+                    || self.try_check_mate(token).is_ok()
+                    || self.try_promotion_piece(token).is_ok()
+                // || self.try_promotion_notation(token).is_ok()
+            )
         {
             return Ok(());
         }

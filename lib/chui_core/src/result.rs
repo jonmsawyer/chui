@@ -57,11 +57,17 @@ pub enum ChuiError {
     /// Invalid coordinates.
     InvalidCoords(String),
 
+    /// Invalid capture.
+    InvalidCapture(String),
+
     /// The square at a coordinate is occupied.
     SquareOccupied(String),
 
     /// Invalid type conversion.
     InvalidTypeConversion(String),
+
+    /// Invalid en passant.
+    InvalidEnPassant(String),
 
     /// The [`TryFromIntError`] type.
     TryFromIntError(String),
@@ -121,12 +127,20 @@ impl fmt::Display for ChuiError {
                 write!(f, "Error (Invalid Coordinates): {}.", reason)
             }
 
+            ChuiError::InvalidCapture(reason) => {
+                write!(f, "Error (Invalid Capture): {}.", reason)
+            }
+
             ChuiError::SquareOccupied(reason) => {
                 write!(f, "Error (Square Occupied): {}.", reason)
             }
 
             ChuiError::InvalidTypeConversion(reason) => {
                 write!(f, "Error (Invalid File): {}.", reason)
+            }
+
+            ChuiError::InvalidEnPassant(reason) => {
+                write!(f, "Error (Invalid En Passant): {}.", reason)
             }
 
             ChuiError::TryFromIntError(reason) => {

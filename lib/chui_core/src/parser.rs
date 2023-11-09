@@ -10,7 +10,7 @@ use crate::prelude::*;
 pub mod algebraic;
 // pub mod concise_reversible;
 // pub mod descriptive;
-// pub mod iccf;
+pub mod iccf;
 // pub mod long_algebraic;
 // pub mod reversible_algebraic;
 // pub mod smith;
@@ -23,12 +23,13 @@ impl fmt::Debug for dyn Parser + Send + Sync {
 
 /// Represents the different available supported parser engines for
 /// chess moves.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub enum ParserEngine {
     /// This engine variant helps to return an `AlgebraicParser`, which
     /// parses moves in algebraic notation.
     /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
     Algebraic,
+
     // /// This engine variant helps to return a `ConciseReversibleParser`,
     // /// which parses moves in concise reversible notation.
     // /// Example moves: `e24`, `e75`, `Ng1f3`, `Nb8c6`, `Bb5:Nc6`, etc.
@@ -43,12 +44,11 @@ pub enum ParserEngine {
     // /// which parses moves in English descriptive notation.
     // /// Example moves: `P-K4`, `NxN`, `QxRch`, `Q-KR4 mate`, `O-O`, etc.
     // Descriptive,
-
-    // /// This engine variant helps to return a `ICCFParser`,
-    // /// which parses moves in ICCF notation.
-    // /// Example moves: `5254`, `5755`, `7163`, `2836`, `6125`, etc.
-    // ICCF,
-
+    /// This engine variant helps to return a `ICCFParser`,
+    /// which parses moves in ICCF notation.
+    /// Example moves: `5254`, `5755`, `7163`, `2836`, `6125`, etc.
+    #[default]
+    ICCF,
     // /// This engine variant helps to return a `LongAlgebraicParser`,
     // /// which parses moves in long algebraic notation.
     // /// Example moves: `e2e4`, `e7e5`, `d2d3`, `Bf8b4+`, `Bb5xc6`, etc.
@@ -99,17 +99,11 @@ impl ParserEngine {
         match parser {
             ParserEngine::Algebraic => algebraic::AlgebraicParser::new(),
             // ParserEngine::ConciseReversible => concise_reversible::ConciseReversibleParser::new(),
-
             // ParserEngine::Coordinate => Coordinate::CoordinateParser::new(),
-
             // ParserEngine::Descriptive => descriptive::DescriptiveParser::new(),
-
-            // ParserEngine::ICCF => iccf::ICCFParser::new(),
-
+            ParserEngine::ICCF => iccf::ICCFParser::new(),
             // ParserEngine::LongAlgebraic => long_algebraic::LongAlgebraicParser::new(),
-
             // ParserEngine::ReversibleAlgebraic => reversible_algebraic::ReversibleAlgebraicParser::new(),
-
             // ParserEngine::Smith => smith::SmithParser::new(),
         }
     }
