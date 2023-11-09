@@ -52,47 +52,40 @@ pub fn run() -> ChuiResult<()> {
                 Some(CommandKind::Quit) => {
                     break_loop = true;
                 }
-
                 Some(CommandKind::Help) => {
                     command.display_help(context);
                     display_board = false;
                     continue;
                 }
-
                 Some(CommandKind::SwitchParser) => {
                     game.switch_parser(&command);
                     command.rebuild_commands(&game);
                     continue;
                 }
-
                 Some(CommandKind::DisplayToMove) => {
                     log();
                     log_ln(game.to_move_to_string());
                     display_board = false;
                     continue;
                 }
-
                 Some(CommandKind::DisplayForWhite) => {
                     log();
                     log_ln(game.white_to_string());
                     display_board = false;
                     continue;
                 }
-
                 Some(CommandKind::DisplayForBlack) => {
                     log();
                     log_ln(game.black_to_string());
                     display_board = false;
                     continue;
                 }
-
                 Some(CommandKind::DisplayFEN) => {
                     log();
                     log_ln(game.get_fen());
                     display_board = false;
                     continue;
                 }
-
                 Some(CommandKind::WhiteResigns) => {
                     log();
                     log_str("White resigns.");
@@ -100,7 +93,6 @@ pub fn run() -> ChuiResult<()> {
                     game.draw_condition = None;
                     continue;
                 }
-
                 Some(CommandKind::BlackResigns) => {
                     log();
                     log_str("Black resigns.");
@@ -108,21 +100,18 @@ pub fn run() -> ChuiResult<()> {
                     game.draw_condition = None;
                     continue;
                 }
-
                 Some(CommandKind::DisplayForWhiteEachMove) => {
                     log();
                     log_str("Display for White after each move.");
                     game.display_for = Some(Color::White);
                     continue;
                 }
-
                 Some(CommandKind::DisplayForBlackEachMove) => {
                     log();
                     log_str("Display for Black after each move.");
                     game.display_for = Some(Color::Black);
                     continue;
                 }
-
                 Some(CommandKind::DisplayMoveList) => {
                     let mut output = String::new();
 
@@ -146,7 +135,6 @@ pub fn run() -> ChuiResult<()> {
 
                     log_ln(format!("Move List Notation:\n{}", output.trim()));
                 }
-
                 Some(CommandKind::DisplayCaptures) => {
                     let mut white_output = String::new();
                     let mut black_output = String::new();
@@ -171,7 +159,6 @@ pub fn run() -> ChuiResult<()> {
                     log_ln(format!("White: {}", white_output));
                     log_ln(format!("Black: {}", black_output));
                 }
-
                 _ => {
                     log();
                     log_ln(format!("Input move or command: {}", move_string));

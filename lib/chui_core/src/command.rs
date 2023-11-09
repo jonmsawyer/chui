@@ -252,10 +252,12 @@ impl Command {
                     command_kind: CommandKind::SwitchParser,
                 },
                 CommandPart {
-                    commands: vec!["dt".to_string(), "display to move".to_string()],
-                    description: "Display board for the color that \
-                                 is to move"
-                        .to_string(),
+                    commands: vec![
+                        "d".to_string(),
+                        "dtm".to_string(),
+                        "display to move".to_string(),
+                    ],
+                    description: "Display board for the color that is to move".to_string(),
                     command_kind: CommandKind::DisplayToMove,
                 },
                 CommandPart {
@@ -270,16 +272,12 @@ impl Command {
                 },
                 CommandPart {
                     commands: vec!["dfw".to_string(), "display for white".to_string()],
-                    description: "Display board for White after \
-                                 each move"
-                        .to_string(),
+                    description: "Display board for White after each move".to_string(),
                     command_kind: CommandKind::DisplayForWhiteEachMove,
                 },
                 CommandPart {
                     commands: vec!["dfb".to_string(), "display for black".to_string()],
-                    description: "Display board for Black after \
-                                 each move"
-                        .to_string(),
+                    description: "Display board for Black after each move".to_string(),
                     command_kind: CommandKind::DisplayForBlackEachMove,
                 },
                 CommandPart {

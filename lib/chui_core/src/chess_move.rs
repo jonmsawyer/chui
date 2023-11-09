@@ -112,9 +112,9 @@ impl fmt::Debug for ChessMove {
             for error in self.validation_errors.iter() {
                 errors.push_str(format!("        {:?},\n", error).as_str());
             }
-            errors.push_str("    ],");
+            errors.push_str("    ]");
         } else {
-            errors = String::from("[],");
+            errors = String::from("[]");
         }
         // Format `from_coord` and `to_coord`.
         let from_coord: String = if self.from_coord.is_some() {
@@ -131,11 +131,11 @@ impl fmt::Debug for ChessMove {
         let output: String = format!(
             "{{
     to_move: {:?},
-    from_coord: {} ({:?}),
+    from_coord: {} - {:?},
     from_coord_file: {:?},
     from_coord_rank: {:?},
     from_piece: {:?},
-    to_coord: {} ({:?}),
+    to_coord: {} - {:?},
     to_coord_file: {:?},
     to_coord_rank: {:?},
     to_piece: {:?},
@@ -791,7 +791,8 @@ impl ChessMove {
         let _position = board.get_position();
 
         // 1) let's validate that this object instance has the necessary information to
-        // determine that a move can at all be unambiguously played given the `Board`'s `Position`.
+        // determine that a move can at all be unambiguously played given the `Board`'s
+        // `Position`.
 
         // 1.a) All parsers will have set the `to_coord` `Coordinate`. In either case,
         // if `to_coord` is not set, there's no way to determine a valid move.
@@ -805,12 +806,16 @@ impl ChessMove {
 
         // 1.b) Since `to_coord` is set, either the `from_coord` has to be set or the following
         // must be set:
-        //  * `from_piece` must be set
+        //  * `from_piece` must be set, and if not:
+        //    * `from_coord_file` may be set
+        //    * from_coord_rank` may be set
         //  * `move_type` must be set
+        //
+        // TODO: Review and refactor.
         if !(self.from_coord.is_some() || self.from_piece.is_some() && self.move_type.is_some()) {
             return Err(ChuiError::InvalidMove(
-                "This Move's `from_coord` attribute is not set or `from_piece` is not set and the \
-                `move_type` is not valid"
+                "This Move's `from_coord` attribute is not set or `from_piece` is not set \
+                and `move_type` is not valid"
                     .to_string(),
             ));
         }

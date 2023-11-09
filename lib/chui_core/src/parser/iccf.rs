@@ -30,7 +30,6 @@ impl Parser for ICCFParser {
                 .as_str(),
             )?;
         }
-        println!("The move: {:?}", the_move);
         let from_coord: Coord = Coord::try_from((
             the_move.remove(0).to_digit(10).unwrap() - 1,
             the_move.remove(0).to_digit(10).unwrap() - 1,
@@ -45,6 +44,7 @@ impl Parser for ICCFParser {
             from_coord: Some(from_coord),
             to_coord: Some(to_coord),
             input_move: move_string,
+            is_parsed: true,
             ..ChessMove::default()
         };
         println!("The move: {:?}", chess_move);
