@@ -161,7 +161,7 @@ impl Game {
             half_move_clock: 0,
             move_counter: 1,
             //move_generator: MoveGenerator::generate_move_list(),
-            parser: ParserEngine::new(parser_engine),
+            parser: ParserEngine::new(parser_engine, Color::White),
             move_list: Vec::<ChessMove>::new(),
             current_move: None,
             win_condition: None,
@@ -187,7 +187,7 @@ impl Game {
 
     /// Set a new parser based on `ParserEngine`.
     pub fn set_parser(&mut self, parser_engine: ParserEngine) {
-        self.parser = ParserEngine::new(parser_engine);
+        self.parser = ParserEngine::new(parser_engine, self.to_move);
     }
 
     /// Get input string from `io::stdin()`.

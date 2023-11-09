@@ -11,7 +11,7 @@ use crate::prelude::*;
 
 /// A parser that will parse algebraic chess notation.
 /// Example moves: `e4`, `Bxc6+`, `Kd6`, `e8Q#`, `a1=N`, etc.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AlgebraicParser<'a> {
     /// The move generator. Generates chess moves in Algebraic Notation.
     pub move_generator: MoveGenerator<'a>,
@@ -164,7 +164,7 @@ impl<'a> Parser for AlgebraicParser<'a> {
         // instance of `ChessMove`.
         let mut move_obj = self.move_obj.to_owned();
         move_obj.set_color(to_move);
-        self.move_obj = ChessMove::new();
+        self.move_obj = ChessMove::new(to_move);
 
         Ok(move_obj)
     }
@@ -183,13 +183,13 @@ impl<'a> Parser for AlgebraicParser<'a> {
     /// parser's notation.
     fn generate_move_from_board_coordinates(
         &self,
-        engine: &Game,
+        game: &Game,
         from_coord: Coord,
         to_coord: Coord,
     ) -> ChuiResult<String> {
         let mut _move_string = String::new();
-        let mut the_move = ChessMove::new();
-        let piece: Piece = match engine.board.get_position().get_piece(Some(from_coord)) {
+        let mut the_move = ChessMove::new(game.to_move);
+        let piece: Piece = match game.board.get_position().get_piece(Some(from_coord)) {
             Some(piece) => piece,
             None => {
                 return Err(ChuiError::InvalidMove(format!(
@@ -211,8 +211,8 @@ impl<'a> Parser for AlgebraicParser<'a> {
             }
         }
         // TODO: fix _to_square
-        let _to_square = engine.board.get_position().get_piece(Some(to_coord));
-        let piece_move_coords = piece.get_move_coords(&(engine.board), None);
+        let _to_square = game.board.get_position().get_piece(Some(to_coord));
+        let piece_move_coords = piece.get_move_coords(&(game.board), None);
         for coord in piece_move_coords.iter() {
             if &to_coord == coord {
                 println!("Valid move.");
@@ -230,10 +230,10 @@ impl<'a> Parser for AlgebraicParser<'a> {
 
 impl<'a> AlgebraicParser<'a> {
     /// Return a new dynamic parser that implements the `Parser` trait.
-    pub fn new() -> Box<dyn Parser + Send + Sync> {
+    pub fn new(to_move: Color) -> Box<AlgebraicParser<'a>> {
         Box::new(AlgebraicParser {
             move_generator: MoveGenerator::new(),
-            move_obj: ChessMove::new(),
+            move_obj: ChessMove::new(to_move),
         })
     }
 

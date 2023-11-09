@@ -34,7 +34,7 @@ use crate::prelude::*;
 ///
 ///     fn generate_move_from_board_coordinates(
 ///         &self,
-///         engine: &Game,
+///         game: &Game,
 ///         from_coord: Coord,
 ///         to_coord: Coord,
 ///     ) -> ChuiResult<String> {

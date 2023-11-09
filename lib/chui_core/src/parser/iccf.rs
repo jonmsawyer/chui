@@ -6,13 +6,17 @@ use crate::prelude::*;
 
 /// A parser that will parse ICCF chess notation.
 /// Example moves: `5254`, `5755`, `7163`, `2836`, `6125`, etc.
-#[derive(Debug, Copy, Clone)]
-pub struct ICCFParser;
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ICCFParser {
+    /// The color to move.
+    pub to_move: Color,
+}
 
 impl Parser for ICCFParser {
     /// Parse the chess move, return `Ok(Move)` on success,
     /// `ChuiError::InvalidMove(reason)` on failure.
     fn parse(&mut self, move_string: String, to_move: Color) -> ChuiResult<ChessMove> {
+        self.to_move = to_move;
         let char_list: Vec<char> = vec!['1', '2', '3', '4', '5', '6', '7', '8'];
         let mut the_move: String = self.trim_and_check_whitespace(&move_string)?;
         the_move.retain(|c: char| char_list.contains(&c));
@@ -74,7 +78,7 @@ impl Parser for ICCFParser {
 
 impl ICCFParser {
     /// Return a new dynamic parser that implements the `Parser` trait.
-    pub fn new() -> Box<dyn Parser + Send + Sync> {
-        Box::new(ICCFParser {})
+    pub fn new(to_move: Color) -> Box<ICCFParser> {
+        Box::new(ICCFParser { to_move })
     }
 }

@@ -212,7 +212,7 @@ pub fn update_mouse_click(
                 {
                     Ok(result) => {
                         ui_state.move_representation = result;
-                        let mut chess_move = ChessMove::new();
+                        let mut chess_move = ChessMove::new(game.to_move);
                         chess_move.from_coord =
                             Coord::try_from((from_coord.get_file(), from_coord.get_rank())).ok();
                         chess_move.to_coord =

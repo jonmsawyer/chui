@@ -95,13 +95,13 @@ impl ParserEngine {
     /// };
     /// ```
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(parser: ParserEngine) -> Box<dyn Parser + Send + Sync> {
+    pub fn new(parser: ParserEngine, to_move: Color) -> Box<dyn Parser + Send + Sync> {
         match parser {
-            ParserEngine::Algebraic => algebraic::AlgebraicParser::new(),
+            ParserEngine::Algebraic => algebraic::AlgebraicParser::new(to_move),
             // ParserEngine::ConciseReversible => concise_reversible::ConciseReversibleParser::new(),
             // ParserEngine::Coordinate => Coordinate::CoordinateParser::new(),
             // ParserEngine::Descriptive => descriptive::DescriptiveParser::new(),
-            ParserEngine::ICCF => iccf::ICCFParser::new(),
+            ParserEngine::ICCF => iccf::ICCFParser::new(to_move),
             // ParserEngine::LongAlgebraic => long_algebraic::LongAlgebraicParser::new(),
             // ParserEngine::ReversibleAlgebraic => reversible_algebraic::ReversibleAlgebraicParser::new(),
             // ParserEngine::Smith => smith::SmithParser::new(),

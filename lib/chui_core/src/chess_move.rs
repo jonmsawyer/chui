@@ -1,9 +1,8 @@
 //! Provides a struct for `ChessMove` instances. Each move has properties
-//! covering from and to Coordinates, the piece being moved, the
-//! original move text and interpreted move text. If the move is
-//! invalid, `MoveType::Invalid` will occupy `self.move_type`.
+//! covering from and to `Coordinate`s, the piece being moved, the
+//! original move text and interpreted move text.
 //!
-//! Also provides the `MoveType` enum.
+//! Also provides the `Casting`, `Check`, and `MoveType` enums.
 
 use std::fmt;
 
@@ -58,10 +57,10 @@ pub struct ChessMove {
     pub from_coord: Option<Coord>,
 
     /// Represents the from move's file index (0..=7).
-    pub from_coord_file: Option<u8>,
+    pub from_coord_file: Option<NonMaxU8>,
 
     /// Represents the from move's rank index (0..=7).
-    pub from_coord_rank: Option<u8>,
+    pub from_coord_rank: Option<NonMaxU8>,
 
     /// The chess piece to move.
     pub from_piece: Option<Piece>,
@@ -70,10 +69,10 @@ pub struct ChessMove {
     pub to_coord: Option<Coord>,
 
     /// Represents the to move's file index (0..=7).
-    pub to_coord_file: Option<u8>,
+    pub to_coord_file: Option<NonMaxU8>,
 
     /// Represents the to move's rank index (0..=7).
-    pub to_coord_rank: Option<u8>,
+    pub to_coord_rank: Option<NonMaxU8>,
 
     /// The chess piece to capture.
     pub to_piece: Option<Piece>,
@@ -87,19 +86,17 @@ pub struct ChessMove {
     /// Is castling move?
     pub castling: Option<Castling>,
 
-    /// Does the move allow the opponent to capture en passant next turn?
-    pub is_en_passant: bool,
+    /// En passant coordinate.
+    pub en_passant: Option<Coord>,
 
-    /// En passant `Coordinate`.
-    pub en_passant_coord: Option<Coord>,
+    /// Represents the type of move to be performed.
+    pub move_type: Option<MoveType>,
 
     /// The user's input move text (e.g., `Be5`).
     pub input_move: String,
 
-    /// Represents the type of move to be performed. See `MoveType`.
-    pub move_type: Option<MoveType>,
-
-    /// Has the attributes in this chess move been modified by a `Parser`?
+    /// Have the attributes in this chess move been modified by a `Parser`?
+    /// TODO: Is this necessary?
     pub is_parsed: bool,
 
     /// Any validation errors.
@@ -145,10 +142,9 @@ impl fmt::Debug for ChessMove {
     check: {:?},
     promotion: {:?},
     castling: {:?},
-    en_passant: {:?},
-    en_passant_coord: {:?},
-    input_move: {:?},
     move_type: {:?},
+    en_passant: {:?},
+    input_move: {:?},
     parsed: {:?},
     validation_errors: {},
 }}",
@@ -166,10 +162,9 @@ impl fmt::Debug for ChessMove {
             self.check,
             self.promotion,
             self.castling,
-            self.is_en_passant,
-            self.en_passant_coord,
-            self.input_move,
+            self.en_passant,
             self.move_type,
+            self.input_move,
             self.is_parsed,
             errors,
         );
@@ -193,8 +188,7 @@ impl Default for ChessMove {
             check: None,
             promotion: None,
             castling: None,
-            is_en_passant: false,
-            en_passant_coord: None,
+            en_passant: None,
             input_move: String::new(),
             move_type: None,
             is_parsed: false,
@@ -211,12 +205,15 @@ impl fmt::Display for ChessMove {
 
 impl ChessMove {
     /// Return a new default `ChessMove`.
-    pub fn new() -> ChessMove {
-        ChessMove::default()
+    pub fn new(to_move: Color) -> ChessMove {
+        ChessMove {
+            to_move,
+            ..ChessMove::default()
+        }
     }
 
     //
-    // boolean checks
+    // Boolean checks.
     //
 
     /// Is it White to move?
@@ -312,12 +309,100 @@ impl ChessMove {
     }
 
     //
-    // Getters
+    // Getters.
     //
 
     /// Get moving piece.
     pub const fn get_piece(&self) -> Option<Piece> {
         self.from_piece
+    }
+
+    /// Return the verbose move text.
+    ///
+    /// # Panics
+    ///
+    /// Panics when `self.piece` is None after checking that it's Some.
+    ///
+    /// TODO: Review and refactor.
+    pub fn get_move_text(&self) -> String {
+        if self.from_piece.is_none() || self.move_type.is_none() {
+            return String::new();
+        }
+
+        // E.g., "White King"
+        let mut move_text = self.from_piece.expect("Piece cannot be None.").get_text();
+
+        let mut is_capture = false;
+
+        // Is moving, capturing, or castling?
+        let move_verb = match self.move_type {
+            Some(MoveType::PawnMove | MoveType::PieceMove) => "moves to",
+            Some(MoveType::PawnCapture | MoveType::PieceCapture) => {
+                is_capture = true;
+                "captures on"
+            }
+            Some(MoveType::Castle) => "castles",
+            None => "<no move verb>",
+        };
+
+        move_text = format!("{} {}", move_text, move_verb);
+
+        // Is castling King or Queen side?
+        if self.is_castling_king() {
+            return format!("{} King side", move_text);
+        } else if self.is_castling_queen() {
+            return format!("{} Queen side", move_text);
+        }
+
+        let (from_file, from_rank) = self
+            .from_coord
+            .map_or(('-', 9), |from_coord| from_coord.to_char_u8_coord());
+
+        let mut is_from = false;
+        if from_file != '-' || from_rank <= 8 {
+            is_from = true;
+            move_text = format!("{} from ", move_text);
+        }
+
+        if from_file != '-' {
+            move_text = format!("{}{}", move_text, from_file);
+        }
+
+        if from_rank <= 8 {
+            move_text = format!("{}{}", move_text, from_rank);
+        }
+
+        let (to_file, to_rank) = self
+            .to_coord
+            .map_or(('-', 9), |to_coord| to_coord.to_char_u8_coord());
+
+        if to_file != '-' || from_rank <= 8 {
+            if is_capture && !is_from {
+                move_text = format!("{} ", move_text);
+            } else {
+                move_text = format!("{} to ", move_text);
+            }
+        }
+
+        if to_file != '-' {
+            move_text = format!("{}{}", move_text, to_file);
+        }
+
+        if to_rank <= 8 {
+            move_text = format!("{}{}", move_text, to_rank);
+        }
+
+        if let Some(piece) = self.promotion {
+            move_text = format!("{} promotes to {}", move_text, piece.get_text());
+        }
+
+        if self.is_check() {
+            move_text = format!("{} check", move_text);
+        } else if self.is_check_mate() {
+            move_text = format!("{} check mate", move_text);
+        }
+
+        move_text
     }
 
     #[allow(clippy::unused_self)]
@@ -353,7 +438,7 @@ impl ChessMove {
     }
 
     //
-    // Setters
+    // Setters.
     //
 
     /// Set the input move.
@@ -487,18 +572,14 @@ impl ChessMove {
         self.from_coord = coord;
     }
 
-    /// Set the `from_coord` file.
+    /// Set the `from_coord_file` index (0..=7).
     ///
     /// # Errors
     ///
     /// Returns a `ChuiError` result if the file index is out of range. See `set_file()`.
     pub fn set_from_coord_file(&mut self, file: char) -> ChuiResult<()> {
         if let Some(idx) = self.match_file_to_index(file) {
-            if let Some(from_coord) = self.from_coord.as_mut() {
-                from_coord.set_file(idx)?;
-            } else {
-                self.set_from_coord(Some(Coord::new(idx, 0)?));
-            }
+            self.from_coord_file = NonMaxU8::try_from(idx).ok();
             Ok(())
         } else {
             Err(ChuiError::InvalidFile(format!(
@@ -508,18 +589,14 @@ impl ChessMove {
         }
     }
 
-    /// Set the `from_coord` rank.
+    /// Set the `from_coord_rank` index (0..=7).
     ///
     /// # Errors
     ///
     /// Returns a `ChuiError` result if the rank index is out of range. See `set_rank()`.
     pub fn set_from_coord_rank(&mut self, rank: char) -> ChuiResult<()> {
         if let Some(idx) = self.match_rank_to_index(rank) {
-            if let Some(from_coord) = self.from_coord.as_mut() {
-                from_coord.set_rank(idx)?;
-            } else {
-                self.set_from_coord(Some(Coord::new(0, idx)?));
-            }
+            self.from_coord_rank = NonMaxU8::try_from(idx).ok();
             Ok(())
         } else {
             Err(ChuiError::InvalidRank(format!(
@@ -534,18 +611,14 @@ impl ChessMove {
         self.to_coord = coord;
     }
 
-    /// Set the `to_coord` file.
+    /// Set the `to_coord_file` index (0..=7).
     ///
     /// # Errors
     ///
     /// Returns a `ChuiError` result if the file index is out of range. See `set_file()`.
     pub fn set_to_coord_file(&mut self, file: char) -> ChuiResult<()> {
         if let Some(idx) = self.match_file_to_index(file) {
-            if let Some(to_coord) = self.to_coord.as_mut() {
-                to_coord.set_file(idx)?;
-            } else {
-                self.set_to_coord(Some(Coord::new(idx, 0)?));
-            }
+            self.to_coord_file = NonMaxU8::try_from(idx).ok();
             Ok(())
         } else {
             Err(ChuiError::InvalidFile(format!(
@@ -555,18 +628,14 @@ impl ChessMove {
         }
     }
 
-    /// Set the `to_coord` rank.
+    /// Set the `to_coord_rank` index (0..=7).
     ///
     /// # Errors
     ///
     /// Returns a `ChuiError` result if the rank index is out of range. See `set_rank()`.
     pub fn set_to_coord_rank(&mut self, rank: char) -> ChuiResult<()> {
         if let Some(idx) = self.match_rank_to_index(rank) {
-            if let Some(to_coord) = self.to_coord.as_mut() {
-                to_coord.set_rank(idx)?;
-            } else {
-                self.set_to_coord(Some(Coord::new(0, idx)?));
-            }
+            self.to_coord_rank = NonMaxU8::try_from(idx).ok();
             Ok(())
         } else {
             Err(ChuiError::InvalidRank(format!(
@@ -576,156 +645,6 @@ impl ChessMove {
         }
     }
 
-    // /// Set the `to_index` file.
-    // ///
-    // /// # Errors
-    // ///
-    // /// Returns a `ChuiError` result if a new `Coord` could not be constructed.
-    // pub fn set_to_index_file(&mut self, file: u8) -> ChuiResult<()> {
-    //     let from_coord = Coord::new(self.to_coord.get_file(), self.to_coord.get_rank())?;
-    //     let to_coord = Coord::new(file, self.to_coord.get_rank())?;
-    //     self.from_coord = from_coord;
-    //     self.to_coord = to_coord;
-    //     Ok(())
-    // }
-
-    // /// Set the `to_index` rank.
-    // ///
-    // /// # Errors
-    // ///
-    // /// Returns a `ChuiError` result if a new `Coord` could not be constructed.
-    // pub fn set_to_index_rank(&mut self, rank: u8) -> ChuiResult<()> {
-    //     let from_coord = Coord::new(self.from_coord.get_file(), self.to_coord.get_rank())?;
-    //     let to_coord = Coord::new(self.to_coord.get_file(), rank)?;
-    //     self.from_coord = from_coord;
-    //     self.to_coord = to_coord;
-    //     Ok(())
-    // }
-
-    //
-    // Updaters
-    //
-
-    /// Return the verbose move text.
-    ///
-    /// # Panics
-    ///
-    /// Panics when `self.piece` is None after checking that it's Some.
-    ///
-    /// TODO: Review and refactor.
-    pub fn get_move_text(&self) -> String {
-        if self.from_piece.is_none() || self.move_type.is_none() {
-            return String::new();
-        }
-
-        // E.g., "White King"
-        let mut move_text = self.from_piece.expect("Piece cannot be None.").get_text();
-
-        let mut is_capture = false;
-
-        // Is moving, capturing, or castling?
-        let move_verb = match self.move_type {
-            Some(MoveType::PawnMove | MoveType::PieceMove) => "moves to",
-            Some(MoveType::PawnCapture | MoveType::PieceCapture) => {
-                is_capture = true;
-                "captures on"
-            }
-            Some(MoveType::Castle) => "castles",
-            None => "<no move verb>",
-        };
-
-        move_text = format!("{} {}", move_text, move_verb);
-
-        // Is castling King or Queen side?
-        if self.is_castling_king() {
-            return format!("{} King side", move_text);
-        } else if self.is_castling_queen() {
-            return format!("{} Queen side", move_text);
-        }
-
-        let (from_file, from_rank) = self
-            .from_coord
-            .map_or(('-', 9), |from_coord| from_coord.to_char_u8_coord());
-
-        let mut is_from = false;
-        if from_file != '-' || from_rank <= 8 {
-            is_from = true;
-            move_text = format!("{} from ", move_text);
-        }
-
-        if from_file != '-' {
-            move_text = format!("{}{}", move_text, from_file);
-        }
-
-        if from_rank <= 8 {
-            move_text = format!("{}{}", move_text, from_rank);
-        }
-
-        let (to_file, to_rank) = self
-            .to_coord
-            .map_or(('-', 9), |to_coord| to_coord.to_char_u8_coord());
-
-        if to_file != '-' || from_rank <= 8 {
-            if is_capture && !is_from {
-                move_text = format!("{} ", move_text);
-            } else {
-                move_text = format!("{} to ", move_text);
-            }
-        }
-
-        if to_file != '-' {
-            move_text = format!("{}{}", move_text, to_file);
-        }
-
-        if to_rank <= 8 {
-            move_text = format!("{}{}", move_text, to_rank);
-        }
-
-        if let Some(piece) = self.promotion {
-            move_text = format!("{} promotes to {}", move_text, piece.get_text());
-        }
-
-        if self.is_check() {
-            move_text = format!("{} check", move_text);
-        } else if self.is_check_mate() {
-            move_text = format!("{} check mate", move_text);
-        }
-
-        move_text
-    }
-
-    /// Mogrify the internal state of the Chess Move for application from the [`Board`] and the
-    /// [`Game`].
-    ///
-    /// # Errors
-    ///
-    /// Returns a [`ChuiError`] result when `self.move_type` is None.
-    pub fn process_move(&mut self, game: &mut Game) -> ChuiResult<()> {
-        self.set_color(game.to_move);
-        match self.move_type {
-            Some(MoveType::Castle) => {
-                println!("Move Type is Castle.");
-            }
-            Some(MoveType::PawnCapture) => {
-                println!("Move Type is Pawn Capture.");
-            }
-            Some(MoveType::PawnMove) => {
-                println!("Move Type is Pawn Move");
-            }
-            Some(MoveType::PieceCapture) => {
-                println!("Move Type is Piece Capture.");
-            }
-            Some(MoveType::PieceMove) => {
-                println!("Move Type is Piece Move.");
-            }
-            None => {
-                println!("Move Type is Invalid.");
-            }
-        }
-
-        Ok(())
-    }
-
     /// Set possible en passant information.
     ///
     /// # Errors
@@ -733,8 +652,6 @@ impl ChessMove {
     /// When:
     ///  * The move is not a Pawn move
     ///  * The Pawn move does not begin and end on the correct file or rank
-    ///  *
-    #[allow(clippy::collapsible_if)]
     pub fn set_en_passant(&mut self, board: &Board) -> ChuiResult<()> {
         // 2nd and 7th ranks
         let from_rank: u8 = if self.to_move == Color::White { 1 } else { 6 };
@@ -797,8 +714,7 @@ impl ChessMove {
         if ep_pawn1.is_some_and(|p| p.is_pawn() && p.is_opposite_color(self.to_move))
             || ep_pawn2.is_some_and(|p| p.is_pawn() && p.is_opposite_color(self.to_move))
         {
-            self.is_en_passant = true;
-            self.en_passant_coord = Coord::try_from((
+            self.en_passant = Coord::try_from((
                 to_coord.get_file(),
                 (to_coord.get_rank() as i8 + direction) as u8,
             ))
@@ -810,11 +726,46 @@ impl ChessMove {
         }
 
         // Check to see if en passant square was set correctly.
-        if self.en_passant_coord.is_none() {
-            self.is_en_passant = false;
+        if self.en_passant.is_none() {
             return Err(ChuiError::Unknown(
                 "En Passant target square was supposed to be set, but it wasn't".to_string(),
             ));
+        }
+
+        Ok(())
+    }
+
+    //
+    // Updaters.
+    //
+
+    /// Mogrify the internal state of the Chess Move for application from the [`Board`] and the
+    /// [`Game`].
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`ChuiError`] result when `self.move_type` is None.
+    pub fn process_move(&mut self, game: &mut Game) -> ChuiResult<()> {
+        self.set_color(game.to_move);
+        match self.move_type {
+            Some(MoveType::Castle) => {
+                println!("Move Type is Castle.");
+            }
+            Some(MoveType::PawnCapture) => {
+                println!("Move Type is Pawn Capture.");
+            }
+            Some(MoveType::PawnMove) => {
+                println!("Move Type is Pawn Move");
+            }
+            Some(MoveType::PieceCapture) => {
+                println!("Move Type is Piece Capture.");
+            }
+            Some(MoveType::PieceMove) => {
+                println!("Move Type is Piece Move.");
+            }
+            None => {
+                println!("Move Type is Invalid.");
+            }
         }
 
         Ok(())
@@ -938,13 +889,17 @@ impl ChessMove {
         self.invalidate("Could not validate move")
     }
 
+    //
+    // Errors.
+    //
+
     /// Invalidate
     ///
     /// # Errors
     ///
     /// Always errors. Could not validate the chess move.
     pub fn invalidate(&mut self, reason: &str) -> ChuiResult<()> {
-        *self = ChessMove::new();
+        *self = ChessMove::new(self.to_move);
         Err(ChuiError::InvalidMove(reason.to_string()))
     }
 }
