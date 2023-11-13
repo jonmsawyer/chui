@@ -18,12 +18,12 @@ impl Parser for ICCFParser {
     fn parse(&mut self, move_string: String, to_move: Color) -> ChuiResult<ChessMove> {
         self.to_move = to_move;
         let mut the_move: String = self.trim_and_check_whitespace(&move_string)?;
-        the_move.retain(|c: char| CHAR_RANKS.contains(&c));
-        if the_move.len() != 4 {
+        the_move.retain(|c: char| CHAR_RANKS.contains(&c) || CHAR_PROMOTION_PIECES.contains(&c));
+        if the_move.len() < 4 || the_move.len() > 5 {
             self.invalid_input(
                 format!(
                     "{} is an invalid move: invalid length (move length is {} but it needs \
-                    to be 4)",
+                    to be between [4, 5], inclusive)",
                     the_move,
                     the_move.len(),
                 )
@@ -38,9 +38,15 @@ impl Parser for ICCFParser {
             the_move.remove(0).to_digit(10).unwrap() - 1,
             the_move.remove(0).to_digit(10).unwrap() - 1,
         ))?;
+        let promotion: Option<Piece> = if !the_move.is_empty() {
+            Piece::try_from(the_move.remove(0)).ok()
+        } else {
+            None
+        };
         from_coord.validate_possible_move(to_coord)?;
         let chess_move: ChessMove = ChessMove {
             to_move,
+            promotion,
             from_coord: Some(from_coord),
             to_coord: Some(to_coord),
             input_move: move_string,

@@ -771,6 +771,109 @@ impl ChessMove {
         Ok(())
     }
 
+    /// Validate `to_coord`.
+    ///
+    /// # Errors
+    ///
+    /// When a `to_coord` is not valid.
+    ///
+    /// TODO: Refactor docs.
+    pub fn validate_to_coord(&self) -> ChuiResult<()> {
+        // 1.a) All parsers will have set the `to_coord` `Coordinate`. In either case,
+        // if `to_coord` is not set, there's no way to determine a valid move.
+        if self.to_coord.is_none() {
+            return Err(ChuiError::InvalidMove(
+                "This Move's `to_coord` attribute is <None>; there's no way to determine \
+                a valid move"
+                    .to_string(),
+            ));
+        }
+        Ok(())
+    }
+
+    /// Validate other attributes.
+    ///
+    /// # Errors
+    ///
+    /// When a move is not valid.
+    ///
+    /// TODO: Refactor docs.
+    pub fn validate_other_attributes(&self) -> ChuiResult<()> {
+        // 1.b) Since `to_coord` is set, either the `from_coord` has to be set or the following
+        // must be set:
+        //  * `from_piece` must be set, and if not:
+        //    * `from_coord_file` may be set, and
+        //    * from_coord_rank` may be set
+        //  * `move_type` must be set
+        //
+        // TODO: Review and refactor.
+        if !(self.from_coord.is_some()
+            || self.move_type.is_some()
+                && (self.from_coord_file.is_some()
+                    || self.from_coord_rank.is_some()
+                    || self.from_piece.is_some()))
+        {
+            return Err(ChuiError::InvalidMove(
+                "This Move's `from_coord` attribute is not set or `from_piece` is not set \
+                or `from_coord_file` or `from_coord_rank` is not set and  `move_type` is \
+                not valid"
+                    .to_string(),
+            ));
+        }
+        Ok(())
+    }
+
+    /// Validate opposite color.
+    ///
+    /// # Errors
+    ///
+    /// When move is not valid.
+    ///
+    /// TODO: Refactor docs.
+    pub fn validate_opposite_color(&self) -> ChuiResult<()> {
+        // 2.a) Determine if `from_piece` is same color as `to_move`.
+        if let Some(from_piece) = self.from_piece {
+            if self.from_coord.is_none() && from_piece != self.to_move {
+                return Err(ChuiError::InvalidMove(
+                    "The piece that would be moved is not the same color as the player \
+                    to move"
+                        .to_string(),
+                ));
+            }
+        }
+        Ok(())
+    }
+
+    /// Validate move to or capture square.
+    ///
+    /// # Errors
+    ///
+    /// When move is invalid.
+    ///
+    /// # Panics
+    ///
+    /// When something is `None` instead of `Some()`.
+    pub fn validate_move_or_capture(&self, board: &Board) -> ChuiResult<()> {
+        // 2.b) Get a vector of coordinates that `from_piece` is attacking. Hopefully one of
+        // those coordinates are the same as `to_coord`.
+        if let Some(from_piece) = self.from_piece {
+            if from_piece
+                .get_move_coords(board, None)
+                .iter()
+                .filter(|&&c| Some(c) == self.to_coord)
+                .collect::<Vec<&Coord>>()
+                .is_empty()
+            {
+                return Err(ChuiError::InvalidMove(format!(
+                    "The piece `{}` cannot move to or capture the square `{}`",
+                    from_piece,
+                    self.to_coord.unwrap()
+                )));
+            }
+        }
+        Ok(())
+    }
+
     /// Validate the chess move for the given `Position`.
     ///
     /// Depending on the parser, certain coordinates and attributes will
@@ -793,32 +896,8 @@ impl ChessMove {
         // 1) let's validate that this object instance has the necessary information to
         // determine that a move can at all be unambiguously played given the `Board`'s
         // `Position`.
-
-        // 1.a) All parsers will have set the `to_coord` `Coordinate`. In either case,
-        // if `to_coord` is not set, there's no way to determine a valid move.
-        if self.to_coord.is_none() {
-            return Err(ChuiError::InvalidMove(
-                "This Move's `to_coord` attribute is <None>; there's no way to determine \
-                a valid move"
-                    .to_string(),
-            ));
-        }
-
-        // 1.b) Since `to_coord` is set, either the `from_coord` has to be set or the following
-        // must be set:
-        //  * `from_piece` must be set, and if not:
-        //    * `from_coord_file` may be set
-        //    * from_coord_rank` may be set
-        //  * `move_type` must be set
-        //
-        // TODO: Review and refactor.
-        if !(self.from_coord.is_some() || self.from_piece.is_some() && self.move_type.is_some()) {
-            return Err(ChuiError::InvalidMove(
-                "This Move's `from_coord` attribute is not set or `from_piece` is not set \
-                and `move_type` is not valid"
-                    .to_string(),
-            ));
-        }
+        self.validate_to_coord()?;
+        self.validate_other_attributes()?;
 
         // 2) If the `from_coord` and `to_coord` are set, we can process the board position and
         // normalize any values improperly set by any parser or via manual entry. If instead the
@@ -827,35 +906,8 @@ impl ChessMove {
         //
         // TODO: `from_piece` has its coordinate set. Program logic around not caring what a
         //       `Piece`'s coordinates are.
-
-        // 2.a) Determine if `from_piece` is same color as `to_move`.
-        if let Some(from_piece) = self.from_piece {
-            if self.from_coord.is_none() && from_piece != self.to_move {
-                return Err(ChuiError::InvalidMove(
-                    "The piece that would be moved is not the same color as the player \
-                    to move"
-                        .to_string(),
-                ));
-            }
-        }
-
-        // 2.b) Get a vector of coordinates that `from_piece` is attacking. Hopefully one of
-        // those coordinates are the same as `to_coord`.
-        if let Some(from_piece) = self.from_piece {
-            if from_piece
-                .get_move_coords(board, None)
-                .iter()
-                .filter(|&&c| Some(c) == self.to_coord)
-                .collect::<Vec<&Coord>>()
-                .is_empty()
-            {
-                return Err(ChuiError::InvalidMove(format!(
-                    "The piece `{}` cannot move to or capture the square `{}`",
-                    from_piece,
-                    self.to_coord.unwrap()
-                )));
-            }
-        }
+        self.validate_opposite_color()?;
+        self.validate_move_or_capture(board)?;
 
         // // Validate that the move is even possible.
         // if let Err(e) = self.from_coord.validate_possible_move(self.to_coord) {
