@@ -1,4 +1,5 @@
 {
     "rust-analyzer.checkOnSave.command": "cranky", // The "old" name of this setting, somehow needed at least for my environment
-    "rust-analyzer.check.command": "cranky" // The "new" name of this setting, should be the only one needed but somehow isn't
+    "rust-analyzer.check.command": "cranky", // The "new" name of this setting, should be the only one needed but somehow isn't
+    "cargo.automaticCheck": false
 }
